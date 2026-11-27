@@ -3,32 +3,34 @@ import { orthogonalNeighbours } from '../world/rivers';
 import { tileHash } from '../world/rng';
 import type { Point, World } from '../world/types';
 import { TWIN_MAP } from '../world/twinGeneration';
+import type { ElamiteRole } from './elamitePeople';
 import { CAMP_DAY } from './tiers';
 
 export interface CaravanSchedule {
-  revision: 1;
+  revision: 2;
   firstCycle: number;
 }
 
 export function caravanSchedule(firstCycle = 0): CaravanSchedule {
-  return { revision: 1, firstCycle };
+  return { revision: 2, firstCycle };
 }
 
 export interface CaravanVisit {
   id: string;
   wagon: 'covered' | 'open';
   cargoLayout: 0 | 1;
-  thirdRole: 'seal-keeper' | 'textile-merchant' | 'artisan' | 'apprentice';
+  thirdRole: Exclude<ElamiteRole, 'master' | 'handler'>;
   route: readonly Point[];
 }
 
 export type CaravanStage = 'arrival' | 'travelling' | 'pitching' | 'established' | 'packing' | 'departure' | 'aftermath';
 
-const THIRD_ROLES = ['seal-keeper', 'textile-merchant', 'artisan', 'apprentice'] as const;
+const THIRD_ROLES = ['seal-keeper', 'textile-merchant', 'artisan', 'apprentice', 'wool-dresser'] as const;
 const WAGON_GROUND = new Set(['plains', 'hills', 'desert']);
 const OFFSETS = [-1, 0, 1] as const;
 
 const distance = (a: Point, b: Point) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
+const routeCache = new WeakMap<World, Map<string, readonly Point[] | null>>();
 const key = (p: Point) => `${p.x},${p.y}`;
 
 /**
@@ -84,8 +86,13 @@ export function elamiteCaravanVisit(
   if (fieldMapId !== TWIN_MAP || !world.twinRegion || cycle < schedule.firstCycle) return null;
   const roll = (salt: string) => tileHash(world.seed, cycle, 0, `elamite:v${schedule.revision}:${salt}`);
   if (roll('visit') % 4 !== 0) return null;
+  let routes = routeCache.get(world);
+  if (!routes) routeCache.set(world, (routes = new Map()));
+  const protectedKey = places.map(key).join(';');
   for (const campsite of campsites) {
-    const route = westernCaravanRoute(world, campsite, places);
+    const cacheKey = `${key(campsite)}:${protectedKey}`;
+    if (!routes.has(cacheKey)) routes.set(cacheKey, westernCaravanRoute(world, campsite, places));
+    const route = routes.get(cacheKey);
     if (!route) continue;
     return {
       id: `${fieldMapId}:${cycle}:elamite-v${schedule.revision}`,

@@ -126,6 +126,8 @@ export interface Choice {
    * word or a discovery -- those are canon's and go through `grants`.
    */
   sets?: string[];
+  /** Journey flags this choice takes back. */
+  clears?: string[];
 }
 
 /**

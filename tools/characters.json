@@ -22,6 +22,13 @@
   "cell": { "width": 26, "height": 40 },
 
   "characters": [
+    { "id": "elamite-wool-dresser", "name": "The wool dresser", "builder": "twin-people", "jrpgSource": "assets/source/twins/people/elamite-wool-dresser-nes-jrpg.png" },
+    { "id": "elamite-apprentice", "name": "The apprentice", "builder": "twin-people", "jrpgSource": "assets/source/twins/people/elamite-apprentice-nes-jrpg.png" },
+    { "id": "elamite-artisan", "name": "The artisan", "builder": "twin-people", "jrpgSource": "assets/source/twins/people/elamite-artisan-nes-jrpg.png" },
+    { "id": "elamite-textile-merchant", "name": "The textile merchant", "builder": "twin-people", "jrpgSource": "assets/source/twins/people/elamite-textile-merchant-nes-jrpg.png" },
+    { "id": "elamite-seal-keeper", "name": "The seal keeper", "builder": "twin-people", "jrpgSource": "assets/source/twins/people/elamite-seal-keeper-nes-jrpg.png" },
+    { "id": "elamite-handler", "name": "The handler", "builder": "twin-people", "jrpgSource": "assets/source/twins/people/elamite-handler-nes-jrpg.png" },
+    { "id": "elamite-master", "name": "The master", "builder": "twin-people", "jrpgSource": "assets/source/twins/people/elamite-master-nes-jrpg.png" },
     { "id": "enkidu", "name": "Enkidu", "builder": "twin-people", "jrpgSource": "assets/source/twins/people/enkidu-nes-jrpg.png" },
     { "id": "priest-kang", "name": "Priest Kang", "builder": "twin-people", "jrpgSource":"assets/source/twins/people/priest-kang-nes-jrpg.png" },
     { "id": "mirlepa", "name": "Mirlepa", "builder": "twin-people", "jrpgSource":"assets/source/twins/people/mirlepa-nes-jrpg.png" },

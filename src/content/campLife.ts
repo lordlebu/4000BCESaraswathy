@@ -27,7 +27,7 @@ import { givenNames } from './places';
 import { lookFor } from './looks';
 import { elamiteIdentity, elamiteResidentId, type ElamiteRole } from './elamitePeople';
 import { CAMP_DAY, MEET_HOURS, RUNNER_PACE, VISIT_HOURS, VISIT_PACE_CAP } from './tiers';
-import { FIRST_DAY, PROPS_AROUND, campKindFor, campSpots, campable, type CampKind, type Encampment, type WayIn } from './encampments';
+import { FIRST_DAY, PROPS_AROUND, campIsOpen, caravanPhase, campKindFor, campSpots, campable, type CampKind, type Encampment, type WayIn } from './encampments';
 import type { Bumped } from './bumping';
 import {
   STRANGER_CULTURES,
@@ -267,7 +267,8 @@ const ELAMITE_CHORES: Record<ElamiteRole, string> = {
   'seal-keeper': 'is checking the sealed jars',
   'textile-merchant': 'is folding cloth under the canopy',
   artisan: 'is laying out tools on a woven mat',
-  apprentice: 'is putting away the bedding'
+  apprentice: 'is putting away the bedding',
+  'wool-dresser': 'is brushing dust from a tiered wool wrap'
 };
 
 export function doingLine(kind: CampKind, slot: CampSlot, activity: CampActivity, elamiteRole?: ElamiteRole): string {
@@ -291,7 +292,9 @@ export function doingLine(kind: CampKind, slot: CampSlot, activity: CampActivity
  */
 export function standingRoom(world: World, camp: Encampment): Point[] {
   const { around } = campSpots(world, camp);
-  const props = new Set(around.slice(0, PROPS_AROUND[camp.kind]).map((p) => `${p.x},${p.y}`));
+  const props = new Set(around.slice(0, camp.caravan ? 4 : PROPS_AROUND[camp.kind]).map((p) => `${p.x},${p.y}`));
+  const wagon = camp.caravan?.route.at(-2);
+  if (wagon) props.add(`${wagon.x},${wagon.y}`);
   props.add(`${camp.at.x},${camp.at.y}`);
   const out: { p: Point; ring: number; r: number }[] = [];
   for (let dy = -2; dy <= 2; dy++) {
@@ -330,9 +333,11 @@ export function campPlacements(
   phase: number,
   errand: RunnerErrand | null = null
 ): CampPlacement[] {
+  if (!campIsOpen(world, camp, day)) return [];
+  if (camp.caravan) phase = caravanPhase(world, phase);
   const { around } = campSpots(world, camp);
   const shelter = around[0] ?? camp.at;
-  const things = around.slice(1, PROPS_AROUND[camp.kind]);
+  const things = around.slice(1, camp.caravan ? 4 : PROPS_AROUND[camp.kind]);
   const room = standingRoom(world, camp);
   const taken = new Set<string>();
   const near = (anchor: Point): Point | null => {

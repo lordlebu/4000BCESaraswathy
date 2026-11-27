@@ -468,7 +468,7 @@ export function loadJourney(seed: string): Journey {
     const fieldMapId = typeof parsed.fieldMapId === 'string' ? parsed.fieldMapId : undefined;
     const travelledDay = Math.floor(knowledge.travelled / DAY_MS);
     const savedSchedule = parsed.caravanSchedule;
-    const firstCycle = savedSchedule?.revision === 1 &&
+    const firstCycle = savedSchedule?.revision === 2 &&
       Number.isSafeInteger(savedSchedule.firstCycle) && savedSchedule.firstCycle >= 0
       ? savedSchedule.firstCycle
       : knowledge.travelled > 0 || ground.discovered.length > 0

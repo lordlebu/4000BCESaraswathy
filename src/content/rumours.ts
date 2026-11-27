@@ -13,6 +13,7 @@
 //
 // Pure, and deterministic: which rumour a stranger has is a seeded pick.
 
+import type { CaravanVisit } from './elamiteCaravan';
 import { fieldQuestions } from './knowledge';
 import { fieldMap, npc, npcsAt, poi } from './places';
 
@@ -46,7 +47,7 @@ export interface RumourFacts {
    * The camp standing on this map today, if any (`encampments.ts`). While it stands the road talks
    * about it, and the rumour points at the nearest place, which is where you would start looking.
    */
-  camp?: { id: string; kind: string; near: string | null } | null;
+  camp?: { id: string; kind: string; near: string | null; caravan?: CaravanVisit } | null;
 }
 
 const placeName = (poiId: string): string => (poi(poiId)?.name ?? 'somewhere').replace(/^The /, 'the ');
@@ -105,7 +106,7 @@ export function rumoursOn(fieldMapId: string, facts: RumourFacts): Rumour[] {
       poiId: facts.camp.near,
       place: placeName(facts.camp.near),
       person: null,
-      campKind: facts.camp.kind
+      campKind: facts.camp.caravan ? 'elamite' : facts.camp.kind
     });
   }
 

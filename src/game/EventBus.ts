@@ -15,6 +15,8 @@ import type { TravellerState } from '../content/travellers';
 
 /** Scene → React. */
 export interface GameToUi {
+  'enkidu-nearby': { near: boolean };
+  'enkidu-talk': Record<string, never>;
   'beedu-sighted': {flightId:string};
   'beedu-nearby': {near:boolean; safe?:boolean};
   /** The scene's actual movement capabilities, for route-aware guidance. */

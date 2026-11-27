@@ -267,7 +267,7 @@ export class TravellerView {
     for (const person of campPeople(camp, this.host.fieldMapId, this.host.world.seed)) {
       const body = person.art === this.host.playerKey ? this.otherSheet(person.art) : person.art;
       const frame = frameOf(body);
-      const key = person.look && person.look.body === body ? dyeSheet(this.scene, body, person.look, frame) : body;
+      const key = !person.elamiteRole && person.look && person.look.body === body ? dyeSheet(this.scene, body, person.look, frame) : body;
       const sprite = this.scene.add
         .sprite(0, 0, key, 0)
         .setOrigin(0.5, 1)

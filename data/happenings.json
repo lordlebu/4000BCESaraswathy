@@ -422,7 +422,8 @@
           "adventurers": "There are adventurers camped out past {place}, they say, arguing over a map, and they would be glad of somebody who can read one. Leave the road where a hide rack stands on its own by the verge.",
           "dacoits": "There is a dacoit band out past {place}, they say. Not to worry: they take the salt carriers' toll and leave walkers alone. Leave the road at the tethering post; there is only the one.",
           "pilgrims": "Pilgrims have stopped out past {place}, they say, on their way somewhere, and they sing in the evenings. Leave the road at the little cairn with a lamp on it.",
-          "drovers": "Drovers have folded their goats out past {place}, they say, and could use a hand with the gate. Leave the road where a rack of skins stands by the verge."
+          "drovers": "Drovers have folded their goats out past {place}, they say, and could use a hand with the gate. Leave the road where a rack of skins stands by the verge.",
+          "elamite": "An Elamite wagon came in from the west. Look for a felt dome with a patterned band out past {place}."
         }
       },
       "title": "On the road with {name}",

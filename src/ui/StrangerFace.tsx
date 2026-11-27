@@ -12,6 +12,8 @@
 // own, so drawing it is the game dressing its own extras. The two share the head and shoulders so a
 // stranger and a named person still read as people of one place.
 
+import enkiduPortrait from '../../assets/twins/enkidu-portrait.webp?no-inline';
+import { ENKIDU_ID } from '../content/enkidu';
 import { weightedPickFor } from '../world/rng';
 import type { EventStranger } from '../content/events';
 import { elamiteKit } from '../content/elamitePeople';
@@ -85,11 +87,16 @@ export function compatibleFaces(look: Look, culture: string | null): string[] {
   return own.length ? own : compatible;
 }
 
+const elamitePortraits = import.meta.glob<string>('../../assets/twins/caravan/portraits/*.webp', {
+  eager: true, query: '?no-inline&url', import: 'default'
+});
+
 export function paintedFaceFor(stranger: EventStranger): string | null {
+  if (stranger.id.endsWith(`:${ENKIDU_ID}`)) return enkiduPortrait;
   if (stranger.culture === 'elamite') {
     const [map, id] = stranger.id.split(':');
     const identity = map && id ? elamiteKit(map, id) : null;
-    return identity ? art('portraits', identity.kit.portraitId) : null;
+    return identity ? elamitePortraits[`../../assets/twins/caravan/portraits/${identity.kit.portraitId}.webp`] ?? null : null;
   }
   const id = `${stranger.id}:${stranger.givenName ?? ''}`;
   const faces = compatibleFaces(stranger.look, stranger.culture);

@@ -11,6 +11,7 @@
 // them, and fails the build if one is missing. A string path would go wrong silently at runtime,
 // which is exactly how Mithra's sheet shipped unloaded for a month.
 
+import { ELAMITE_APPEARANCES } from '../content/elamitePeople';
 import varunaUrl from '../../assets/varuna-overworld.png';
 import guyukUrl from '../../assets/guyuk-overworld.png';
 import mithraUrl from '../../assets/mithra-overworld.png';
@@ -121,7 +122,18 @@ export const TRAVELLER_ART = {
  * colours in `assets/looks.json` and can be dealt to anybody. A named person is only drawn when
  * something of theirs puts them on the map -- `content/visitors.ts`, for the princess.
  */
+const elamiteSheets = import.meta.glob<string>('../../assets/elamite-*-overworld.png', {
+  eager: true, query: '?no-inline&url', import: 'default'
+});
+
+const elamiteArt = Object.values(ELAMITE_APPEARANCES).map((kit): CharacterArt => ({
+  key: kit.spriteId,
+  name: kit.title,
+  url: elamiteSheets[`../../assets/${kit.spriteId}-overworld.png`]!
+}));
+
 export const NAMED_ART = {
+  ...Object.fromEntries(elamiteArt.map((kit) => [kit.key, kit])),
   enkidu: { key: 'enkidu', name: 'Enkidu', url: enkiduUrl },
   'priest-kang': {key:'priest-kang',name:'Priest Kang',url:kangUrl},
   mirlepa: {key:'mirlepa',name:'Mirlepa',url:mirlepaUrl},

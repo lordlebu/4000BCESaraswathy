@@ -21,7 +21,7 @@ import { Heap } from '../world/heap';
 import { orthogonalNeighbours } from '../world/rivers';
 import { TWIN_MAP } from '../world/twinGeneration';
 import { stepCostOn } from './species';
-import { elamiteCaravanVisit, type CaravanSchedule, type CaravanVisit } from './elamiteCaravan';
+import { caravanStage, elamiteCaravanVisit, type CaravanSchedule, type CaravanVisit } from './elamiteCaravan';
 
 export type CampKind = 'adventurers' | 'dacoits' | 'pilgrims' | 'drovers';
 
@@ -179,6 +179,26 @@ export function campGround(world: World, places: readonly Point[]): Point[] {
   return ranked;
 }
 
+const caravanClocks = new WeakMap<World, { schedule: CaravanSchedule; phase: () => number }>();
+
+export function setCaravanClock(world: World, schedule: CaravanSchedule, phase: () => number): void {
+  caravanClocks.set(world, { schedule, phase });
+}
+
+export function caravanPhase(world: World, fallback: number): number {
+  return caravanClocks.get(world)?.phase() ?? fallback;
+}
+
+export function caravanStageAt(world: World, camp: Encampment, day: number, fallbackPhase = 0) {
+  return caravanStage(Math.max(camp.from, FIRST_DAY), camp.to, day, (caravanPhase(world, fallbackPhase) * 24 + 6) % 24);
+}
+
+export function campIsOpen(world: World, camp: Encampment, day: number): boolean {
+  if (!camp.caravan) return true;
+  const stage = caravanStageAt(world, camp, day)?.stage;
+  return stage === 'pitching' || stage === 'established' || stage === 'packing';
+}
+
 /**
  * The camp standing on this map today, or null.
  *
@@ -209,6 +229,7 @@ export function encampmentOn(
   // half of everywhere.
   const sky = hash('sky') % SKY_TURN_ONE_IN === 0 ? skyGround(world, ground) : [];
   const hidden = sky.length > 0 ? sky : ground.slice(0, Math.max(1, Math.ceil(ground.length / 2)));
+  schedule ??= caravanClocks.get(world)?.schedule;
   const candidate = hash('tile') % hidden.length;
   const caravan = schedule && world.twinRegion
     ? elamiteCaravanVisit(world, fieldMapId, cycle, schedule,
@@ -283,7 +304,11 @@ export const PROPS_AROUND: Readonly<Record<CampKind, number>> = {
  * alike, and only walkable ground off the road.
  */
 export function campSpots(world: World, camp: Encampment): { fire: Point; around: Point[] } {
-  const open = (d: Point): boolean => campable(world, { x: camp.at.x + d.x, y: camp.at.y + d.y });
+  const wagon = camp.caravan?.route.at(-2);
+  const open = (d: Point): boolean => {
+    const point = { x: camp.at.x + d.x, y: camp.at.y + d.y };
+    return (point.x !== wagon?.x || point.y !== wagon.y) && campable(world, point);
+  };
   const shuffled = (ds: Point[], salt: string) =>
     ds
       .map((d) => ({ d, r: tileHash(world.seed, camp.at.x + d.x, camp.at.y + d.y, `${salt}:${camp.id}`) }))

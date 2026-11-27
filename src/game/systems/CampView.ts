@@ -24,7 +24,7 @@ import {
   lampGlowKey
 } from '../tileTextures';
 import { FIRST_YURT, ROW_SLOT, depthFor, decorFrame, placeFrame } from '../frames';
-import { campSpots, encampmentOn, wayIn, type Encampment, type WayIn } from '../../content/encampments';
+import { campSpots, caravanStageAt, encampmentOn, wayIn, type Encampment, type WayIn } from '../../content/encampments';
 import { campStage } from '../../content/campLife';
 import {
   ASHES_DAYS,
@@ -39,6 +39,7 @@ import {
   carriesTint,
   troddenColour
 } from '../campArt';
+import { CaravanRig, caravanKey } from './CaravanRig';
 import { walkedRoad } from '../../content/travellers';
 import { biomeFor } from '../../content/species';
 import { twinCampDressingSpots, twinCampRouteTiles } from '../../content/twinCampDressing';
@@ -69,6 +70,7 @@ export interface DrawnCamp {
   id: string;
   key: string;
   camp: Encampment;
+  rig: CaravanRig | null;
   sprites: Phaser.GameObjects.Image[];
   /** The shelter and its shadow, put up on the first morning and struck on the last afternoon. */
   shelter: Phaser.GameObjects.Image[];
@@ -118,6 +120,7 @@ export class CampView {
     let struck = false;
     let pitched: Encampment | null = null;
     if (this.current && this.current.id !== today?.id) {
+      this.current.rig?.destroy();
       for (const s of this.current.sprites) s.destroy();
       for (const c of this.current.cleared) c.sprite.setAlpha(c.alpha);
       this.current.smoke?.destroy();
@@ -192,7 +195,7 @@ export class CampView {
     const { around } = campSpots(this.host.world, camp);
     const spot = (n: number): Point => around[n] ?? camp.at;
 
-    if (layout.ground !== null) piece(campKey(camp.kind, layout.ground), undefined, camp.at, -1, 1, false);
+    if (!camp.caravan && layout.ground !== null) piece(campKey(camp.kind, layout.ground), undefined, camp.at, -1, 1, false);
     const ring = placeFrame('', 'travel_node');
     if (ring !== null) piece(PLACE_SHEET, ring, camp.at, 1, 0.6, false);
     // About one camp in three is pitched round the old yurt instead of the kind's own shelter.
@@ -203,7 +206,12 @@ export class CampView {
       : yurt
         ? piece(HUT_SHEET, FIRST_YURT, spot(0), 2)
         : piece(campKey(camp.kind, layout.shelter), undefined, spot(0), 2);
-    layout.extras.forEach((n, i) => piece(campKey(camp.kind, n), undefined, spot(i + 1), 2));
+    if (camp.caravan) {
+      piece(caravanKey('canopy'), undefined, spot(1), 2);
+      piece(caravanKey('trough'), undefined, spot(2), 2);
+    } else {
+      layout.extras.forEach((n, i) => piece(campKey(camp.kind, n), undefined, spot(i + 1), 2));
+    }
 
     const way = wayIn(this.host.world, camp, walkedRoad(this.host.world, this.host.fieldMapId, places), places.map((p) => p.at));
     const cleared = this.clearCampGround(camp, sprites.map((s) => s.at));
@@ -221,7 +229,10 @@ export class CampView {
       spots.forEach((at, i) => {
         const detail = details[i];
         if (!detail) return;
-        if ('piece' in detail) {
+        if (camp.caravan && i < 2) {
+          const order = camp.caravan.cargoLayout === 0 ? ['storage', 'bedding'] : ['bedding', 'storage'];
+          piece(caravanKey(order[i]!), undefined, at, 1);
+        } else if ('piece' in detail) {
           const stands = detail.piece !== layout.ground;
           piece(campKey(camp.kind, detail.piece), undefined, at, 1, detail.scale, stands);
         } else {
@@ -245,6 +256,7 @@ export class CampView {
       id: camp.id,
       key: `${camp.at.x},${camp.at.y}`,
       camp,
+      rig: camp.caravan ? new CaravanRig(this.scene, camp, spot(3)) : null,
       sprites: sprites.map((s) => s.img),
       tiles: sprites.map((s) => `${s.at.x},${s.at.y}`),
       shelter,
@@ -561,9 +573,31 @@ export class CampView {
    * The camp's look for the hour: the shelter up or struck, the smoke thick or a thread, the
    * firelight with the dark. `campStage` decides; this only draws it.
    */
+  animateCaravan(day: number): void {
+    this.current?.rig?.update(this.host.world, day, 0, this.host.discovered);
+  }
+
   stage(phase: number, day: number): void {
     const camp = this.current;
     if (!camp) return;
+    if (camp.rig) {
+      const stage = caravanStageAt(this.host.world, camp.camp, day, phase)?.stage;
+      const built = stage === 'established' || stage === 'pitching' || stage === 'packing';
+      const known = this.host.discovered;
+      for (const [i, sprite] of camp.sprites.entries()) {
+        const show = (built || stage === 'aftermath' && i === 0) && (known.has(camp.tiles[i]!) || known.has(camp.key));
+        sprite.setVisible(show);
+        if (i === 0) sprite.setTint(stage === 'aftermath' ? 0x8a8580 : 0xffffff);
+      }
+      for (const footstep of camp.trodden) footstep.sprite.setVisible(built && known.has(footstep.key));
+      if (camp.smoke && camp.smoke.emitting !== built) {
+        if (built) camp.smoke.start();
+        else camp.smoke.stop(true);
+      }
+      for (const item of camp.cleared) item.sprite.setAlpha(built ? 0 : item.alpha);
+      camp.glow?.setVisible(built && known.has(camp.key)).setAlpha(Math.max(0, this.host.glow()));
+      return;
+    }
     const stage = campStage(camp.camp, day, phase);
     const shelterKnown = camp.shelter.length > 0;
     for (const s of camp.shelter) {

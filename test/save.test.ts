@@ -337,14 +337,15 @@ describe('which map the traveller is on', () => {
 
 describe('Twin Cities caravan schedule', () => {
   it('starts new journeys on the current schedule', () => {
-    expect(loadJourney(SEED).caravanSchedule).toEqual({ revision: 1, firstCycle: 0 });
+    expect(loadJourney(SEED).caravanSchedule).toEqual({ revision: 2, firstCycle: 0 });
   });
 
   it('pins the next cycle of a pre-expansion journey without discarding its history', () => {
     const met = ['field_map_twins:camp_2_leader'];
-    writeRaw({ version: SAVE_VERSION, knowledgeVersion: KNOWLEDGE_VERSION, travelled: 13 * DAY_MS, met });
+    writeRaw({ version: SAVE_VERSION, knowledgeVersion: KNOWLEDGE_VERSION, travelled: 13 * DAY_MS, met,
+      caravanSchedule: { revision: 1, firstCycle: 0 } });
     const original = loadJourney(SEED);
-    expect(original.caravanSchedule).toEqual({ revision: 1, firstCycle: 3 });
+    expect(original.caravanSchedule).toEqual({ revision: 2, firstCycle: 3 });
     expect(original.met).toEqual(met);
     saveJourney(SEED, { ...original, caravanSchedule: undefined, travelled: 19 * DAY_MS });
     expect(loadJourney(SEED).caravanSchedule).toEqual(original.caravanSchedule);
