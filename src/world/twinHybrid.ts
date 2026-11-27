@@ -1,3 +1,4 @@
+import { twinWorldSeed } from './twinGeneration';
 import type { FieldMap, PointOfInterest } from '../content/places';
 import type { FieldMapWorld } from './fieldMap';
 import { findPath, pointKey, routeDistances } from './pathfind';
@@ -143,7 +144,7 @@ function residentialLots({ world, placed }: FieldMapWorld, layout: string): Poin
 }
 
 function makeValley(map: FieldMap, seed: string, pois: readonly PointOfInterest[], layout: string) {
-  const legacySeed = seed.startsWith('twins:') ? seed : `twins:${seed}`;
+  const legacySeed = twinWorldSeed(seed);
   const form = valleyTerrain(legacySeed, layout, TWIN_PROFILE);
   return generateFromProfile(TWIN_PROFILE, () => {
     const built = buildTwinCities(map, seed, pois, form);

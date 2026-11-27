@@ -15,6 +15,7 @@ import { isComplete, isFirstMeeting, lineIsSpent, rungOf } from '../journey';
 import { discoveries } from './knowledge';
 import { allNpcs, fieldMap, poi, type Npc } from './places';
 import { campPersonFor } from './campLife';
+import { TWIN_MAP, twinWorldSeed } from '../world/twinGeneration';
 import { travellersOn, type StrangerCulture, type Traveller } from './travellers';
 
 /** One person, as a record rather than as somebody standing in front of you. */
@@ -117,8 +118,9 @@ export function strangersMet(keys: readonly string[], seed = ''): StrangerMet[] 
   for (const key of keys) {
     const [fieldMapId, travellerId] = key.split(':');
     if (!fieldMapId || !travellerId || !fieldMap(fieldMapId) || key !== `${fieldMapId}:${travellerId}`) continue;
-    const traveller = campPersonFor(fieldMapId, travellerId, seed) ??
-      travellersOn(fieldMapId, seed).find((t) => t.id === travellerId && t.npcId === null);
+    const identitySeed = fieldMapId === TWIN_MAP ? twinWorldSeed(seed) : seed;
+    const traveller = campPersonFor(fieldMapId, travellerId, identitySeed) ??
+      travellersOn(fieldMapId, identitySeed).find((t) => t.id === travellerId && t.npcId === null);
     if (!traveller) continue;
     out.push({
       key,

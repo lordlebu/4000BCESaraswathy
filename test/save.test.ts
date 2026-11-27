@@ -12,6 +12,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { KNOWLEDGE_VERSION, SAVE_VERSION, clearJourney, hasBegun, loadJourney, saveJourney } from '../src/save';
 import { emptyCollection, metOnTile } from '../src/content/collection';
 import { emptyProgress } from '../src/journey';
+import { DAY_MS } from '../src/game/dayNight';
 
 const SEED = 'save-test';
 
@@ -330,5 +331,23 @@ describe('which map the traveller is on', () => {
   it('survives the ground moving, like the character', () => {
     writeRaw({ version: SAVE_VERSION - 1, knowledgeVersion: KNOWLEDGE_VERSION, discovered: [], reached: false, fieldMapId: 'field_map_dwarka' });
     expect(loadJourney(SEED).fieldMapId).toBe('field_map_dwarka');
+  });
+});
+
+
+describe('Twin Cities caravan schedule', () => {
+  it('starts new journeys on the current schedule', () => {
+    expect(loadJourney(SEED).caravanSchedule).toEqual({ revision: 1, firstCycle: 0 });
+  });
+
+  it('pins the next cycle of a pre-expansion journey without discarding its history', () => {
+    const met = ['field_map_twins:camp_2_leader'];
+    writeRaw({ version: SAVE_VERSION, knowledgeVersion: KNOWLEDGE_VERSION, travelled: 13 * DAY_MS, met });
+    const original = loadJourney(SEED);
+    expect(original.caravanSchedule).toEqual({ revision: 1, firstCycle: 3 });
+    expect(original.met).toEqual(met);
+    saveJourney(SEED, { ...original, caravanSchedule: undefined, travelled: 19 * DAY_MS });
+    expect(loadJourney(SEED).caravanSchedule).toEqual(original.caravanSchedule);
+    expect(loadJourney(SEED).met).toEqual(met);
   });
 });

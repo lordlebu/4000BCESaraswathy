@@ -5,6 +5,7 @@ import type { BiomeId, Point, Tile, World } from './types';
 import type { FieldMap, PointOfInterest } from '../content/places';
 import type { FieldMapWorld } from './fieldMap';
 
+import { twinWorldSeed } from './twinGeneration';
 export { TWIN_MAP } from './twinGeneration';
 export interface CityDistrict { id: 'harappa' | 'mohenjodaro'; name: string; x: number; y: number; radius: number }
 export interface TwinRegion {
@@ -89,7 +90,7 @@ interface TwinLandform {
 export function buildTwinCities(
   map: FieldMap, seed: string, pois: readonly PointOfInterest[], landform?: TwinLandform
 ): FieldMapWorld {
-  seed = seed.startsWith('twins:') ? seed : `twins:${seed}`;
+  seed = twinWorldSeed(seed);
   const width = 64, height = 64;
   const region: TwinRegion = { districts: [
     { id: 'harappa', name: 'Harappa', x: 18, y: 18, radius: 4 },
