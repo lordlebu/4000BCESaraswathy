@@ -143,5 +143,6 @@ export const PEOPLE_NAMES: Readonly<Record<StrangerCulture, string>> = {
   harappan: 'Harappan',
   kia: 'Kia',
   maru: 'Maru',
-  asura_hybrid: 'Violet-Horned Clan'
+  asura_hybrid: 'Violet-Horned Clan',
+  elamite: 'Elamite'
 };

@@ -262,7 +262,7 @@ export const ROAD_COMPANY_PER_MAP = 2;
  * here, and a stranger is somebody alive.
  */
 export const STRANGER_CULTURES = ['harappan', 'kia', 'maru', 'asura_hybrid'] as const;
-export type StrangerCulture = (typeof STRANGER_CULTURES)[number];
+export type StrangerCulture = (typeof STRANGER_CULTURES)[number] | 'elamite';
 
 /**
  * The road company: the people a road has that nobody wrote down.

@@ -14,6 +14,7 @@
 
 import { weightedPickFor } from '../world/rng';
 import type { EventStranger } from '../content/events';
+import { elamiteKit } from '../content/elamitePeople';
 import { BODIES, headwearOf, swatchesFor, type Headwear, type Look } from '../content/looks';
 import { art, artNames } from './art';
 import { HEAD, SHOULDERS } from './PersonPortrait';
@@ -85,6 +86,11 @@ export function compatibleFaces(look: Look, culture: string | null): string[] {
 }
 
 export function paintedFaceFor(stranger: EventStranger): string | null {
+  if (stranger.culture === 'elamite') {
+    const [map, id] = stranger.id.split(':');
+    const identity = map && id ? elamiteKit(map, id) : null;
+    return identity ? art('portraits', identity.kit.portraitId) : null;
+  }
   const id = `${stranger.id}:${stranger.givenName ?? ''}`;
   const faces = compatibleFaces(stranger.look, stranger.culture);
   const name = weightedPickFor(faces, 'face', { x: 0, y: 0 }, id, (n) => n, () => 1);

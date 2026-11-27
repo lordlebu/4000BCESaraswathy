@@ -629,6 +629,11 @@ const campScene: Template = ({ camp, biome, taken }, roll, now) => {
   if (!camp) return null;
   if (now.seen.includes(`woven:camp:${camp.id}`)) return null;
   const near = camp.near ? poi(camp.near) : null;
+  if (camp.caravan) {
+    return woven('arriving', 'camp', camp.id, {
+      place: near ? placeName(near) : 'the last place', ground: ground(biome), material: ''
+    }, [{ id: 'sit', eases: COMPANY_EASES }, { id: 'ask' }], { variant: 'elamite' });
+  }
   const common = droppable(biome, taken);
   const gift = camp.kind === 'drovers' ? 'material_goat_hair' : (common.length > 0 ? common[roll('camp-gift') % common.length]!.id : null);
   const giftName = gift ? lower(material(gift)?.name ?? 'goat hair') : '';
@@ -667,7 +672,11 @@ const campTalk: Template = ({ campPerson }, _roll, now) => {
     'road',
     'camp-talk',
     `${id}:${now.day}`,
-    { name, title: person.title, doing, says: words.says[person.slot], eats: words.eats },
+    {
+      name, title: person.title, doing,
+      says: person.elamiteRole ? 'Come sit. We have been travelling since first light.' : words.says[person.slot],
+      eats: person.elamiteRole ? 'warm barley and lentils' : words.eats
+    },
     meal ? [{ id: 'eat', eases: MEAL_EASES }, { id: 'go' }] : [{ id: 'sit', eases: COMPANY_EASES }, { id: 'go' }],
     {
       variant: known ? 'again' : 'first',
@@ -675,14 +684,14 @@ const campTalk: Template = ({ campPerson }, _roll, now) => {
         ? { stranger: { id, role: person.role, look: person.look, culture: person.culture, givenName: person.givenName } }
         : {}),
       art: 'woven-camp',
-      artVariant: `woven-camp-${person.kind}`,
+      artVariant: `woven-camp-${person.elamiteRole ? 'elamite' : person.kind}`,
       // At the meal, the kind's own evening at the fire, when it has been painted: the four prompts
       // are `woven-camp-meal-*` in docs/event-prompts.md. Until then, the camp's painting as before.
-      ...(meal ? { artMoment: `woven-camp-meal-${person.kind}` } : {})
+      ...(meal && !person.elamiteRole ? { artMoment: `woven-camp-meal-${person.kind}` } : {})
     }
   );
   if (!known || now.fieldMapId !== TWIN_MAP) return event;
-  const context = { road: false as const, kind: person.kind, slot: person.slot, activity: campPerson.activity };
+  const context = { road: false as const, kind: person.kind, slot: person.slot, activity: campPerson.activity, elamite: person.elamiteRole !== undefined };
   const topics = ambientTopics(id, context, now.day, now.last);
   if (!topics.length) return event;
   return { ...event, prose: `${name} ${doing}, and nods as if you had only stepped away.`, topics };

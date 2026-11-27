@@ -1,4 +1,9 @@
 import { describe, expect, it } from 'vitest';
+import { campPeople, campPlacements, doingLine } from '../src/content/campLife';
+import { happeningNow, surroundingsAt } from '../src/content/happenings';
+import { strangersMet } from '../src/content/people';
+import { ELAMITE_DIALOGUE } from '../src/content/elamiteDialogue';
+import { atHour } from '../src/content/travellers';
 import { caravanSchedule, caravanStage, elamiteCaravanVisit, westernCaravanRoute } from '../src/content/elamiteCaravan';
 import { campGround, CYCLE_DAYS, encampmentOn } from '../src/content/encampments';
 import { fieldMap } from '../src/content/places';
@@ -48,6 +53,30 @@ describe('Elamite caravan planning', () => {
     expect(visit.caravan?.route.at(-1)).toEqual(visit.at);
     expect(visit).toMatchObject({ id: legacy[day]?.id, from: legacy[day]?.from, to: legacy[day]?.to });
     expect(revised[day + 1]?.caravan).toEqual(visit.caravan);
+    const roster = campPeople(visit, TWIN_MAP, world.seed);
+    const keys = roster.map(({ id }) => `${TWIN_MAP}:${id}`);
+    expect(roster.map(({ elamiteRole }) => elamiteRole)).toEqual(['master', 'handler', visit.caravan?.thirdRole]);
+    expect(strangersMet(keys, 'camps').map(({ traveller }) => traveller)).toEqual(roster);
+    expect(campPlacements(world, visit, day + 2, atHour(12)).map(({ id }) => id)).toEqual(roster.map(({ id }) => id));
+
+    const roll = () => 0;
+    const vicinity = surroundingsAt(world, visit.at, TWIN_MAP, null, roll)!;
+    const now = { fieldMapId: TWIN_MAP, day: day + 2, shelter: null, holds: [], seen: [], met: keys };
+    const welcome = happeningNow({ ...now, occasion: 'arriving' }, roll, { ...vicinity, camp: visit }, [], { kind: 'camp', asked: true });
+    expect(welcome?.title).toBe('The western caravan');
+    expect(welcome?.choices).toHaveLength(2);
+    expect(welcome?.choices.every((choice) => (choice.gives?.length ?? 0) === 0)).toBe(true);
+    const person = roster[1]!;
+    const talk = happeningNow({ ...now, occasion: 'road' }, roll, {
+      ...vicinity,
+      campPerson: {
+        person, activity: 'chore', meal: false, doing: doingLine(person.kind, person.slot, 'chore', person.elamiteRole)
+      }
+    }, [], { kind: 'camp-talk', asked: true });
+    expect(talk?.stranger).toMatchObject({ id: keys[1], givenName: person.givenName, culture: 'elamite' });
+    expect(talk?.topics?.every((topic) => topic.historyKey.includes(':elamite-'))).toBe(true);
+    expect(talk?.topics).toHaveLength(3);
+    expect(Object.values(ELAMITE_DIALOGUE).flat()).toHaveLength(42);
   });
 
   it('derives every stage and reverses the route from the camp clock', () => {

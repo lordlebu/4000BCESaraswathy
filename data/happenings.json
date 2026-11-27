@@ -498,33 +498,39 @@
         "adventurers": "Adventurers' fire",
         "dacoits": "A dacoit band",
         "pilgrims": "Pilgrims resting",
-        "drovers": "A drovers' fold"
+        "drovers": "A drovers' fold",
+        "elamite": "The western caravan"
       },
       "prose": {
         "adventurers": "A lean-to and a fire out on {ground}, well past {place}, and three people with more rope than sense arguing over a scratched map. They wave you in before you have decided whether to go.",
         "dacoits": "Smoke from a hollow on {ground}, past {place}. A dacoit band, and they have seen you. Nobody reaches for anything. The one who seems to lead them only looks, and waits to see what you want.",
         "pilgrims": "Pilgrims camped on {ground}, past {place}, on their way to somewhere they will not name to a stranger. Somebody is singing under their breath, and stops when you come near.",
-        "drovers": "A fold of hurdles on {ground}, past {place}, full of goats, and two drovers mending the gate. One of them nods at the gap and then at you, as if you had been sent for."
+        "drovers": "A fold of hurdles on {ground}, past {place}, full of goats, and two drovers mending the gate. One of them nods at the gap and then at you, as if you had been sent for.",
+        "elamite": "Past {place}, cloth shelters stand on {ground}. A woolly animal lowers its head to a trough, and someone near the wagon waves you toward the fire."
       },
       "choices": {
         "sit": {
           "label": {
             "adventurers": "Sit by their fire",
-            "pilgrims": "Sit with them a while"
+            "pilgrims": "Sit with them a while",
+            "elamite": "Sit by the hearth"
           },
           "line": {
             "adventurers": "You sit, and are shown the map, and are told what three different people think it means. The fire is good and nobody is in a hurry.",
-            "pilgrims": "You sit. The singing starts again, quieter, and nobody asks where you are going either."
+            "pilgrims": "You sit. The singing starts again, quieter, and nobody asks where you are going either.",
+            "elamite": "You sit where the canopy shades the fire. The wagon handler leaves space beside you on the mat."
           }
         },
         "ask": {
           "label": {
             "adventurers": "Ask what they have found",
-            "pilgrims": "Ask where the road is good"
+            "pilgrims": "Ask where the road is good",
+            "elamite": "Ask where they came from"
           },
           "line": {
             "adventurers": "They show you what the ground out here gives, and press a little {material} into your hands as if it were nothing.",
-            "pilgrims": "They tell you which stretches are firm after rain and which are not, and send you off with a little {material} for the road."
+            "pilgrims": "They tell you which stretches are firm after rain and which are not, and send you off with a little {material} for the road.",
+            "elamite": "The caravan master names the western road and asks whether you know Hutel down at Southern Landing."
           }
         },
         "talk": {
