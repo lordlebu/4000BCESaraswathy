@@ -87,9 +87,9 @@ def croc_walk(path):
     atlas.save(ART / "croc-walk.png", optimize=True)
 
 
-def pose_strip(path, name, count, size):
+def pose_strip(path, name, count, size, standing_height=None):
     poses = [sprite(cell) for cell in cells(path, count, 1)]
-    scale = min((size[0]-2) / max(p.width for p in poses), (size[1]-2) / max(p.height for p in poses))
+    scale = min((size[0]-2) / max(p.width for p in poses), (standing_height or size[1]-2) / max(p.height for p in poses))
     atlas = Image.new("RGBA", (size[0] * count, size[1]))
     for index, pose in enumerate(poses):
         atlas.paste(centred(pose, *size, scale), (index * size[0], 0))
@@ -108,6 +108,6 @@ if __name__ == "__main__":
     elif args.sheet_type == "croc-walk":
         croc_walk(args.input_image)
     elif args.sheet_type == "enkidu-gestures":
-        pose_strip(args.input_image, args.sheet_type, 4, (40, 40))
+        pose_strip(args.input_image, args.sheet_type, 4, (40, 40), standing_height=36)
     else:
         {"directions": directions, "people": people, "portraits": portraits, "props": props}[args.sheet_type](args.input_image)

@@ -34,7 +34,7 @@ def import_sheet(source, destination, width, standing_height=None):
             boxes.append((left+x0,y0+top,left+x1,y0+bottom))
     # One scale for every pose avoids breathing/stride frames changing body size.
     scale=min((width-2)/max(b[2]-b[0] for b in boxes),
-              38/max(b[3]-b[1] for b in boxes[:16]))
+              (standing_height or 38)/max(b[3]-b[1] for b in boxes[:16]))
     compact=Image.new('RGBA',(width*4,40*5))
     for index,box in enumerate(boxes):
         sprite=im.crop(box)

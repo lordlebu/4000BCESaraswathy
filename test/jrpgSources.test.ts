@@ -26,3 +26,22 @@ describe('reviewed NES JRPG sources',()=>{
     });
   }
 });
+
+it('draws Enkidu’s standing frames at 90% of Varuna’s visible height', () => {
+  const idleFrames = [0, 1, 4, 5, 8, 9, 12, 13];
+  const sheet = (id: string) => decodePng(join(root, 'assets', `${id}-overworld.png`));
+  const enkidu = sheet('enkidu');
+  const varuna = sheet('varuna');
+  const visibleHeight = (atlas: ReturnType<typeof sheet>, frame: number): number => {
+    const width = atlas.width / 20;
+    const rows = [];
+    for (let y = 0; y < atlas.height; y++) {
+      const from = y * atlas.width + frame * width;
+      if (Array.from({ length: width }, (_, x) => atlas.data[(from + x) * 4 + 3]).some((alpha) => alpha >= 128)) rows.push(y);
+    }
+    return rows.at(-1)! - rows[0]! + 1;
+  };
+  for (const frame of idleFrames) {
+    expect(visibleHeight(enkidu, frame)).toBe(0.9 * visibleHeight(varuna, frame));
+  }
+});

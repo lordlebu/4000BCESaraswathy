@@ -1,4 +1,4 @@
-import type Phaser from 'phaser';
+import Phaser from 'phaser';
 import { ENKIDU_ID, enkiduDry, enkiduHome } from '../../content/enkidu';
 import { orthogonalNeighbours } from '../../world/rivers';
 import type { Point, World } from '../../world/types';
@@ -24,8 +24,15 @@ export class EnkiduView {
     this.home = enkiduHome(world, landing, occupied);
     this.sprite = scene.add.sprite(0, 0, 'enkidu').setName('companion:enkidu')
       .setOrigin(0.5, 1).setScale(figureScale(TILE_SIZE)).setVisible(false);
-    this.shadow = scene.add.image(0, 0, SHADOW_TEXTURE).setDisplaySize(86, 21).setVisible(false);
-    this.sprite.setInteractive({ useHandCursor: true });
+    for (const key of ['enkidu', 'caravan-enkidu-gestures']) {
+      scene.textures.get(key).setFilter(Phaser.Textures.FilterMode.NEAREST);
+    }
+    this.shadow = scene.add.image(0, 0, SHADOW_TEXTURE).setDisplaySize(79, 19).setVisible(false);
+    this.sprite.setInteractive({
+      hitArea: new Phaser.Geom.Rectangle(2, 4, 36, 36),
+      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+      useHandCursor: true
+    });
     this.sprite.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => {
       if (!this.selectionTile()) return;
       event.stopPropagation();

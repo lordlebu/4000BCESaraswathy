@@ -1240,7 +1240,7 @@ export function App() {
               label: talk.label,
               detail: talk.detail ?? undefined,
               mark: talkFace && StrangerFace
-                ? <StrangerFace stranger={talkFace} size={24} />
+                ? <StrangerFace stranger={talkFace} size={22} variant="action" />
                 : talk.npcId || talk.atCamp ? '💬' : '👣',
               // Never greyed: anybody in view can be called to, and they wait while you walk up.
               blocked: null,

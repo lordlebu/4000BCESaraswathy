@@ -73,6 +73,12 @@ const findVisit = (page: Page, withEnkidu: boolean) => page.evaluate((withEnkidu
   return null;
 }, withEnkidu);
 
+async function expectPainting(page: Page, key: string) {
+  const painting = page.getByRole('dialog').locator('img.activity-scene');
+  await expect(painting).toHaveAttribute('src', new RegExp(`${key}[-.]`));
+  await expect.poll(() => painting.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBe(640);
+}
+
 test('Enkidu meets the player at an eligible caravan and can rejoin at Southern Landing', async ({ page }) => {
   await page.goto(path + '&hour=12&at=poi_twin_landing');
   const talk = page.getByRole('button', { name: 'Talk to Enkidu' });
@@ -89,7 +95,9 @@ test('Enkidu meets the player at an eligible caravan and can rejoin at Southern 
   await page.goto(fixture + `&at=${guest.at.x},${guest.at.y}`);
   await expect(talk).toBeVisible({ timeout: 20_000 });
   await talk.click();
+  await expectPainting(page, 'woven-enkidu-meeting');
   await page.getByRole('button', { name: 'Invite Enkidu to travel' }).click();
+  await expectPainting(page, 'woven-enkidu-recruitment');
   await page.getByRole('button', { name: 'Go on' }).click();
   await expect.poll(async () => (await readJourney(page)).flags)
     .toEqual(expect.arrayContaining(['met:npc_enkidu', 'recruited:npc_enkidu', 'companion:npc_enkidu']));
@@ -119,6 +127,7 @@ test('the first overnight offer can be declined, then records the host visit on 
   await expect(rest).toBeEnabled({ timeout: 20_000 });
   await rest.click();
   await expect(page.getByRole('heading', { name: 'Beneath the western shelter' })).toBeVisible();
+  await expectPainting(page, 'woven-camp-sleep-elamite');
   await page.getByRole('button', { name: 'Leave for now' }).click();
   expect((await readJourney(page)).travelled).toBe(day * DAY_MS);
   await expect(rest).toBeEnabled();
@@ -129,7 +138,8 @@ test('the first overnight offer can be declined, then records the host visit on 
   const journey = await readJourney(page);
   expect(journey.travelled).toBeGreaterThan(day * DAY_MS);
   expect(journey.diaryEvents).toEqual(expect.arrayContaining([expect.objectContaining({
-    day, subjectId: camp.id, choiceId: 'stay', campResidents: expect.any(Array)
+    day, subjectId: camp.id, choiceId: 'stay', campResidents: expect.any(Array),
+    art: { collection: 'events', key: 'woven-camp-sleep-elamite', take: 0 }
   })]));
   expect(journey.diaryEvents.find((entry: { subjectId?: string }) => entry.subjectId === camp.id).campResidents).toHaveLength(3);
 });

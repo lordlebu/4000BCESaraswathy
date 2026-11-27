@@ -95,17 +95,19 @@ export function paintedFaceFor(stranger: EventStranger): string | null {
 export interface StrangerFaceProps {
   stranger: EventStranger;
   size?: number;
+  variant?: 'portrait' | 'action';
 }
 
 /** Presentational, like `PersonPortrait`: the title beside it already says who this is. */
-export function StrangerFace({ stranger, size = 40 }: StrangerFaceProps) {
+export function StrangerFace({ stranger, size = 40, variant = 'portrait' }: StrangerFaceProps) {
+  const className = variant === 'action' ? 'tile-action-portrait' : 'person-portrait';
   // Keyed on the name as well as who they are, because the name is dealt per journey: a new journey's
   // carrier is a new face, and one journey's carrier keeps theirs.
   const painted = paintedFaceFor(stranger);
   if (painted) {
     return (
       <img
-        className="person-portrait is-painted stranger-face"
+        className={`${className} is-painted stranger-face`}
         src={painted}
         width={size}
         height={size}
@@ -120,7 +122,7 @@ export function StrangerFace({ stranger, size = 40 }: StrangerFaceProps) {
   const headwear = HEADWEAR[headwearOf(stranger.look.body)];
   return (
     <svg
-      className="person-portrait stranger-face"
+      className={`${className} stranger-face`}
       width={size}
       height={size}
       viewBox="0 0 24 24"
