@@ -22,11 +22,10 @@ const PEOPLE = {
 };
 function buildTwinPerson(id, out) {
   const person = PEOPLE[id];
-  if (!person) throw new Error(`Unknown twin-city figure: ${id}`);
   const entry=JSON.parse(fs.readFileSync(path.join(__dirname,'characters.json'),'utf8')).characters.find(c=>c.id===id);
   const source=entry?.jrpgSource?path.join(__dirname,'..',entry.jrpgSource):null;
   if(source){
-    const image=decodePng(source),cell=person.width??26;
+    const image=decodePng(source),cell=entry.cell?.width??person?.width??26;
     if(image.width!==cell*4||image.height!==200)throw new Error(`${id}: expected four columns and five rows`);
     const pixels=Buffer.alloc(cell*20*40*4);
     for(let frame=0;frame<20;frame++)for(let y=0;y<40;y++){
@@ -36,6 +35,7 @@ function buildTwinPerson(id, out) {
     fs.writeFileSync(out,encodePng(cell*20,40,pixels));
     return;
   }
+  if (!person) throw new Error(`Unknown twin-city figure: ${id}`);
   const cell=person.width??26, width = cell * 20, pixels = Buffer.alloc(width * 40 * 4);
   const { skin, light, cloth, shade, accent } = person;
   const palette = { ink:'#30231e', hair:person.hair.startsWith('grey')?'#938a7b':'#514237', wood:'#c6a271', skin, light, cloth, shade, accent };

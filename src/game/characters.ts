@@ -35,6 +35,7 @@ import ulennaUrl from '../../assets/cove-watcher-ulenna-overworld.png?no-inline'
 import kangUrl from '../../assets/priest-kang-overworld.png?no-inline';
 import mirlepaUrl from '../../assets/mirlepa-overworld.png?no-inline';
 import yamantakaUrl from '../../assets/yamantaka-overworld.png?no-inline';
+import enkiduUrl from '../../assets/enkidu-overworld.png?no-inline';
 import caveCookUrl from '../../assets/cave-cook-overworld.png?no-inline';
 import caveHerderUrl from '../../assets/cave-herder-overworld.png?no-inline';
 
@@ -121,6 +122,7 @@ export const TRAVELLER_ART = {
  * something of theirs puts them on the map -- `content/visitors.ts`, for the princess.
  */
 export const NAMED_ART = {
+  enkidu: { key: 'enkidu', name: 'Enkidu', url: enkiduUrl },
   'priest-kang': {key:'priest-kang',name:'Priest Kang',url:kangUrl},
   mirlepa: {key:'mirlepa',name:'Mirlepa',url:mirlepaUrl},
   yamantaka: {key:'yamantaka',name:'Yamantaka',url:yamantakaUrl,frame:{width:34,height:40}},

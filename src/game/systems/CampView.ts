@@ -198,9 +198,11 @@ export class CampView {
     // About one camp in three is pitched round the old yurt instead of the kind's own shelter.
     const details = this.host.fieldMapId === TWIN_MAP ? TWIN_CAMP_DETAILS[camp.kind] : undefined;
     const yurt = !details && Math.floor(roll / 7) % YURT_ONE_IN === 0;
-    const shelter = yurt
-      ? piece(HUT_SHEET, FIRST_YURT, spot(0), 2)
-      : piece(campKey(camp.kind, layout.shelter), undefined, spot(0), 2);
+    const shelter = camp.caravan
+      ? piece('camp-elamite-dome', undefined, spot(0), 2)
+      : yurt
+        ? piece(HUT_SHEET, FIRST_YURT, spot(0), 2)
+        : piece(campKey(camp.kind, layout.shelter), undefined, spot(0), 2);
     layout.extras.forEach((n, i) => piece(campKey(camp.kind, n), undefined, spot(i + 1), 2));
 
     const way = wayIn(this.host.world, camp, walkedRoad(this.host.world, this.host.fieldMapId, places), places.map((p) => p.at));
