@@ -14,6 +14,7 @@ import type { Progress } from '../journey';
 import { isComplete, isFirstMeeting, lineIsSpent, rungOf } from '../journey';
 import { discoveries } from './knowledge';
 import { allNpcs, fieldMap, poi, type Npc } from './places';
+import { ENKIDU_ID, enkiduEncounter } from './enkidu';
 import { campPersonFor } from './campLife';
 import { TWIN_MAP, twinWorldSeed } from '../world/twinGeneration';
 import { travellersOn, type StrangerCulture, type Traveller } from './travellers';
@@ -119,6 +120,13 @@ export function strangersMet(keys: readonly string[], seed = ''): StrangerMet[] 
     const [fieldMapId, travellerId] = key.split(':');
     if (!fieldMapId || !travellerId || !fieldMap(fieldMapId) || key !== `${fieldMapId}:${travellerId}`) continue;
     const identitySeed = fieldMapId === TWIN_MAP ? twinWorldSeed(seed) : seed;
+    if (fieldMapId === TWIN_MAP && travellerId === ENKIDU_ID) {
+      const companion = enkiduEncounter([]).stranger!;
+      out.push({ key, fieldMapId, between: [], traveller: {
+        ...companion, id: travellerId, name: 'Enkidu', npcId: null, art: 'enkidu', circuit: [], conveyance: null
+      } });
+      continue;
+    }
     const traveller = campPersonFor(fieldMapId, travellerId, identitySeed) ??
       travellersOn(fieldMapId, identitySeed).find((t) => t.id === travellerId && t.npcId === null);
     if (!traveller) continue;

@@ -9,8 +9,16 @@ cropped to the solid alpha bounds and point-resized to a camp shelter’s 176-pi
 compact asset is `assets/camps/elamite-dome.png`.
 
 Enkidu’s map sheet uses the approved pangolin with a pilot cap, bronze goggles, ochre scarf and
-pouch. Rebuild the 20-frame strip with `node tools/build-characters.js enkidu`. The caravan and
-companion gameplay are in development.
+pouch. He can be found beside Southern Landing independently of the caravan. Rebuild his map
+strip with `node tools/build-characters.js enkidu`.
+
+The six original Elamite roles and the wool dresser each have a sprite sheet and a matched
+256-square painted portrait. The wool dresser wears the owner’s scalloped cream wool wrap with
+an indigo shoulder cloth. The wagon, woolly draft animal, and camp props use the compact
+atlases in `assets/twins/caravan/`. Rebuild the compact art from the reviewed contact sheets
+with `tools/import-caravan-art.py` and build the people strips with `tools/build-characters.js`.
+The caravan can replace an eligible Twin Cities camp once the revised schedule reaches the
+next cycle boundary on an existing journey.
 
 
 ## Rail bridge, mixed verges and walkway follow-up - 18 November 2026

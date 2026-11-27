@@ -760,7 +760,7 @@ const nightSounds: Template = ({ biome, landmass }, roll) => {
 const fireside: Template = ({ camp }, roll, now) => {
   if (!camp || now.occasion !== 'night') return null;
   const said = sayingFor('fireside', now.fieldMapId, roll);
-  return woven('night', 'fireside', camp.id, { kind: CAMP_PEOPLE[camp.kind] ?? 'the people at the fire', saying: said?.text.replace(/\n/g, ' ') ?? 'The fire travels with us.' }, [{ id: 'listen' }, { id: 'tell' }], {
+  return woven('night', 'fireside', camp.id, { kind: CAMP_PEOPLE[camp.caravan ? 'elamite' : camp.kind] ?? 'the people at the fire', saying: said?.text.replace(/\n/g, ' ') ?? 'The fire travels with us.' }, [{ id: 'listen' }, { id: 'tell' }], {
     variant: camp.kind,
     art: 'camp-night-fireside'
   });
@@ -784,7 +784,8 @@ const CAMP_PEOPLE: Readonly<Record<string, string>> = {
   adventurers: 'the adventurers',
   dacoits: 'the band',
   pilgrims: 'the pilgrims',
-  drovers: 'the drovers'
+  drovers: 'the drovers',
+  elamite: 'the western caravan’s keepers'
 };
 
 const dream: Template = ({ biome }) =>

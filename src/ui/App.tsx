@@ -1,3 +1,4 @@
+import { enkiduEncounter } from '../content/enkidu';
 import { useDiscoveryNotices } from './useDiscoveryNotices';
 // Layout and shared state. The map is a sibling, not a child — React never renders a tile.
 
@@ -1059,6 +1060,22 @@ export function App() {
 
   // Who the talk row is about, calling out to them, the camp's people, and who speaks first on the
   // road: all of it is `useRoadTalk`, which names what it needs from here.
+  const [enkiduNear, setEnkiduNear] = useState(false);
+  const talkToEnkidu = useCallback(() => {
+    if (!enkiduNear || cardOpenRef.current || crossing.current || surface !== null && surface !== 'here') return;
+    cardOpenRef.current = true;
+    setHappening({ event: enkiduEncounter(journeyFlags.current), shelter: null });
+  }, [enkiduNear, setHappening, surface]);
+  useEffect(() => {
+    const onNearby = ({ near }: GameToUi['enkidu-nearby']) => setEnkiduNear(near);
+    EventBus.onEvent('enkidu-nearby', onNearby);
+    EventBus.onEvent('enkidu-talk', talkToEnkidu);
+    return () => {
+      EventBus.offEvent('enkidu-nearby', onNearby);
+      EventBus.offEvent('enkidu-talk', talkToEnkidu);
+    };
+  }, [talkToEnkidu]);
+
   const { talk, campFolk, talkWith, callTo } = useRoadTalk({
     nearbyTravellers,
     world,
@@ -1198,6 +1215,9 @@ export function App() {
             } satisfies TileAction
           ]
         : []),
+      ...(enkiduNear ? [{
+        id: 'enkidu', label: 'Talk to Enkidu', mark: '💬', blocked: null, onDo: talkToEnkidu
+      } satisfies TileAction] : []),
       ...(talk
         ? [
             {
@@ -1223,7 +1243,9 @@ export function App() {
     currentCreature,
     moment,
     world,
-    talk
+    talk,
+    enkiduNear,
+    talkToEnkidu
   ]);
 
   /**

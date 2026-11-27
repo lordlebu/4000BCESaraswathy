@@ -1,3 +1,7 @@
+import { loadCaravanArt } from '../systems/CaravanRig';
+import { EnkiduView } from '../systems/EnkiduView';
+import { ENKIDU_FOLLOWS } from '../../content/enkidu';
+import { loadJourney } from '../../save';
 import { TwinAmbienceView } from '../systems/TwinAmbienceView';
 import {bakeTwinTerrain} from '../twinTerrainTextures';
 import {TWIN_TURF,type TwinTurf} from '../twinTerrain';
@@ -94,7 +98,7 @@ import { bustStage } from '../../content/twinStories';
 import { planTwinResidents } from '../twinResidents';
 import { BeeduView } from '../systems/BeeduView';
 import { DUGOUT_VIEWS, ROW_SLOT, depthFor, dugoutFor, rowAtFoot, type DugoutView, type Edge } from '../frames';
-import { atCamp, encampmentOn, wayIn } from '../../content/encampments';
+import { atCamp, campIsOpen, caravanStageAt, encampmentOn, setCaravanClock, wayIn } from '../../content/encampments';
 import { campVisitors, runnerErrand } from '../../content/campLife';
 import { campPieces } from '../campArt';
 import { beatFor, beatKey, settleZoom, type ArrivalPlace } from '../arrival';
@@ -530,9 +534,12 @@ export class WorldScene extends Phaser.Scene {
   /** The lodestone carriage, shown only while it is carrying him. See `onRide`. */
   private carriage!: Phaser.GameObjects.Image;
   private terminalTurn: { start: number; heading: number } | null = null;
+  private enkidu: EnkiduView | null = null;
+  private enkiduFollows = false;
   private twinEffects: Phaser.GameObjects.Image[] = [];
   private onTwinKnowledge = ({completed,flags=[]}: UiToGame['twin-knowledge']): void => {
     if (!this.world?.twinRegion) return;
+    this.enkiduFollows = flags.includes(ENKIDU_FOLLOWS);
     this.tileOwned = this.tileOwned.filter(item => !this.twinEffects.includes(item.sprite as Phaser.GameObjects.Image));
     for (const image of this.twinEffects) image.destroy();
     this.twinEffects=[];
@@ -790,8 +797,12 @@ export class WorldScene extends Phaser.Scene {
     // Every sheet, not just the one being walked. They are 9-12 KB each and 55 KB for the set, so
     // loading them all costs less than the machinery to load one lazily and swap textures later --
     // and it means a character can be changed without a scene restart.
-    for (const art of everySheet()) loadCharacterSheet(this, art.key, art.url, frameOf(art.key));
+    for (const art of everySheet()) {
+      if (this.fieldMapId !== TWIN_MAP && (art.key === 'enkidu' || art.key.startsWith('elamite-'))) continue;
+      loadCharacterSheet(this, art.key, art.url, frameOf(art.key));
+    }
     // Each kind of camp's own props, cut from the owner's sheets. Twelve small images.
+    if (this.fieldMapId === TWIN_MAP) loadCaravanArt(this);
     for (const piece of campPieces()) this.load.image(piece.key, piece.url);
     // This map's painted animals and no other's. It used to be every map's, on the reasoning that
     // `built` is not assigned until `create` and the files would be a few KB each. They are not:
@@ -872,6 +883,20 @@ export class WorldScene extends Phaser.Scene {
     // what stops a terrain change from being a save-breaking change. See `world/bake.ts`.
     this.built = worldFor(map, data.seed, this.twinGeneration);
     this.world = this.built.world;
+    this.enkidu = null;
+    this.enkiduFollows = false;
+    EventBus.emitEvent('enkidu-nearby', { near: false });
+    const landing = this.built.placed.find(({ poi }) => poi.id === 'poi_twin_landing');
+    if (this.world.twinRegion && landing) {
+      const journey = loadJourney(data.seed);
+      this.enkiduFollows = journey.flags?.includes(ENKIDU_FOLLOWS) ?? false;
+      if (journey.caravanSchedule) {
+        const hour = new URLSearchParams(window.location.search).get('hour');
+        const start = hour === null ? 0 : startPhaseFor(hour);
+        setCaravanClock(this.world, journey.caravanSchedule, () => phaseAt(this.travelled, start));
+      }
+      this.enkidu = new EnkiduView(this, this.world, landing.at, this.built.placed.map(({ at }) => at));
+    }
     this.at = startTileFor(this.built, window.location.search);
     this.boat = boatOn(this.built.fieldMap.id, this.lent) !== null;
     this.shallows = this.boat ? shallowsOf(this.world) : new Set();
@@ -1296,7 +1321,7 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private createPlayer(): void {
-    for (const art of everySheet()) createCharacterAnimations(this, art.key);
+    for (const art of everySheet()) if (this.textures.exists(art.key)) createCharacterAnimations(this, art.key);
     // Varuna stands taller than a tile, so he is anchored by the feet and allowed to overhang.
     //
     // The frame is 26x40 pixels of art and stays that way — the figures are deliberately still
@@ -2240,7 +2265,7 @@ export class WorldScene extends Phaser.Scene {
     if (!this.built) return false;
     const places = this.built.placed.map((p) => ({ poiId: p.poi.id, at: p.at }));
     const camp = encampmentOn(this.world, this.built.fieldMap.id, places, this.dayOfJourney());
-    return camp !== null && atCamp(camp, this.at);
+    return camp !== null && campIsOpen(this.world, camp, this.dayOfJourney()) && atCamp(camp, this.at);
   }
 
   /**
@@ -2390,6 +2415,7 @@ export class WorldScene extends Phaser.Scene {
       x: this.at.x,
       y: this.at.y,
       biome: this.world.tiles[this.at.y]?.[this.at.x]?.biome ?? null,
+      enkidu: this.enkidu?.report() ?? null,
       // How he is drawn in water, so a spec can hold the wading table to the screen.
       wade: this.wade,
       // Whether he is in the dugout, for `e2e/dugout.spec.ts`.
@@ -2489,6 +2515,11 @@ export class WorldScene extends Phaser.Scene {
       const now = day === undefined ? this.campView.current : null;
       return {
         ...c,
+        caravanStage: c.caravan ? caravanStageAt(this.world, c, d)?.stage : null,
+        wagon: day === undefined && c.caravan ? {
+          count: this.children.list.filter((piece) => piece.name === 'caravan-wagon').length,
+          x: (this.children.getByName('caravan-wagon') as Phaser.GameObjects.Image | null)?.x
+        } : null,
         visible: day === undefined ? (now?.sprites[0]?.visible ?? false) : null,
         // What it is drawn from, and whether its smoke is rising: `e2e/camps.spec.ts`.
         pieces: now?.sprites.map((s) => s.texture.key) ?? [],
@@ -2670,6 +2701,7 @@ export class WorldScene extends Phaser.Scene {
     // Before the movement guard: the light keeps changing while the player stands still, and it
     // keeps changing mid-step too.
     this.updateSky();
+    if (this.world.twinRegion) this.campView.animateCaravan(this.dayOfJourney());
     this.updatePinch();
     this.updateGuidanceEdge();
     this.updateSway();
@@ -2677,6 +2709,7 @@ export class WorldScene extends Phaser.Scene {
     this.updateTerminalTurn();
     this.beedu?.update(this.time.now);
     this.updateCaveResidents();
+    this.enkidu?.update(this.at, this.discovered, this.enkiduFollows, !this.riding && !this.afloat, this.player.anims.currentAnim?.key.includes('-sit-') ?? false);
     this.twinAmbience?.update(this.time.now);
     this.visitors.update();
     // A painted walk steps every frame; where the wanderers are is still the half-second gate's.

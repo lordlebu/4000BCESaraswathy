@@ -22,6 +22,10 @@ export const ELAMITE_APPEARANCES = {
     title: 'travelling artisan', spriteId: 'elamite-artisan', portraitId: 'elamite-artisan', iconId: 'elamite-artisan',
     personality: 'inventive', names: ['Naptek', 'Temarak', 'Kutir']
   },
+  'wool-dresser': {
+    title: 'wool dresser', spriteId: 'elamite-wool-dresser', portraitId: 'elamite-wool-dresser', iconId: 'elamite-wool-dresser',
+    personality: 'observant', names: ['Temrut', 'Hutarek', 'Napesh']
+  },
   apprentice: {
     title: 'caravan apprentice', spriteId: 'elamite-apprentice', portraitId: 'elamite-apprentice', iconId: 'elamite-apprentice',
     personality: 'inquisitive', names: ['Temi', 'Hutina', 'Napele']

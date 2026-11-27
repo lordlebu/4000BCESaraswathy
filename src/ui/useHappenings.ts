@@ -14,7 +14,7 @@ import { EventBus, type GameToUi } from '../game/EventBus';
 import { isComplete, receiveAll, type Progress, type WorldMoment } from '../journey';
 import { events, type Choice, type GameEvent, type Occasion } from '../content/events';
 import { happeningNow, surroundingsAt, type CampTalk, type Talk, type Wanted } from '../content/happenings';
-import { atCamp, encampmentOn, type Encampment } from '../content/encampments';
+import { atCamp, campIsOpen, encampmentOn, type Encampment } from '../content/encampments';
 import { rumourAt } from '../content/rumours';
 import { APPROACHES, approachAt, approachId } from '../content/visitors';
 import { beatNow, type BeatWhen } from '../content/storylines';
@@ -331,7 +331,7 @@ export function useHappenings({
       const world = latest.current.world;
       if (!world) return;
       const camp = encampmentOn(world, latest.current.fieldMapId, fieldPlaced.current, day);
-      if (!camp || !atCamp(camp, at) || seenEvents.current.includes(`woven:camp:${camp.id}`)) return;
+      if (!camp || !campIsOpen(world, camp, day) || !atCamp(camp, at) || seenEvents.current.includes(`woven:camp:${camp.id}`)) return;
       // Not over another card: the next step beside the fire asks again.
       if (cardOpenRef.current) return;
       maybeHappens('arriving', at, null, `camp:${camp.id}`, { camp, force: { kind: 'camp', asked: true } });
@@ -455,6 +455,7 @@ export function useHappenings({
     }
     if (choice.eases && choice.eases > 0) EventBus.emitEvent('ease', { by: choice.eases });
     // What this choice leaves behind, for a later event to find.
+    if (choice.clears?.length) journeyFlags.current = journeyFlags.current.filter((flag) => !choice.clears!.includes(flag));
     for (const flag of choice.sets ?? []) {
       if (!journeyFlags.current.includes(flag)) journeyFlags.current = [...journeyFlags.current, flag];
     }
