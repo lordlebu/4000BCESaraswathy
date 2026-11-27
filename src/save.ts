@@ -10,6 +10,8 @@ import { type Satchel, emptySatchel } from './content/satchel';
 import { type Drawn, type Nodes, noNodes } from './content/nodes';
 import { type Progress, emptyProgress } from './journey';
 import type { DiaryEventEntry, EventOrigin } from './content/diaryEvents';
+import { ENKIDU_FOLLOWS, ENKIDU_JOINED } from './content/enkidu';
+import { legacyNpcAppearances, type NpcAppearanceJournal } from './content/npcAppearance';
 import { caravanSchedule, type CaravanSchedule } from './content/elamiteCaravan';
 import { CYCLE_DAYS } from './content/encampments';
 import { DAY_MS } from './game/dayNight';
@@ -245,6 +247,7 @@ export interface Journey {
    * `seenEvents`' precedent: absent is "nobody yet", which is true of every older save.
    */
   met?: string[];
+  npcAppearances?: NpcAppearanceJournal;
   /**
    * The day each event last happened, by id. What lets a storylet come round again after its
    * `again_after`, and the pacer know how long the road has been quiet. Optional on `met`'s
@@ -274,6 +277,7 @@ const empty = (): Journey => ({
   seenEvents: [],
   diaryEvents: [],
   met: [],
+  npcAppearances: {},
   eventDays: {},
   flags: []
 });
@@ -319,6 +323,7 @@ function readDiaryEvents(value: unknown): DiaryEventEntry[] {
       ...(typeof e.subjectId === 'string' ? { subjectId: e.subjectId } : {}),
       title: e.title, prose: e.prose, choiceId: e.choiceId, choiceLabel: e.choiceLabel,
       outcome: e.outcome, day: e.day, fieldMapId: e.fieldMapId,
+      ...(Array.isArray(e.campResidents) ? { campResidents: readIds(e.campResidents) } : {}),
       ...(typeof e.poiId === 'string' ? { poiId: e.poiId } : {}), art
     });
   }
@@ -474,10 +479,17 @@ export function loadJourney(seed: string): Journey {
       : knowledge.travelled > 0 || ground.discovered.length > 0
         ? Math.floor(travelledDay / CYCLE_DAYS) + 1
         : 0;
+    if (!knowledge.flags.includes(ENKIDU_JOINED) && (knowledge.flags.includes(ENKIDU_FOLLOWS) ||
+        knowledge.diaryEvents.some((entry) => entry.eventId === 'woven:enkidu' && ['invite', 'dismiss'].includes(entry.choiceId)))) {
+      knowledge.flags.push(ENKIDU_JOINED);
+    }
     return {
       version: SAVE_VERSION, knowledgeVersion: KNOWLEDGE_VERSION, ...knowledge, ...ground, fieldMapId,
       twinGeneration: parsed.twinGeneration === 2 ? 2 : 1,
-      caravanSchedule: caravanSchedule(firstCycle)
+      caravanSchedule: caravanSchedule(firstCycle),
+      npcAppearances: parsed.npcAppearances && typeof parsed.npcAppearances === 'object' && !Array.isArray(parsed.npcAppearances) && knowledgeOk
+        ? Object.fromEntries(Object.entries(parsed.npcAppearances).filter(([, id]) => typeof id === 'string'))
+        : legacyNpcAppearances(knowledge.met)
     };
   } catch {
     localStorage.removeItem(key(seed));

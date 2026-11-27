@@ -101,6 +101,7 @@ export const BODIES: Readonly<Record<string, BodyPalette>> = looksData.bodies as
 
 /** Somebody's colouring. Ids into `SKIN_TONES` and `DYES`. */
 export interface Look {
+  portraitId?: string;
   body: string;
   skin: string;
   cloth: string;

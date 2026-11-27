@@ -108,6 +108,6 @@ if __name__ == "__main__":
     elif args.sheet_type == "croc-walk":
         croc_walk(args.input_image)
     elif args.sheet_type == "enkidu-gestures":
-        pose_strip(args.input_image, args.sheet_type, 4, (26, 40))
+        pose_strip(args.input_image, args.sheet_type, 4, (40, 40))
     else:
         {"directions": directions, "people": people, "portraits": portraits, "props": props}[args.sheet_type](args.input_image)

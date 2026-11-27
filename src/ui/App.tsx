@@ -1,4 +1,5 @@
-import { enkiduEncounter } from '../content/enkidu';
+import { bindNpcAppearances } from '../content/npcAppearance';
+import { ENKIDU_ID, ENKIDU_STRANGER } from '../content/enkidu';
 import { useDiscoveryNotices } from './useDiscoveryNotices';
 // Layout and shared state. The map is a sibling, not a child — React never renders a tile.
 
@@ -81,7 +82,7 @@ import { peopleAtPlaces, whoIsHere } from '../content/presence';
 import {CAVE_POI,CAVE_REST_LABEL} from '../content/twinStories';
 import { useRoadTalk } from './useRoadTalk';
 import { type Bumped, whoSpeaksFirst } from '../content/bumping';
-import { encampmentOn } from '../content/encampments';
+import { atCamp, campCanHost, encampmentOn, hospitalityFlag } from '../content/encampments';
 import { rumourFor, rumoursOn } from '../content/rumours';
 import { standingOn as howKnownOn, warmTo } from '../content/standing';
 import { discoveries, offeredAt } from '../content/knowledge';
@@ -169,7 +170,7 @@ export function App() {
   const [fieldSessionFailed, setFieldSessionFailed] = useState(false);
   const {
     PhaserGame, ActivityModal, CollectionPanel, EventCard, FieldKit,
-    Negotiation, Overworld, PeoplePanel, SatchelPanel, WorkshopPanel
+    Negotiation, Overworld, PeoplePanel, SatchelPanel, WorkshopPanel, StrangerFace, hospitalityOffer, enkiduEncounter
   } = fieldSession ?? {};
   // Read the save once. Calling loadJourney per state initialiser would parse the same JSON
   // three times and, worse, let the three copies drift.
@@ -197,6 +198,8 @@ export function App() {
   const [cardOpen, setCardOpen] = useState(false);
 
   const [seed, setSeed] = useState(seedFromUrl);
+  const npcAppearances = useRef(initialJourney.current.npcAppearances ?? {});
+  bindNpcAppearances(seed, npcAppearances.current);
   const [caravanSchedule, setCaravanSchedule] = useState(initialJourney.current.caravanSchedule);
   const [twinGeneration, setTwinGeneration] = useState(() =>
     twinGenerationFor(initialJourney.current.twinGeneration, new URLSearchParams(window.location.search).get('twinGen'), false));
@@ -467,6 +470,7 @@ export function App() {
     eventDays,
     journeyFlags,
     metStrangers,
+    npcAppearances,
     fieldPlaced,
     cardOpenRef,
     pageOpenRef,
@@ -597,6 +601,7 @@ export function App() {
         diaryEvents,
         // Strangers you have met, so somebody on the road can know you the second time.
         met: metStrangers.current,
+        npcAppearances: npcAppearances.current,
         // When each event last happened, and what earlier choices left behind.
         eventDays: eventDays.current,
         flags: journeyFlags.current,
@@ -723,6 +728,8 @@ export function App() {
     seenEvents.current = loaded.seenEvents ?? [];
     setDiaryEvents(loaded.diaryEvents ?? []);
     metStrangers.current = loaded.met ?? [];
+    npcAppearances.current = loaded.npcAppearances ?? {};
+    bindNpcAppearances(next, npcAppearances.current);
     eventDays.current = loaded.eventDays ?? {};
     journeyFlags.current = loaded.flags ?? [];
     // A new walk's day starts now, so its first night does not recount the old walk.
@@ -1060,21 +1067,12 @@ export function App() {
 
   // Who the talk row is about, calling out to them, the camp's people, and who speaks first on the
   // road: all of it is `useRoadTalk`, which names what it needs from here.
-  const [enkiduNear, setEnkiduNear] = useState(false);
   const talkToEnkidu = useCallback(() => {
-    if (!enkiduNear || cardOpenRef.current || crossing.current || surface !== null && surface !== 'here') return;
+    if (cardOpenRef.current || crossing.current || surface !== null && surface !== 'here') return;
+    if (!enkiduEncounter) return;
     cardOpenRef.current = true;
     setHappening({ event: enkiduEncounter(journeyFlags.current), shelter: null });
-  }, [enkiduNear, setHappening, surface]);
-  useEffect(() => {
-    const onNearby = ({ near }: GameToUi['enkidu-nearby']) => setEnkiduNear(near);
-    EventBus.onEvent('enkidu-nearby', onNearby);
-    EventBus.onEvent('enkidu-talk', talkToEnkidu);
-    return () => {
-      EventBus.offEvent('enkidu-nearby', onNearby);
-      EventBus.offEvent('enkidu-talk', talkToEnkidu);
-    };
-  }, [talkToEnkidu]);
+  }, [setHappening, surface, enkiduEncounter]);
 
   const { talk, campFolk, talkWith, callTo } = useRoadTalk({
     nearbyTravellers,
@@ -1090,7 +1088,8 @@ export function App() {
     cardOpen,
     cardOpenRef,
     bumpedNamed,
-    speakFirst
+    speakFirst,
+    talkToEnkidu
   });
 
   // In a place: whoever is here, a moment after walking in, once the arrival has had its turn --
@@ -1153,6 +1152,15 @@ export function App() {
     // in view, and comes last so a chip that wraps on a small screen is this one rather than one of
     // the steady three.
 
+    const speaker = talk && !talk.npcId
+      ? campFolk.find(({ id }) => id === talk.travellerId) ??
+        travellersOn(fieldMapId, world?.seed ?? '').find(({ id }) => id === talk.travellerId)
+      : null;
+    const talkFace = talk?.npcId === ENKIDU_ID ? ENKIDU_STRANGER
+      : speaker?.look ? {
+        id: `${fieldMapId}:${speaker.id}`, role: speaker.role, look: speaker.look,
+        culture: speaker.culture, givenName: speaker.givenName
+      } : null;
     return [
       {
         id: 'take',
@@ -1182,7 +1190,17 @@ export function App() {
         // Through the same modal as everything else. Nothing is won and nothing can go wrong, so
         // it settles on its own -- but it is the same shape of act, and the night should look like
         // one rather than happening between two frames.
-        onDo: () => startRest(shelter)
+        onDo: () => {
+          const camp = shelter === 'camp' && world && arrival
+            ? encampmentOn(world, fieldMapId, fieldPlaced.current, arrival.day) : null;
+          if (hospitalityOffer && camp && world && arrival && atCamp(camp, arrival.at) && campCanHost(world, camp, arrival.day) &&
+              !journeyFlags.current.includes(hospitalityFlag(camp))) {
+            cardOpenRef.current = true;
+            setHappening({ event: hospitalityOffer(camp, fieldMapId), shelter: 'camp' });
+            return;
+          }
+          startRest(shelter);
+        }
       } satisfies TileAction
           ]),
       // The line is one map's furniture, so the row only exists where there is a line. Every other
@@ -1215,16 +1233,15 @@ export function App() {
             } satisfies TileAction
           ]
         : []),
-      ...(enkiduNear ? [{
-        id: 'enkidu', label: 'Talk to Enkidu', mark: '💬', blocked: null, onDo: talkToEnkidu
-      } satisfies TileAction] : []),
       ...(talk
         ? [
             {
               id: 'talk',
               label: talk.label,
               detail: talk.detail ?? undefined,
-              mark: talk.npcId || talk.atCamp ? '💬' : '👣',
+              mark: talkFace && StrangerFace
+                ? <StrangerFace stranger={talkFace} size={24} />
+                : talk.npcId || talk.atCamp ? '💬' : '👣',
               // Never greyed: anybody in view can be called to, and they wait while you walk up.
               blocked: null,
               key: 'T',
@@ -1244,8 +1261,12 @@ export function App() {
     moment,
     world,
     talk,
-    enkiduNear,
-    talkToEnkidu
+    campFolk,
+    hospitalityOffer,
+    StrangerFace,
+    fieldMapId,
+    startRest,
+    setHappening
   ]);
 
   /**

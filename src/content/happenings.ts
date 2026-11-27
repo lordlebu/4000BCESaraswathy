@@ -1,3 +1,4 @@
+import { effectiveCampKind } from './encampments';
 // Events made on the spot, from what is actually here.
 //
 // **`events.ts` is a registry nobody has written into, and this does not change that.** An
@@ -67,7 +68,6 @@ import { rumourAt, type Rumour } from './rumours';
 import { sayingFor } from './sayings';
 import type { Encampment } from './encampments';
 import { CAMP_WORDS, type CampActivity, type CampPerson } from './campLife';
-import { TWIN_MAP } from '../world/twinGeneration';
 import { ambientTopics } from './twinAmbientTalk';
 
 /** A seeded roll, as `eventNow` takes it: the same salt always gives the same number. */
@@ -587,11 +587,11 @@ const smallTalk: Template = ({ stranger, talk, biome }, _roll, now) => {
     const variant = rumour.kind === 'camp' ? rumour.campKind : rumour.person ? 'someone' : 'nobody';
     news = { id: rumour.id, text: fill(pick(words.lines?.[rumour.kind] ?? '', variant), slots) };
   }
-  if (now.fieldMapId === TWIN_MAP) {
-    const context = { road: true as const, biome, culture: stranger.culture, standing: talk.standing, warm: talk.warm };
-    return { ...event, topics: ambientTopics(stranger.id, context, now.day, now.last, news) };
-  }
-  return news ? { ...event, prose: `${event.prose} ${news.text}` } : event;
+  const context = {
+    road: true as const, biome, culture: stranger.culture, standing: talk.standing, warm: talk.warm,
+    map: now.fieldMapId, occupation: stranger.role
+  };
+  return { ...event, topics: ambientTopics(stranger.id, context, now.day, now.last, news) };
 };
 
 /**
@@ -687,11 +687,11 @@ const campTalk: Template = ({ campPerson }, _roll, now) => {
       artVariant: `woven-camp-${person.elamiteRole ? 'elamite' : person.kind}`,
       // At the meal, the kind's own evening at the fire, when it has been painted: the four prompts
       // are `woven-camp-meal-*` in docs/event-prompts.md. Until then, the camp's painting as before.
-      ...(meal && !person.elamiteRole ? { artMoment: `woven-camp-meal-${person.kind}` } : {})
+      ...(meal ? { artMoment: `woven-camp-meal-${person.elamiteRole ? 'elamite' : person.kind}` } : {})
     }
   );
-  if (!known || now.fieldMapId !== TWIN_MAP) return event;
-  const context = { road: false as const, kind: person.kind, slot: person.slot, activity: campPerson.activity, elamite: person.elamiteRole !== undefined };
+  if (!known) return event;
+  const context = { road: false as const, kind: person.kind, slot: person.slot, activity: campPerson.activity, elamite: person.elamiteRole !== undefined, map: now.fieldMapId, occupation: person.role };
   const topics = ambientTopics(id, context, now.day, now.last);
   if (!topics.length) return event;
   return { ...event, prose: `${name} ${doing}, and nods as if you had only stepped away.`, topics };
@@ -760,9 +760,10 @@ const nightSounds: Template = ({ biome, landmass }, roll) => {
 const fireside: Template = ({ camp }, roll, now) => {
   if (!camp || now.occasion !== 'night') return null;
   const said = sayingFor('fireside', now.fieldMapId, roll);
-  return woven('night', 'fireside', camp.id, { kind: CAMP_PEOPLE[camp.caravan ? 'elamite' : camp.kind] ?? 'the people at the fire', saying: said?.text.replace(/\n/g, ' ') ?? 'The fire travels with us.' }, [{ id: 'listen' }, { id: 'tell' }], {
-    variant: camp.kind,
-    art: 'camp-night-fireside'
+  return woven('night', 'fireside', camp.id, { kind: CAMP_PEOPLE[effectiveCampKind(camp)] ?? 'the people at the fire', saying: said?.text.replace(/\n/g, ' ') ?? 'The fire travels with us.' }, [{ id: 'listen' }, { id: 'tell' }], {
+    variant: effectiveCampKind(camp),
+    art: 'camp-night-fireside',
+    ...(camp.caravan ? { artVariant: 'woven-camp-sleep-elamite' } : {})
   });
 };
 

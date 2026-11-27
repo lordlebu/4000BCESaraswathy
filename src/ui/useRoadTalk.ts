@@ -1,3 +1,4 @@
+import { ENKIDU_ID, ENKIDU_TRAVELLER } from '../content/enkidu';
 // The road's people, from React's side: who the talk row means, calling out to somebody so they
 // wait, opening what they have to say once you are beside them, the people who keep today's camp,
 // and who speaks first as you come alongside.
@@ -55,7 +56,8 @@ export function useRoadTalk({
   cardOpen,
   cardOpenRef,
   bumpedNamed,
-  speakFirst
+  speakFirst,
+  talkToEnkidu
 }: {
   /** Who the scene reports walking near, closest first. */
   nearbyTravellers: GameToUi['travellers-nearby']['travellers'];
@@ -74,6 +76,7 @@ export function useRoadTalk({
   cardOpenRef: MutableRefObject<boolean>;
   /** Who among the named people near has a reason to speak first. */
   bumpedNamed: (npcIds: readonly string[], travellerOf: (npcId: string) => string | null) => Bumped[];
+  talkToEnkidu: () => void;
   speakFirst: MutableRefObject<(near: readonly Bumped[]) => void>;
 }) {
   // Who the talk row is about. **Asked of `roadTalk`**, which says who they are, whether they are
@@ -94,7 +97,8 @@ export function useRoadTalk({
     () =>
       roadTalk(nearbyTravellers, fieldMapId, metStrangers.current, chosenTraveller, previousTarget.current, [
         ...travellersOn(fieldMapId, seed),
-        ...campFolk
+        ...campFolk,
+        ENKIDU_TRAVELLER
       ], campToday?.kind ?? null),
     [nearbyTravellers, fieldMapId, chosenTraveller, campFolk]
   );
@@ -115,6 +119,10 @@ export function useRoadTalk({
   /** Open the conversation with somebody on the road, who is beside the player now. */
   const talkWith = useRef<(travellerId: string, npcId: string | null) => void>(() => {});
   talkWith.current = (travellerId, npcId) => {
+    if (travellerId === ENKIDU_ID) {
+      talkToEnkidu();
+      return;
+    }
     if (npcId) {
       dispatch({ type: 'talk-to', npcId });
       return;

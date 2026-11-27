@@ -8,6 +8,8 @@
 // schedule. Letting either drive the other directly is how canvas apps end up re-mounting the game
 // on every keystroke in a text input.
 
+import type { GameEvent } from '../content/events';
+import type { Encampment } from '../content/encampments';
 import type { Shelter } from './night';
 import type { JournalEntry } from '../content/journal';
 import type { Point, World } from '../world/types';
@@ -15,8 +17,7 @@ import type { TravellerState } from '../content/travellers';
 
 /** Scene → React. */
 export interface GameToUi {
-  'enkidu-nearby': { near: boolean };
-  'enkidu-talk': Record<string, never>;
+  'caravan-witnessed': { event: GameEvent };
   'beedu-sighted': {flightId:string};
   'beedu-nearby': {near:boolean; safe?:boolean};
   /** The scene's actual movement capabilities, for route-aware guidance. */
@@ -211,6 +212,10 @@ export interface GameToUi {
    */
   'night-passed': {
     at: Point;
+    hostedBy?: Encampment;
+    campResidents?: string[];
+    startDay?: number;
+    hospitality?: string;
     shelter: Shelter;
     /**
      * Whether it counted as a real sleep, for the diary's wording.
@@ -254,7 +259,7 @@ export interface UiToGame {
    */
   'set-character': { characterId: string };
   /** Bed down for the night. Ignored unless standing at a camp after dark. */
-  'camp': Record<string, never>;
+  'camp': { hospitality?: string };
   /** Lay down a different field map. The overworld sends this. */
   'travel-to': { fieldMapId: string; seed: string; ride?: number };
   'resume-journey': { seed: string; discovered: string[]; twinGeneration?: 1 | 2 };

@@ -18,7 +18,7 @@ export function loadCaravanArt(scene: Phaser.Scene): void {
     if (vehicleArt.has(name)) {
       scene.load.spritesheet(caravanKey(name), url, { frameWidth: 112, frameHeight: 88 });
     } else if (name === 'enkidu-gestures') {
-      scene.load.spritesheet(caravanKey(name), url, { frameWidth: 26, frameHeight: 40 });
+      scene.load.spritesheet(caravanKey(name), url, { frameWidth: 40, frameHeight: 40 });
     } else {
       scene.load.image(caravanKey(name), url);
     }

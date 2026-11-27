@@ -16,7 +16,7 @@ def runs(values):
     return out
 
 
-def import_sheet(source, destination, width):
+def import_sheet(source, destination, width, standing_height=None):
     im=Image.open(source).convert('RGBA')
     alpha=im.getchannel('A')
     # Alpha is used to locate the artwork only; output samples retain their original RGBA.
@@ -38,7 +38,8 @@ def import_sheet(source, destination, width):
     compact=Image.new('RGBA',(width*4,40*5))
     for index,box in enumerate(boxes):
         sprite=im.crop(box)
-        sprite=sprite.resize((max(1,round(sprite.width*scale)),max(1,round(sprite.height*scale))),
+        pose_scale = min((width-2)/sprite.width, standing_height/sprite.height) if standing_height and index < 16 else scale
+        sprite=sprite.resize((max(1,round(sprite.width*pose_scale)),max(1,round(sprite.height*pose_scale))),
                              Image.Resampling.NEAREST)
         if sprite.height>40:raise ValueError('Seated pose exceeds cell height')
         x=(index%4)*width+(width-sprite.width)//2;y=(index//4)*40+39-sprite.height
@@ -52,5 +53,6 @@ if __name__=='__main__':
     parser=argparse.ArgumentParser()
     parser.add_argument('source');parser.add_argument('destination')
     parser.add_argument('--width',type=int,default=26)
+    parser.add_argument('--standing-height',type=int,choices=range(1,40))
     args=parser.parse_args()
-    import_sheet(args.source,args.destination,args.width)
+    import_sheet(args.source,args.destination,args.width,args.standing_height)
