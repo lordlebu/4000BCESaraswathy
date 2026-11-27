@@ -1,3 +1,4 @@
+import { TWIN_MAP } from '../world/twinGeneration';
 import type { BiomeId } from '../world/types';
 import { tileHash } from '../world/rng';
 import type { CampActivity, CampSlot } from './campLife';
@@ -33,9 +34,9 @@ export interface AmbientTopic {
   day: number;
 }
 
-type Context =
+type Context = { map?: string; occupation?: string } & (
   | { road: true; culture: StrangerCulture | null; biome: BiomeId; standing: Standing; warm: boolean }
-  | { road: false; kind: CampKind; slot: CampSlot; activity?: CampActivity; elamite?: boolean };
+  | { road: false; kind: CampKind; slot: CampSlot; activity?: CampActivity; elamite?: boolean });
 
 interface Line {
   id: string;
@@ -50,6 +51,20 @@ const culture = (id: StrangerCulture) => (c: Context) => c.road && c.culture ===
 const ground = (...biomes: BiomeId[]) => (c: Context) => c.road && biomes.includes(c.biome);
 const camp = (kind: CampKind, slot: CampSlot) => (c: Context) => !c.road && c.kind === kind && c.slot === slot;
 const doing = (...activities: CampActivity[]) => (c: Context) => !c.road && c.activity !== undefined && activities.includes(c.activity);
+
+const regional = (map: string) => (c: Context) => c.map === map;
+const work = (role: string) => (c: Context) => c.occupation?.toLowerCase().includes(role) === true;
+
+const REGIONAL: readonly Line[] = [
+  { id: 'lothal-tide', topic: 'ground', text: '“The tide leaves a dry crust on the flats. Follow the shell line back before it turns.”', fits: (c) => regional('field_map_lothal')(c) && ground('coast', 'wetland', 'river')(c) },
+  { id: 'lothal-reeds', topic: 'work', text: '“Tie the reeds in short bundles here. A long one catches every mangrove branch on the path.”', fits: (c) => regional('field_map_lothal')(c) && work('carrier')(c) },
+  { id: 'narmada-stone', topic: 'ground', text: '“On the plateau the bare stone stays warm after sunset. You can feel the change when you step off it.”', fits: regional('field_map_narmada') },
+  { id: 'narmada-monsoon', topic: 'people', text: '“We know the rain is coming when the wind carries the smell of the plateau down to the river.”', fits: regional('field_map_narmada') },
+  { id: 'dwarka-wheels', topic: 'work', text: '“Sand in the wheel finds a way past any cloth. I listen for the first squeak when we set off.”', fits: (c) => regional('field_map_dwarka')(c) && work('carrier')(c) },
+  { id: 'dwarka-shore', topic: 'ground', text: '“The coast wind brings salt a long way inland. Look at the side of the stones that faces the sea.”', fits: regional('field_map_dwarka') },
+  { id: 'aravali-heights', topic: 'ground', text: '“Cloud can cover the far end of the span before you’re halfway across. Wait for a gap and count the pillars.”', fits: regional('field_map_aravali') },
+  { id: 'aravali-home', topic: 'people', text: '“At home the first one to see clear sky through the notch starts the fire for the rest of us.”', fits: regional('field_map_aravali') }
+];
 
 const ROAD: readonly Line[] = [
   { id: 'long-stride', topic: 'greeting', text: '“There you are. I thought I knew that stride.”' },
@@ -66,7 +81,7 @@ const ROAD: readonly Line[] = [
   { id: 'river-edge', topic: 'ground', text: '“Watch the reeds when the river rises. The current takes them first, and then it widens its bed.”', fits: ground('river', 'wetland', 'coast') },
   { id: 'dry-ridge', topic: 'ground', text: '“That ridge keeps the wind all day. I’d stop on the far side if I wanted to hear myself think.”', fits: ground('hills', 'mountains') },
   { id: 'trees', topic: 'ground', text: '“Under these trees, you feel the rain twice. Once in the open and again after you think it’s over.”', fits: ground('forest') },
-  { id: 'roads', topic: 'ground', text: '“Between the two cities, I let the road take me round the wet ground. A dry boot saves more time than a shortcut.”' },
+  { id: 'roads', topic: 'ground', text: '“Between the two cities, I let the road take me round the wet ground. A dry boot saves more time than a shortcut.”', fits: regional(TWIN_MAP) },
   { id: 'dust', topic: 'ground', text: '“The dust stays in the ruts after the rain. Walk on the shoulder and you can see who passed before you.”', fits: ground('plains', 'desert', 'settlement', 'landmark') },
   { id: 'shade-ahead', topic: 'parting', text: '“May the next stretch have shade where you need it.”' },
   { id: 'see-you', topic: 'parting', text: '“I’ll know to look for you on this road now.”' }
@@ -122,7 +137,7 @@ export function ambientTopics(
     : elamite ? ELAMITE_TOPICS.filter((id) => id !== intro) : ['work', 'greeting', 'people', 'parting'];
   const rank = (id: string, at = 0) => tileHash(speaker, at, 0, id);
   subjects.sort((a, b) => rank(a, day) - rank(b, day));
-  const local = (context.road ? ROAD : elamite ? ELAMITE : CAMP).filter((line) => !line.fits || line.fits(context));
+  const local = [...(context.road ? ROAD : elamite ? ELAMITE : CAMP), ...REGIONAL].filter((line) => !line.fits || line.fits(context));
   const options = news ? [topic('news', news.text, key(news.id))] : [];
   const age = (line: Line) => day - (history[key(line.id)] ?? -Infinity);
   for (const id of [intro, ...subjects]) {

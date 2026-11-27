@@ -93,12 +93,12 @@ describe('small talk and the rumour it passes on', () => {
   it('passes a rumour on only when the stranger cares, and asking leaves the flags', () => {
     const [warm] = wovenFor(now(), talking({ standing: 'known', warm: true, rumour }), roll, 'small-talk', true);
     expect(warm, 'no small talk with a warm stranger').toBeTruthy();
-    expect(warm!.prose).toContain(rumour.place);
+    expect(warm!.topics?.find(({ id }) => id === 'news')?.line).toContain(rumour.place);
     const ask = warm!.choices.find((c) => c.id === 'ask')!;
     expect(ask.sets).toEqual([`heard:${rumour.id}`, `told:${rumour.id}@${rumour.poiId}@${who}`]);
 
     const [cold] = wovenFor(now(), talking({ standing: 'stranger', warm: false, rumour }), roll, 'small-talk', true);
-    expect(cold!.prose, 'a cold stranger passed on a rumour').not.toContain(rumour.place);
+    expect(cold!.topics?.some(({ id }) => id === 'news'), 'a cold stranger passed on a rumour').toBe(false);
     expect(cold!.choices.map((c) => c.id)).toEqual(['walk', 'part']);
   });
 

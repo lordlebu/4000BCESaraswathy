@@ -46,6 +46,7 @@ import {
   type TravellerState,
   type Waiting
 } from '../../content/travellers';
+import { ENKIDU_ID } from '../../content/enkidu';
 import type { Encampment } from '../../content/encampments';
 import { waitAtPiers } from '../../content/vehicles';
 import { isWalkable } from '../../world/generate';
@@ -72,6 +73,7 @@ export interface TravellerHost {
   camp(): DrawnCamp | null;
   /** How tall the player is drawn, for the browser suite to compare a traveller against. */
   playerHeight(): number;
+  companion?(): { at: Point; sprite: Phaser.GameObjects.Sprite } | null;
 }
 
 export class TravellerView {
@@ -427,9 +429,11 @@ export class TravellerView {
    * the player does, since either can bring somebody alongside.
    */
   reportNearby(): void {
-    const close = nearby(this.tiles, this.host.at).map(({ id, steps, beside }) => ({
+    const companion = this.host.companion?.();
+    const positions = companion ? new Map(this.tiles).set(ENKIDU_ID, companion.at) : this.tiles;
+    const close = nearby(positions, this.host.at).map(({ id, steps, beside }) => ({
       id,
-      npcId: this.list.find((t) => t.traveller.id === id)?.traveller.npcId ?? null,
+      npcId: id === ENKIDU_ID ? ENKIDU_ID : this.list.find((t) => t.traveller.id === id)?.traveller.npcId ?? null,
       steps,
       beside,
       doing: this.campDoing.get(id) ?? null
@@ -595,9 +599,8 @@ export class TravellerView {
    * every frame because the traveller it rides on is moved on the half-second gate.
    */
   placeTargetMark(): void {
-    const sprite = this.talkTarget
-      ? this.list.find((t) => t.traveller.id === this.talkTarget)?.sprite
-      : undefined;
+    const sprite = this.talkTarget === ENKIDU_ID ? this.host.companion?.()?.sprite
+      : this.list.find((t) => t.traveller.id === this.talkTarget)?.sprite;
     if (!sprite || !sprite.visible) {
       this.targetMark?.setVisible(false);
       return;

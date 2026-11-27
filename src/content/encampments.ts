@@ -199,6 +199,10 @@ export function campIsOpen(world: World, camp: Encampment, day: number): boolean
   return stage === 'pitching' || stage === 'established' || stage === 'packing';
 }
 
+export function campCanHost(world: World, camp: Encampment, day: number): boolean {
+  return !camp.caravan || caravanStageAt(world, camp, day)?.stage === 'established';
+}
+
 /**
  * The camp standing on this map today, or null.
  *
@@ -429,4 +433,14 @@ function searchWayIn(
     step = toward.get(key(step));
   }
   return { turnOff: found.at, tiles, cost: found.cost };
+}
+
+export type HospitalityKind = CampKind | 'elamite';
+
+export function effectiveCampKind(camp: Encampment): HospitalityKind {
+  return camp.caravan ? 'elamite' : camp.kind;
+}
+
+export function hospitalityFlag(camp: Pick<Encampment, 'id'>): string {
+  return `hospitality:${camp.id}`;
 }

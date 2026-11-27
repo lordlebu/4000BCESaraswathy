@@ -18,6 +18,7 @@ export interface DiaryEventEntry {
   choiceLabel: string;
   outcome: string;
   day: number;
+  campResidents?: string[];
   fieldMapId: string;
   poiId?: string;
   art: DiaryEventArt | null;

@@ -1,3 +1,4 @@
+import { rememberNpcAppearance, type NpcAppearanceJournal } from '../content/npcAppearance';
 // Things that happen to the traveller, from React's side: asking whether anything happens on a
 // night, an arrival, a day's road or at a camp, a story beat first, and the card that opens -- and
 // what choosing on it does.
@@ -14,7 +15,7 @@ import { EventBus, type GameToUi } from '../game/EventBus';
 import { isComplete, receiveAll, type Progress, type WorldMoment } from '../journey';
 import { events, type Choice, type GameEvent, type Occasion } from '../content/events';
 import { happeningNow, surroundingsAt, type CampTalk, type Talk, type Wanted } from '../content/happenings';
-import { atCamp, campIsOpen, encampmentOn, type Encampment } from '../content/encampments';
+import { atCamp, campIsOpen, encampmentOn, hospitalityFlag, type Encampment } from '../content/encampments';
 import { rumourAt } from '../content/rumours';
 import { APPROACHES, approachAt, approachId } from '../content/visitors';
 import { beatNow, type BeatWhen } from '../content/storylines';
@@ -49,6 +50,7 @@ export function useHappenings({
   eventDays,
   journeyFlags,
   metStrangers,
+  npcAppearances,
   fieldPlaced,
   cardOpenRef,
   pageOpenRef,
@@ -70,6 +72,7 @@ export function useHappenings({
   eventDays: MutableRefObject<Record<string, number>>;
   journeyFlags: MutableRefObject<string[]>;
   metStrangers: MutableRefObject<string[]>;
+  npcAppearances: MutableRefObject<NpcAppearanceJournal>;
   /** Where this map's places landed, from the scene's `world-ready`. */
   fieldPlaced: MutableRefObject<{ poiId: string; at: { x: number; y: number } }[]>;
   /** Set the instant a card opens, so an effect in the same commit sees it. */
@@ -99,6 +102,7 @@ export function useHappenings({
     event: GameEvent;
     shelter: string | null;
   } | null>(null);
+  const completedHospitality = useRef<{ visit: string; day?: number; residents?: string[] } | null>(null);
   const blockedRef=useRef(blocked);blockedRef.current=blocked;
   const pendingBeedu=useRef<string|null>(null);
   const beeduSafe=useRef(true);
@@ -245,14 +249,17 @@ export function useHappenings({
      * **`night-passed` had no listener at all** before events: emitted every time somebody slept,
      * carrying where they were and what shelter they had, and read by nothing.
      */
-    const onNight = ({ at, shelter }: GameToUi['night-passed']) => {
+    const onNight = ({ at, shelter, hostedBy, hospitality, startDay, campResidents }: GameToUi['night-passed']) => {
+      if (hospitality) {
+        completedHospitality.current = { visit: hospitality, day: startDay, residents: campResidents };
+        return;
+      }
       if (storyNow('night', null)) return;
       // **Beside a camp, the night is at their fire.** The first night slept beside each camp is
       // asked for rather than rationed: its own kind's untold story if canon has one, else the fire
       // or what comes to the edge of its light. Every night after is an ordinary one.
-      const world = latest.current.world;
-      const camp = world ? encampmentOn(world, latest.current.fieldMapId, fieldPlaced.current, latest.current.day) : null;
-      if (camp && atCamp(camp, at)) {
+      const camp = hostedBy;
+      if (camp) {
         const first = !journeyFlags.current.includes(`fireside:${camp.id}`);
         if (first) journeyFlags.current = [...journeyFlags.current, `fireside:${camp.id}`];
         if (maybeHappens('night', at, shelter, `fireside:${camp.id}`, { camp, ...(first ? { force: { asked: true } } : {}) })) return;
@@ -415,6 +422,14 @@ export function useHappenings({
     };
 
     EventBus.onEvent('approached', onApproached);
+    const onCaravanWitnessed = ({ event }: GameToUi['caravan-witnessed']) => {
+      if (blockedRef.current || cardOpenRef.current || pageOpenRef.current || latest.current.activityOpen || crossing.current) return;
+      if (seenEvents.current.includes(event.id)) return;
+      seenEvents.current = [...seenEvents.current, event.id];
+      cardOpenRef.current = true;
+      setHappening({ event, shelter: null });
+    };
+    EventBus.onEvent('caravan-witnessed', onCaravanWitnessed);
     EventBus.onEvent('night-passed', onNight);
     EventBus.onEvent('poi-reached', onArrived);
     EventBus.onEvent('poi-returned', onReturned);
@@ -425,6 +440,7 @@ export function useHappenings({
     return () => {
       EventBus.offEvent('approached', onApproached);
       EventBus.offEvent('night-passed', onNight);
+      EventBus.offEvent('caravan-witnessed', onCaravanWitnessed);
       EventBus.offEvent('poi-reached', onArrived);
       EventBus.offEvent('poi-returned', onReturned);
       EventBus.offEvent('tile-entered', onRoad);
@@ -436,6 +452,21 @@ export function useHappenings({
   }, []);
 
   function resolveEvent(event: GameEvent, choice: Choice, art: ArtSelection | null, topic?: AmbientTopic) {
+    type Overnight = { visit: string; day?: number; residents?: string[] };
+    let overnight: Overnight | null = null;
+    if (event.id.startsWith('woven:camp-sleep:')) {
+      if (choice.id === 'leave' || !event.subjectId || journeyFlags.current.includes(hospitalityFlag({ id: event.subjectId }))) {
+        setHappening(null);
+        return;
+      }
+      completedHospitality.current = null;
+      EventBus.emitEvent('camp', { hospitality: event.subjectId });
+      overnight = completedHospitality.current as Overnight | null;
+      if (overnight?.visit !== event.subjectId) {
+        setHappening(null);
+        return;
+      }
+    }
     if (event.once && (event.origin === 'discovery' || event.origin === 'sub-location') &&
         seenEvents.current.includes(event.id)) return;
     // Through the same door a conversation uses. An event grants the same kinds of thing a
@@ -463,6 +494,7 @@ export function useHappenings({
     // Whoever this was about, you have met now.
     const stranger = event.stranger;
     if (stranger && !metStrangers.current.includes(stranger.id)) {
+      rememberNpcAppearance(npcAppearances.current, stranger.id, stranger.look);
       metStrangers.current = [...metStrangers.current, stranger.id];
     }
     // Noted rather than announced, like every other outcome in this game: the progression
@@ -482,7 +514,8 @@ export function useHappenings({
         choiceId: choice.id,
         choiceLabel: choice.label,
         outcome: choice.line,
-        day: latest.current.day,
+        day: overnight?.day ?? latest.current.day,
+        ...(overnight?.residents ? { campResidents: overnight.residents } : {}),
         fieldMapId: latest.current.fieldMapId,
         ...(latest.current.poiId ? { poiId: latest.current.poiId } : {}),
         art: art && (art.folder === 'events' || art.folder === 'scenes' || art.folder === 'places')

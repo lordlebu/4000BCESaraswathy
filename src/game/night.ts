@@ -178,6 +178,7 @@ export function nightRestores(shelter: Shelter): number {
  * a camp of a kind not here, or a camp-rung night with no camp named, keeps the plain line below.
  */
 const CAMP_NIGHTS: Readonly<Record<string, string>> = {
+  elamite: 'Slept beside the western felt dome. The Croc had settled by the wagon before the last embers went dark.',
   drovers: 'Slept by the drovers\u2019 fold. The goats shifted all night, and the milker kept the fire.',
   pilgrims: 'Slept at the pilgrims\u2019 fire. Somebody sang until the lamp on the cairn was the only light.',
   adventurers: 'Slept at the adventurers\u2019 fire. They were still arguing about the map when I dropped off.',

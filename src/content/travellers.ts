@@ -28,6 +28,7 @@ import { allNpcs, fieldMap, fieldMaps, givenNames, npc, poi, type Npc } from './
 import { weightedPickFor } from '../world/rng';
 import { vehicles } from './making';
 import { stepCostOn } from './species';
+import { npcAppearance } from './npcAppearance';
 import { type Look, lookFor } from './looks';
 import { TWIN_PEOPLE } from './twinPeople';
 
@@ -473,6 +474,7 @@ export function travellersOn(fieldMapId: string, seed = ''): Traveller[] {
       if (!second || first === second) second = roadPlaces[(salt % roadPlaces.length + 1) % roadPlaces.length]!;
       const circuit = [first, second];
       const grounds = new Set(circuit.flatMap((id) => poi(id)?.terrain ?? []));
+      const kit = npcAppearance(fieldMapId, seed, who.id, who.body, who.culture);
       out.push({
         id: who.id,
         name: who.name,
@@ -480,9 +482,9 @@ export function travellersOn(fieldMapId: string, seed = ''): Traveller[] {
         npcId: null,
         circuit,
         conveyance: conveyanceFor(grounds),
-        art: who.body,
+        art: kit?.body ?? who.body,
         // Dyed and named per journey, like the name (`dealtNames`); the circuit stays the map's.
-        look: lookFor(seed ? `${seed}|${fieldMapId}:${who.id}` : `${fieldMapId}:${who.id}`, who.body),
+        look: kit ?? lookFor(seed ? `${seed}|${fieldMapId}:${who.id}` : `${fieldMapId}:${who.id}`, who.body),
         culture: who.culture,
         givenName: givenNameFor(`${fieldMapId}:${who.id}`, seed)
       });

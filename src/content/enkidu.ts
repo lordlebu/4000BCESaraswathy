@@ -1,11 +1,41 @@
-import { TWIN_MAP } from '../world/twinGeneration';
 import { orthogonalNeighbours } from '../world/rivers';
 import type { Point, World } from '../world/types';
-import type { GameEvent } from './events';
+import { caravanStageAt, type Encampment } from './encampments';
+import { tileHash } from '../world/rng';
+import type { Traveller } from './travellers';
+import { TWIN_MAP } from '../world/twinGeneration';
+import type { EventStranger } from './events';
 
 export const ENKIDU_ID = 'npc_enkidu';
 export const ENKIDU_MET = 'met:npc_enkidu';
 export const ENKIDU_FOLLOWS = 'companion:npc_enkidu';
+
+export const ENKIDU_JOINED = 'recruited:npc_enkidu';
+
+export const ENKIDU_TRAVELLER: Traveller = {
+  id: ENKIDU_ID, name: 'Enkidu', role: 'pangolin adventurer',
+  npcId: ENKIDU_ID, art: 'enkidu', circuit: [], conveyance: null, culture: null, givenName: 'Enkidu',
+  look: { body: 'enkidu', skin: 'as-painted', cloth: 'ochre', second: 'undyed' }
+};
+
+export function caravanCarriesEnkidu(seed: string, visitId: string): boolean {
+  return tileHash(seed, 0, 0, `enkidu:guest:${visitId}`) % 10 === 0;
+}
+
+export function caravanEnkiduPosition(world: World, camp: Encampment, day: number): Point | null {
+  if (!camp.caravan || !caravanCarriesEnkidu(world.seed, camp.caravan.id)) return null;
+  const state = caravanStageAt(world, camp, day);
+  if (!state || state.stage === 'aftermath') return null;
+  const { route } = camp.caravan;
+  if (state.stage === 'established' || state.stage === 'pitching' || state.stage === 'packing') {
+    return orthogonalNeighbours(camp.at, world.width, world.height)
+      .filter((p) => enkiduDry(world, p) && !route.slice(-2).some((r) => r.x === p.x && r.y === p.y)).at(-1)
+      ?? camp.at;
+  }
+  const index = Math.round(state.routeProgress * (route.length - 1));
+  const besideWagon = Math.max(0, Math.min(route.length - 1, index + (state.stage === 'departure' ? 2 : -2)));
+  return route[besideWagon] ?? null;
+}
 
 const DRY_LANDING = new Set(['plains', 'hills', 'desert', 'settlement', 'coast']);
 export function enkiduDry(world: World, at: Point): boolean {
@@ -29,29 +59,7 @@ export function enkiduHome(world: World, landing: Point, occupied: readonly Poin
   return null;
 }
 
-export function enkiduEncounter(flags: readonly string[]): GameEvent {
-  const met = flags.includes(ENKIDU_MET);
-  const following = flags.includes(ENKIDU_FOLLOWS);
-  return {
-    id: 'woven:enkidu',
-    subjectId: ENKIDU_ID,
-    title: 'Enkidu',
-    occasion: 'road',
-    once: false,
-    art: 'woven-enkidu',
-    conditions: { shelter: [], fieldMaps: [TWIN_MAP], fromDay: 0, requires: [], pois: [], camps: [] },
-    stranger: {
-      id: `${TWIN_MAP}:${ENKIDU_ID}`, role: 'pangolin adventurer', givenName: 'Enkidu', culture: null,
-      look: { body: 'enkidu', skin: 'as-painted', cloth: 'ochre', second: 'undyed' }
-    },
-    prose: following ? 'Enkidu pats the dust off his goggles and looks back down the road.'
-      : met ? 'Enkidu lifts his goggles when he sees you. He has been watching the boats come in.'
-        : 'A small pangolin waves from the bank. “Enkidu,” he says, adjusting his bronze goggles. “Have you walked far?”',
-    choices: [
-      following
-        ? { id: 'dismiss', label: 'Part ways for now', line: 'Enkidu heads back to his spot at Southern Landing.', needs: [], grants: [], clears: [ENKIDU_FOLLOWS] }
-        : { id: 'invite', label: 'Invite Enkidu to travel', line: 'Enkidu pulls his goggles down and falls into step.', needs: [], grants: [], sets: [ENKIDU_MET, ENKIDU_FOLLOWS] },
-      { id: 'talk', label: following ? 'Talk about the road' : 'Talk by the landing', line: 'Enkidu tells you which boats he can recognise by their wake.', needs: [], grants: [], sets: [ENKIDU_MET] }
-    ]
-  };
-}
+export const ENKIDU_STRANGER: EventStranger = {
+  id: `${TWIN_MAP}:${ENKIDU_ID}`, role: ENKIDU_TRAVELLER.role, givenName: 'Enkidu', culture: null,
+  look: ENKIDU_TRAVELLER.look!
+};

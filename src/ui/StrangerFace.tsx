@@ -14,6 +14,7 @@
 
 import enkiduPortrait from '../../assets/twins/enkidu-portrait.webp?no-inline';
 import { ENKIDU_ID } from '../content/enkidu';
+import { PAINTED_APPEARANCE } from '../content/npcAppearance';
 import { weightedPickFor } from '../world/rng';
 import type { EventStranger } from '../content/events';
 import { elamiteKit } from '../content/elamitePeople';
@@ -54,31 +55,16 @@ export function facesFor(culture: string | null, names: readonly string[] = artN
   return [...own, ...anybody];
 }
 
-interface FaceAppearance {
-  headwear: Headwear;
-  skin: readonly string[];
-  headDye: string;
-  shoulderDye: string;
-}
+const LEGACY_PAINTINGS = new Set(['any-01', 'harappan-f-02', 'harappan-f-04', 'harappan-m-02', 'harappan-m-05', 'maru-m-02']);
 
-// Audited existing paintings. A dye denotes the visible colour family, including undyed cloth.
-// Untagged paintings remain in the library while bodies and their palettes evolve.
-const PAINTED_APPEARANCE: Readonly<Record<string, FaceAppearance>> = {
-  'any-01': { headwear: 'hood', skin: ['as-painted', 'light'], headDye: 'charcoal', shoulderDye: 'charcoal' },
-  'harappan-f-02': { headwear: 'hood', skin: ['as-painted', 'light'], headDye: 'ochre', shoulderDye: 'ochre' },
-  'harappan-f-04': { headwear: 'wrap', skin: ['as-painted', 'light'], headDye: 'undyed', shoulderDye: 'indigo' },
-  'harappan-m-02': { headwear: 'wrap', skin: ['as-painted', 'light'], headDye: 'ochre', shoulderDye: 'undyed' },
-  'harappan-m-05': { headwear: 'turban', skin: ['as-painted', 'light'], headDye: 'undyed', shoulderDye: 'undyed' },
-  'maru-m-02': { headwear: 'hood', skin: ['dark', 'deep'], headDye: 'ochre', shoulderDye: 'charcoal' }
-};
-
-export function compatibleFaces(look: Look, culture: string | null): string[] {
+export function compatibleFaces(look: Look, culture: string | null, allowed?: ReadonlySet<string>): string[] {
   const body = BODIES[look.body];
   if (!body) return [];
   const dyeFor = (part: string) => part === 'cloth' ? look.cloth : part === 'second' ? look.second : part;
   const headDye = body.face.headwear === '#f9e3cc' ? 'undyed' : dyeFor(body.face.headwear);
   const shoulderDye = dyeFor(body.face.shoulders);
   const compatible = facesFor(culture).filter((name) => {
+    if (allowed && !allowed.has(name)) return false;
     const face = PAINTED_APPEARANCE[name];
     return face?.headwear === body.headwear && face.skin.includes(look.skin) &&
       face.headDye === headDye && face.shoulderDye === shoulderDye;
@@ -92,6 +78,7 @@ const elamitePortraits = import.meta.glob<string>('../../assets/twins/caravan/po
 });
 
 export function paintedFaceFor(stranger: EventStranger): string | null {
+  if (stranger.look.portraitId) return art('faces', stranger.look.portraitId);
   if (stranger.id.endsWith(`:${ENKIDU_ID}`)) return enkiduPortrait;
   if (stranger.culture === 'elamite') {
     const [map, id] = stranger.id.split(':');
@@ -99,7 +86,8 @@ export function paintedFaceFor(stranger: EventStranger): string | null {
     return identity ? elamitePortraits[`../../assets/twins/caravan/portraits/${identity.kit.portraitId}.webp`] ?? null : null;
   }
   const id = `${stranger.id}:${stranger.givenName ?? ''}`;
-  const faces = compatibleFaces(stranger.look, stranger.culture);
+  const legacy = compatibleFaces(stranger.look, stranger.culture, LEGACY_PAINTINGS);
+  const faces = legacy.length ? legacy : compatibleFaces(stranger.look, stranger.culture);
   const name = weightedPickFor(faces, 'face', { x: 0, y: 0 }, id, (n) => n, () => 1);
   return name ? art('faces', name) : null;
 }
@@ -107,17 +95,19 @@ export function paintedFaceFor(stranger: EventStranger): string | null {
 export interface StrangerFaceProps {
   stranger: EventStranger;
   size?: number;
+  variant?: 'portrait' | 'action';
 }
 
 /** Presentational, like `PersonPortrait`: the title beside it already says who this is. */
-export function StrangerFace({ stranger, size = 40 }: StrangerFaceProps) {
+export function StrangerFace({ stranger, size = 40, variant = 'portrait' }: StrangerFaceProps) {
+  const className = variant === 'action' ? 'tile-action-portrait' : 'person-portrait';
   // Keyed on the name as well as who they are, because the name is dealt per journey: a new journey's
   // carrier is a new face, and one journey's carrier keeps theirs.
   const painted = paintedFaceFor(stranger);
   if (painted) {
     return (
       <img
-        className="person-portrait is-painted stranger-face"
+        className={`${className} is-painted stranger-face`}
         src={painted}
         width={size}
         height={size}
@@ -132,7 +122,7 @@ export function StrangerFace({ stranger, size = 40 }: StrangerFaceProps) {
   const headwear = HEADWEAR[headwearOf(stranger.look.body)];
   return (
     <svg
-      className="person-portrait stranger-face"
+      className={`${className} stranger-face`}
       width={size}
       height={size}
       viewBox="0 0 24 24"

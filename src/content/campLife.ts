@@ -24,6 +24,7 @@ import campLifeData from '../../data/camp-life.json';
 import type { Point, World } from '../world/types';
 import { tileHash, weightedPickFor } from '../world/rng';
 import { givenNames } from './places';
+import { npcAppearance } from './npcAppearance';
 import { lookFor } from './looks';
 import { elamiteIdentity, elamiteResidentId, type ElamiteRole } from './elamitePeople';
 import { CAMP_DAY, MEET_HOURS, RUNNER_PACE, VISIT_HOURS, VISIT_PACE_CAP } from './tiers';
@@ -136,6 +137,7 @@ function campRoster(campId: string, kind: CampKind, fieldMapId: string, seed: st
     const givenName =
       weightedPickFor(free.length > 0 ? free : names, 'camp-name', { x: 0, y: 0 }, `${campId}:${slot}`, (n) => n, () => 1) ?? null;
     if (givenName) taken.add(givenName);
+    const kit = npcAppearance(fieldMapId, seed, id, who.body, culture);
     return {
       id,
       name: `The ${who.title}`,
@@ -143,8 +145,8 @@ function campRoster(campId: string, kind: CampKind, fieldMapId: string, seed: st
       npcId: null,
       circuit: [],
       conveyance: null,
-      art: who.body,
-      look: lookFor(`${fieldMapId}:${id}`, who.body),
+      art: kit?.body ?? who.body,
+      look: kit ?? lookFor(`${fieldMapId}:${id}`, who.body),
       culture,
       givenName,
       campId,

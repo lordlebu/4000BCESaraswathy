@@ -44,7 +44,7 @@ describe('Twin Cities ambient conversations', () => {
     expect(other.every((topic) => !(topic.historyKey in history))).toBe(true);
   });
 
-  it('shows live news while retaining the existing choice effects, and keeps other maps on legacy dialogue', () => {
+  it('shows live news while retaining the existing choice effects, and works on other maps', () => {
     const { world, placed } = built;
     const rumour: Rumour = { id: 'rumour:place:bank', kind: 'place', place: 'Reedwright’s Bank', poiId: 'bank', person: null };
     const around = { ...surroundingsAt(world, placed[0]!.at, TWIN_MAP, null, roll)!, stranger, talk: { warm: true, standing: 'known', rumour } } as const;
@@ -53,8 +53,7 @@ describe('Twin Cities ambient conversations', () => {
     expect(repeat.choices[0]?.sets).toContain(`told:${rumour.id}@${rumour.poiId}@${speaker}`);
     expect(happeningNow({ ...now, met: [] }, roll, around, [], smallTalk)).toBeNull();
     const legacy = happeningNow({ ...now, fieldMapId: 'field_map_lothal' }, roll, around, [], smallTalk);
-    expect(legacy?.topics).toBeUndefined();
-    expect(legacy?.prose).toContain(rumour.place);
+    expect(legacy?.topics?.[0]).toMatchObject({ id: 'news', line: expect.stringContaining(rumour.place) });
   });
 
   it('reconstructs a Twin Cities road traveller from the journey seed', () => {

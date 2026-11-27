@@ -81,6 +81,8 @@ export interface Conditions {
  * that you have already lost something.
  */
 export interface Choice {
+  /** Painting shown after choosing, when the outcome has one of its own. */
+  outcomeArt?: string;
   id: string;
   /** What the button says. A verb, in the traveller's register. */
   label: string;

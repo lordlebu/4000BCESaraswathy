@@ -70,7 +70,7 @@ export function EventCardBody({
    * `string | null` doing duty as both *has it resolved* and *what does it say* stops latching the
    * moment some outcome is legitimately empty.
    */
-  const [taken, setTaken] = useState<{ line: string } | null>(null);
+  const [taken, setTaken] = useState<{ line: string; art: ArtSelection | null } | null>(null);
   const [selectedTopic, setSelectedTopic] = useState<AmbientTopic['id'] | null>(null);
   const topic = taken ? undefined : event.topics?.find(({ id }) => id === selectedTopic) ?? event.topics?.[0];
   useEffect(() => {
@@ -97,16 +97,17 @@ export function EventCardBody({
   const choose = useCallback(
     (choice: Choice) => {
       if (taken) return;
-      setTaken({ line: choice.line });
-      onChoose(choice, selection, topic);
+      const outcome = choice.outcomeArt ? preferredArtSelection('events', [choice.outcomeArt], pick) : null;
+      setTaken({ line: choice.line, art: outcome });
+      onChoose(choice, outcome ?? selection, topic);
     },
-    [taken, onChoose, selection, topic]
+    [taken, onChoose, selection, topic, pick]
   );
 
   // The painting of this moment, then the event's own, then one that will do (a road's, for a road's
   // happening), then the night's, then nothing. Every step is optional and the card keeps its shape
   // at each one, so it does not jump when art lands.
-  const picture = selection?.url ?? null;
+  const picture = (taken?.art ?? selection)?.url ?? null;
   const choices = choicesFor(event, holds);
 
   return (

@@ -134,7 +134,7 @@ const elamiteArt = Object.values(ELAMITE_APPEARANCES).map((kit): CharacterArt =>
 
 export const NAMED_ART = {
   ...Object.fromEntries(elamiteArt.map((kit) => [kit.key, kit])),
-  enkidu: { key: 'enkidu', name: 'Enkidu', url: enkiduUrl },
+  enkidu: { key: 'enkidu', name: 'Enkidu', url: enkiduUrl, frame: { width: 40, height: 40 } },
   'priest-kang': {key:'priest-kang',name:'Priest Kang',url:kangUrl},
   mirlepa: {key:'mirlepa',name:'Mirlepa',url:mirlepaUrl},
   yamantaka: {key:'yamantaka',name:'Yamantaka',url:yamantakaUrl,frame:{width:34,height:40}},

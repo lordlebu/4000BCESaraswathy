@@ -9,3 +9,6 @@ export { Overworld } from './Overworld';
 export { PeoplePanel } from './PeoplePanel';
 export { SatchelPanel } from './SatchelPanel';
 export { WorkshopPanel } from './WorkshopPanel';
+export { StrangerFace } from './StrangerFace';
+export { hospitalityOffer } from '../content/campHospitality';
+export { enkiduEncounter } from '../content/enkiduEncounter';

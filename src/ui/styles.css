@@ -2088,7 +2088,7 @@ button.ghost:hover:not(:disabled) {
  * as a picture set into the page rather than an image dropped on it; `object-fit: cover` because
  * the build writes squares and a future non-square source should crop rather than stretch a face.
  */
-.person-portrait.is-painted {
+:is(.person-portrait, .tile-action-portrait).is-painted {
   border-radius: 4px;
   object-fit: cover;
   border: 1px solid var(--edge);

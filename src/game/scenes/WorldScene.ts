@@ -1,6 +1,8 @@
+import { campPeople } from '../../content/campLife';
 import { loadCaravanArt } from '../systems/CaravanRig';
+import { caravanWitnessEvent } from '../../content/campHospitality';
 import { EnkiduView } from '../systems/EnkiduView';
-import { ENKIDU_FOLLOWS } from '../../content/enkidu';
+import { caravanCarriesEnkidu, caravanEnkiduPosition, ENKIDU_FOLLOWS, ENKIDU_ID, ENKIDU_JOINED } from '../../content/enkidu';
 import { loadJourney } from '../../save';
 import { TwinAmbienceView } from '../systems/TwinAmbienceView';
 import {bakeTwinTerrain} from '../twinTerrainTextures';
@@ -98,7 +100,7 @@ import { bustStage } from '../../content/twinStories';
 import { planTwinResidents } from '../twinResidents';
 import { BeeduView } from '../systems/BeeduView';
 import { DUGOUT_VIEWS, ROW_SLOT, depthFor, dugoutFor, rowAtFoot, type DugoutView, type Edge } from '../frames';
-import { atCamp, campIsOpen, caravanStageAt, encampmentOn, setCaravanClock, wayIn } from '../../content/encampments';
+import { atCamp, campCanHost, campIsOpen, caravanStageAt, effectiveCampKind, encampmentOn, setCaravanClock, wayIn } from '../../content/encampments';
 import { campVisitors, runnerErrand } from '../../content/campLife';
 import { campPieces } from '../campArt';
 import { beatFor, beatKey, settleZoom, type ArrivalPlace } from '../arrival';
@@ -536,10 +538,12 @@ export class WorldScene extends Phaser.Scene {
   private terminalTurn: { start: number; heading: number } | null = null;
   private enkidu: EnkiduView | null = null;
   private enkiduFollows = false;
+  private enkiduJoined = false;
   private twinEffects: Phaser.GameObjects.Image[] = [];
   private onTwinKnowledge = ({completed,flags=[]}: UiToGame['twin-knowledge']): void => {
     if (!this.world?.twinRegion) return;
     this.enkiduFollows = flags.includes(ENKIDU_FOLLOWS);
+    this.enkiduJoined = flags.includes(ENKIDU_JOINED);
     this.tileOwned = this.tileOwned.filter(item => !this.twinEffects.includes(item.sprite as Phaser.GameObjects.Image));
     for (const image of this.twinEffects) image.destroy();
     this.twinEffects=[];
@@ -723,7 +727,8 @@ export class WorldScene extends Phaser.Scene {
       },
       day: () => scene.dayOfJourney(),
       camp: () => scene.campView.current,
-      playerHeight: () => scene.player.displayHeight
+      playerHeight: () => scene.player.displayHeight,
+      companion: () => scene.enkidu?.selection() ?? null
     });
     // The last map's pips went with its display list; the next map's arrive from React.
     this.pips = [];
@@ -885,11 +890,12 @@ export class WorldScene extends Phaser.Scene {
     this.world = this.built.world;
     this.enkidu = null;
     this.enkiduFollows = false;
-    EventBus.emitEvent('enkidu-nearby', { near: false });
+    this.enkiduJoined = false;
     const landing = this.built.placed.find(({ poi }) => poi.id === 'poi_twin_landing');
     if (this.world.twinRegion && landing) {
       const journey = loadJourney(data.seed);
       this.enkiduFollows = journey.flags?.includes(ENKIDU_FOLLOWS) ?? false;
+      this.enkiduJoined = journey.flags?.includes(ENKIDU_JOINED) ?? false;
       if (journey.caravanSchedule) {
         const hour = new URLSearchParams(window.location.search).get('hour');
         const start = hour === null ? 0 : startPhaseFor(hour);
@@ -1971,8 +1977,8 @@ export class WorldScene extends Phaser.Scene {
    * Built from the scene's own clock -- wall time plus whatever the walking has spent -- so
    * the creature asleep in the journal and the light on the map are the same moment.
    */
-  private onCamp = (): void => {
-    this.tryStop();
+  private onCamp = ({ hospitality }: UiToGame['camp']): void => {
+    this.tryStop(hospitality);
   };
 
   /** The homestead, from React. Drawn at once and kept for a redraw. */
@@ -2309,13 +2315,19 @@ export class WorldScene extends Phaser.Scene {
    * waking somewhere he had not walked to, which is the game moving the player's character while
    * they were not looking.
    */
-  private tryStop(): boolean {
+  private tryStop(hospitality?: string): boolean {
     if (!this.canStopHere()) return false;
 
     // Beside one of the camps that come and go, the night is told as theirs.
     const shelter = this.shelterHere();
-    const campKind = shelter === 'camp' && this.campView.current && atCamp(this.campView.current.camp, this.at) ? this.campView.current.camp.kind : null;
-    const outcome = spendNight(shelter, campKind);
+    const candidate = shelter === 'camp' ? this.campView.current?.camp : undefined;
+    const camp = candidate && atCamp(candidate, this.at) && campIsOpen(this.world, candidate, this.dayOfJourney())
+      ? candidate : undefined;
+    if (hospitality && (!camp || camp.id !== hospitality || !campCanHost(this.world, camp, this.dayOfJourney()))) return false;
+    const outcome = spendNight(shelter, camp ? effectiveCampKind(camp) : null);
+    const startDay = this.dayOfJourney();
+    const campResidents = camp ? campPeople(camp, this.built.fieldMap.id, this.world.seed)
+      .map(({ id }) => `${this.built.fieldMap.id}:${id}`) : undefined;
     const morning = restUntilMorning(this.travelled, this.startPhase, this.time.now);
     this.travelled = morning.travelledMs;
     // Only a real night's sleep resets the tiredness. The bedroll buys the hours, not the rest.
@@ -2332,6 +2344,10 @@ export class WorldScene extends Phaser.Scene {
     EventBus.emitEvent('night-passed', {
       at: this.at,
       shelter: outcome.shelter,
+      hostedBy: camp,
+      campResidents,
+      startDay,
+      hospitality,
       rested: outcome.rested,
       entry: outcome.entry
     });
@@ -2383,6 +2399,17 @@ export class WorldScene extends Phaser.Scene {
       this.travellers.update(phase);
       // The camp's shelter, smoke and firelight follow its day, on the same gate.
       this.campView.stage(phase, this.dayOfJourney());
+      const visit = this.campView.current?.camp;
+      if (visit?.caravan) {
+        const pose = caravanStageAt(this.world, visit, this.dayOfJourney(), phase);
+        const moment = pose?.stage === 'arrival' || pose?.stage === 'travelling' ? 'arrival'
+          : pose?.stage === 'packing' || pose?.stage === 'departure' ? 'departure' : null;
+        const route = visit.caravan.route;
+        const wagon = pose ? route[Math.round(pose.routeProgress * (route.length - 1))] : null;
+        if (moment && wagon && Math.max(Math.abs(wagon.x - this.at.x), Math.abs(wagon.y - this.at.y)) <= 2) {
+          EventBus.emitEvent('caravan-witnessed', { event: caravanWitnessEvent(visit, moment, this.built.fieldMap.id) });
+        }
+      }
       // The animals that are somewhere rather than everywhere, on the same gate and for the same
       // reason -- a wanderer moves no faster than a drover does.
       this.wanderers.update(phase, this.dayOfJourney());
@@ -2516,6 +2543,7 @@ export class WorldScene extends Phaser.Scene {
       return {
         ...c,
         caravanStage: c.caravan ? caravanStageAt(this.world, c, d)?.stage : null,
+        enkiduGuest: c.caravan ? caravanCarriesEnkidu(this.world.seed, c.caravan.id) : false,
         wagon: day === undefined && c.caravan ? {
           count: this.children.list.filter((piece) => piece.name === 'caravan-wagon').length,
           x: (this.children.getByName('caravan-wagon') as Phaser.GameObjects.Image | null)?.x
@@ -2560,7 +2588,9 @@ export class WorldScene extends Phaser.Scene {
    * sends people the scene reported as near, but a step can land between the two.
    */
   private onHail = ({ travellerId }: UiToGame['hail']): void => {
-    const called = this.travellers.hail(travellerId);
+    const guest = travellerId === ENKIDU_ID ? this.enkidu?.waitForPlayer() : null;
+    const called = guest ? { at: guest, steps: Math.max(Math.abs(guest.x - this.at.x), Math.abs(guest.y - this.at.y)) }
+      : this.travellers.hail(travellerId);
     if (!called || called.steps <= 1) return;
     const { at } = called;
     const { tiles, width, height } = this.world;
@@ -2709,7 +2739,12 @@ export class WorldScene extends Phaser.Scene {
     this.updateTerminalTurn();
     this.beedu?.update(this.time.now);
     this.updateCaveResidents();
-    this.enkidu?.update(this.at, this.discovered, this.enkiduFollows, !this.riding && !this.afloat, this.player.anims.currentAnim?.key.includes('-sit-') ?? false);
+    if (this.enkidu) {
+      const camp = this.campView.current?.camp;
+      const guest = !this.enkiduJoined && camp ? caravanEnkiduPosition(this.world, camp, this.dayOfJourney()) : null;
+      this.enkidu.update(this.at, this.discovered, this.enkiduFollows, !this.riding && !this.afloat,
+        this.player.anims.currentAnim?.key.includes('-sit-') ?? false, this.enkiduJoined, guest);
+    }
     this.twinAmbience?.update(this.time.now);
     this.visitors.update();
     // A painted walk steps every frame; where the wanderers are is still the half-second gate's.

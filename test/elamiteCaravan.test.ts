@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { caravanWitnessEvent } from '../src/content/campHospitality';
+import { preferredArtSelection } from '../src/ui/art';
 import { campPeople, campPlacements, doingLine } from '../src/content/campLife';
 import { happeningNow, surroundingsAt } from '../src/content/happenings';
 import { strangersMet } from '../src/content/people';
@@ -64,6 +66,10 @@ describe('Elamite caravan planning', () => {
     const now = { fieldMapId: TWIN_MAP, day: day + 2, shelter: null, holds: [], seen: [], met: keys };
     const welcome = happeningNow({ ...now, occasion: 'arriving' }, roll, { ...vicinity, camp: visit }, [], { kind: 'camp', asked: true });
     expect(welcome?.title).toBe('The western caravan');
+    expect(preferredArtSelection('events', [welcome?.artVariant, welcome?.art])?.key).toBe('woven-camp-elamite');
+    const witnessArt = (['arrival', 'departure'] as const).map((moment) =>
+      preferredArtSelection('events', [caravanWitnessEvent(visit, moment, TWIN_MAP).art])?.key);
+    expect(witnessArt).toEqual(['woven-camp-elamite-arrival', 'woven-camp-elamite-departure']);
     expect(welcome?.choices).toHaveLength(2);
     expect(welcome?.choices.every((choice) => (choice.gives?.length ?? 0) === 0)).toBe(true);
     const person = roster[1]!;
@@ -76,6 +82,13 @@ describe('Elamite caravan planning', () => {
     expect(talk?.stranger).toMatchObject({ id: keys[1], givenName: person.givenName, culture: 'elamite' });
     expect(talk?.topics?.every((topic) => topic.historyKey.includes(':elamite-'))).toBe(true);
     expect(talk?.topics).toHaveLength(3);
+    const meal = happeningNow({ ...now, occasion: 'road' }, roll, {
+      ...vicinity,
+      campPerson: {
+        person, activity: 'meal', meal: true, doing: doingLine(person.kind, person.slot, 'meal', person.elamiteRole)
+      }
+    }, [], { kind: 'camp-talk', asked: true });
+    expect(preferredArtSelection('events', [meal?.artMoment, meal?.artVariant, meal?.art])?.key).toBe('woven-camp-meal-elamite');
     expect(Object.values(ELAMITE_DIALOGUE).flat()).toHaveLength(42);
   });
 
