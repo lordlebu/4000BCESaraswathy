@@ -8,7 +8,7 @@ import { fieldMap } from '../src/content/places';
 import type { Rumour } from '../src/content/rumours';
 import { ambientTopics } from '../src/content/twinAmbientTalk';
 import { twinCampDressingSpots, twinCampRouteTiles } from '../src/content/twinCampDressing';
-import { walkedRoad } from '../src/content/travellers';
+import { travellersOn, walkedRoad } from '../src/content/travellers';
 import { compatibleFaces, paintedFaceFor } from '../src/ui/StrangerFace';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { TWIN_MAP } from '../src/world/twinGeneration';
@@ -57,6 +57,11 @@ describe('Twin Cities ambient conversations', () => {
     expect(legacy?.prose).toContain(rumour.place);
   });
 
+  it('reconstructs a Twin Cities road traveller from the journey seed', () => {
+    const traveller = travellersOn(TWIN_MAP, built.world.seed).find((person) => person.npcId === null)!;
+    expect(strangersMet([`${TWIN_MAP}:${traveller.id}`], 'camps')[0]?.traveller).toEqual(traveller);
+  });
+
   it('keeps introductions and meal effects, and dresses camps away from their residents and approaches', () => {
     const { world, placed } = built;
     const places = placed.map(({ poi, at }) => ({ poiId: poi.id, at }));
@@ -67,7 +72,7 @@ describe('Twin Cities ambient conversations', () => {
       if (!camp || day !== camp.from + 1 || kinds.has(camp.kind)) continue;
       kinds.add(camp.kind);
       const person = campPeople(camp, TWIN_MAP, world.seed)[0]!;
-      const memory = strangersMet([`${TWIN_MAP}:${person.id}`], world.seed);
+      const memory = strangersMet([`${TWIN_MAP}:${person.id}`], 'camps');
       expect(memory[0]?.traveller).toEqual(person);
       const campPerson = { person, activity: 'meal', doing: doingLine(camp.kind, person.slot, 'meal'), meal: true } as const;
       const around = { ...surroundingsAt(world, camp.at, TWIN_MAP, null, roll)!, campPerson };

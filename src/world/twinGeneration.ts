@@ -4,6 +4,10 @@ export type TwinGeneration = 1 | 2;
 export const NEW_TWIN_GENERATION: TwinGeneration = 2;
 export const TWIN_MAP = 'field_map_twins';
 
+export function twinWorldSeed(seed: string): string {
+  return seed.startsWith('twins:') ? seed : `twins:${seed}`;
+}
+
 export function twinGenerationFor(
   saved: TwinGeneration | undefined,
   link: string | null,

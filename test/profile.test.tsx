@@ -12,7 +12,8 @@ import { PROFILE_SIZE, ProfileButton, ProfileCard } from '../src/ui/Profile';
 import { npc } from '../src/content/places';
 import { strangersMet } from '../src/content/people';
 import { travellersOn } from '../src/content/travellers';
-import {JourneySeed} from '../src/ui/journeySeed';
+import { JourneySeed } from '../src/ui/journeySeed';
+import { TWIN_MAP, twinWorldSeed } from '../src/world/twinGeneration';
 
 afterEach(cleanup);
 
@@ -52,8 +53,9 @@ describe('a stranger’s card', () => {
 
   it('keeps a stranger’s face when their name is learned, across maps and journey seeds', () => {
     for(const seed of ['play-test','twin-review','portrait-continuity']){
-      for(const map of ['field_map_lothal','field_map_dwarka','field_map_aravali','field_map_narmada','field_map_twins']){
-        for(const traveller of travellersOn(map,seed).filter(t=>t.npcId===null)){
+      for(const map of ['field_map_lothal','field_map_dwarka','field_map_aravali','field_map_narmada',TWIN_MAP]){
+        const mapSeed = map === TWIN_MAP ? twinWorldSeed(seed) : seed;
+        for(const traveller of travellersOn(map,mapSeed).filter(t=>t.npcId===null)){
           const key=`${map}:${traveller.id}`;
           const view=render(<JourneySeed.Provider value={seed}>
             <ProfileCard who={{kind:'stranger',key,known:false}} open onClose={noop}/>

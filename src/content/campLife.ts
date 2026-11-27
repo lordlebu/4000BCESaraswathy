@@ -25,6 +25,7 @@ import type { Point, World } from '../world/types';
 import { tileHash, weightedPickFor } from '../world/rng';
 import { givenNames } from './places';
 import { lookFor } from './looks';
+import { elamiteIdentity, elamiteResidentId, type ElamiteRole } from './elamitePeople';
 import { CAMP_DAY, MEET_HOURS, RUNNER_PACE, VISIT_HOURS, VISIT_PACE_CAP } from './tiers';
 import { FIRST_DAY, PROPS_AROUND, campKindFor, campSpots, campable, type CampKind, type Encampment, type WayIn } from './encampments';
 import type { Bumped } from './bumping';
@@ -97,6 +98,7 @@ export interface CampPerson extends Traveller {
   kind: CampKind;
   /** What they are called before you know their name: "the head drover". */
   title: string;
+  elamiteRole?: ElamiteRole;
 }
 
 const isCulture = (c: string): c is StrangerCulture => (STRANGER_CULTURES as readonly string[]).includes(c);
@@ -110,7 +112,11 @@ const isCulture = (c: string): c is StrangerCulture => (STRANGER_CULTURES as rea
  * and never two alike in one camp.
  */
 export function campPeople(camp: Encampment, fieldMapId: string, seed = ''): CampPerson[] {
-  return campRoster(camp.id, camp.kind, fieldMapId, seed);
+  if (!camp.caravan) return campRoster(camp.id, camp.kind, fieldMapId, seed);
+  const cycle = Number(camp.id.split(':').at(-1));
+  return (['master', 'handler', camp.caravan.thirdRole] as const).map((role) =>
+    elamiteCampPerson(fieldMapId, elamiteResidentId(cycle, role), seed)!
+  );
 }
 
 function campRoster(campId: string, kind: CampKind, fieldMapId: string, seed: string): CampPerson[] {
@@ -151,6 +157,8 @@ function campRoster(campId: string, kind: CampKind, fieldMapId: string, seed: st
 
 /** Recreate a resident using the same roster the scene drew, even when the camp has moved on. */
 export function campPersonFor(fieldMapId: string, id: string, seed: string): CampPerson | undefined {
+  const elamite = elamiteCampPerson(fieldMapId, id, seed);
+  if (elamite) return elamite;
   const match = /^camp-(0|[1-9]\d*)-(leader|runner|watch)$/.exec(id);
   if (!match) return undefined;
   const cycle = Number(match[1]);
@@ -158,6 +166,29 @@ export function campPersonFor(fieldMapId: string, id: string, seed: string): Cam
   const campId = `${fieldMapId}:${cycle}`;
   const kind = campKindFor(seed, fieldMapId, cycle);
   return campRoster(campId, kind, fieldMapId, seed).find((person) => person.id === id);
+}
+
+function elamiteCampPerson(fieldMapId: string, id: string, seed: string): CampPerson | undefined {
+  const identity = elamiteIdentity(fieldMapId, id, seed);
+  if (!identity) return undefined;
+  const { cycle, role, givenName, culture, kit } = identity;
+  return {
+    id,
+    name: `The ${kit.title}`,
+    title: kit.title,
+    role: kit.title,
+    npcId: null,
+    circuit: [],
+    conveyance: null,
+    art: kit.spriteId,
+    look: { body: kit.spriteId, skin: 'as-painted', cloth: 'undyed', second: 'indigo' },
+    culture,
+    givenName,
+    campId: `${fieldMapId}:${cycle}`,
+    slot: role === 'master' ? 'leader' : role === 'handler' ? 'runner' : 'watch',
+    kind: campKindFor(seed, fieldMapId, cycle),
+    elamiteRole: role
+  };
 }
 
 /** Whether this is the day a camp pitches, and the day it strikes. */
@@ -222,7 +253,31 @@ export function campActivity(
 }
 
 /** "{name} is mending the hurdles": the rest of that sentence, for one person and what they are doing. */
-export function doingLine(kind: CampKind, slot: CampSlot, activity: CampActivity): string {
+const ELAMITE_ACTIVITY: Partial<Record<CampActivity, string>> = {
+  pitch: 'is pitching the woven shelter',
+  strike: 'is packing the wagon',
+  shade: 'is resting in the shade of the canopy',
+  evening: 'is sitting beside the hearth',
+  watch: 'is keeping the hearth alight'
+};
+
+const ELAMITE_CHORES: Record<ElamiteRole, string> = {
+  master: 'is checking where the wagon can turn',
+  handler: 'is tending the woolly draft animal',
+  'seal-keeper': 'is checking the sealed jars',
+  'textile-merchant': 'is folding cloth under the canopy',
+  artisan: 'is laying out tools on a woven mat',
+  apprentice: 'is putting away the bedding'
+};
+
+export function doingLine(kind: CampKind, slot: CampSlot, activity: CampActivity, elamiteRole?: ElamiteRole): string {
+  if (elamiteRole) {
+    if (activity === 'chore') return ELAMITE_CHORES[elamiteRole];
+    const line = ELAMITE_ACTIVITY[activity];
+    if (line) return line;
+    if (activity === 'meal') return 'is eating beside the hearth';
+    if (activity === 'relight') return 'is coaxing the hearth back to life';
+  }
   const words = CAMP_WORDS[kind].doing[activity];
   if (activity === 'asleep') return 'is asleep in the shelter';
   if (!words) return 'is about the camp';
@@ -299,8 +354,12 @@ export function campPlacements(
     watch: things[0] ?? camp.at
   };
 
+  const cycle = Number(camp.id.split(':').at(-1) ?? '0');
+  const roles = camp.caravan
+    ? { leader: 'master', runner: 'handler', watch: camp.caravan.thirdRole } as const
+    : null;
   return CAMP_SLOTS.map((slot) => {
-    const id = `camp-${camp.id.split(':').pop() ?? '0'}-${slot}`;
+    const id = roles ? elamiteResidentId(cycle, roles[slot]) : `camp-${cycle}-${slot}`;
     const activity = campActivity(camp, slot, day, phase, slot === 'runner' ? errand : null);
     if (activity === 'asleep') return { id, slot, at: null, facing: shelter, activity };
     if (errand && (activity === 'road' || activity === 'trade' || activity === 'home')) {
@@ -388,7 +447,7 @@ export function runnerErrand(
   roster: readonly RoadTraveller[],
   day: number
 ): RunnerErrand | null {
-  if (!way || way.tiles.length < 3) return null;
+  if (camp.caravan || !way || way.tiles.length < 3) return null;
   const { first, last } = campDays(camp, day);
   // From the fire out to the tile beside the road: the turn-off itself is the traveller's.
   const out = [...way.tiles].reverse().slice(0, -1);

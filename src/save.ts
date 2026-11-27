@@ -10,6 +10,9 @@ import { type Satchel, emptySatchel } from './content/satchel';
 import { type Drawn, type Nodes, noNodes } from './content/nodes';
 import { type Progress, emptyProgress } from './journey';
 import type { DiaryEventEntry, EventOrigin } from './content/diaryEvents';
+import { caravanSchedule, type CaravanSchedule } from './content/elamiteCaravan';
+import { CYCLE_DAYS } from './content/encampments';
+import { DAY_MS } from './game/dayNight';
 import { journeyStorageKey as key } from './storageKeys';
 
 /**
@@ -147,6 +150,8 @@ const KNOWLEDGE_1_UNSTAMPED = 18;
 export interface Journey {
   /** A valid stored journey without this field predates the hybrid valley. */
   twinGeneration?: 1 | 2;
+  /** The first cycle that may use the revised Twin Cities schedule. */
+  caravanSchedule?: CaravanSchedule;
   /** The where-you-are half's version. See `SAVE_VERSION`. */
   version: number;
   /** The what-you-know half's version. See `KNOWLEDGE_VERSION`. */
@@ -258,6 +263,7 @@ export interface Journey {
 const empty = (): Journey => ({
   version: SAVE_VERSION,
   knowledgeVersion: KNOWLEDGE_VERSION,
+  caravanSchedule: caravanSchedule(),
   discovered: [],
   collection: {},
   reached: false,
@@ -460,9 +466,18 @@ export function loadJourney(seed: string): Journey {
         { discovered: [], reached: false, nodesByMap: fresh.nodesByMap };
     // Outside both halves, like `characterId`: which country you are in survives either half moving.
     const fieldMapId = typeof parsed.fieldMapId === 'string' ? parsed.fieldMapId : undefined;
+    const travelledDay = Math.floor(knowledge.travelled / DAY_MS);
+    const savedSchedule = parsed.caravanSchedule;
+    const firstCycle = savedSchedule?.revision === 1 &&
+      Number.isSafeInteger(savedSchedule.firstCycle) && savedSchedule.firstCycle >= 0
+      ? savedSchedule.firstCycle
+      : knowledge.travelled > 0 || ground.discovered.length > 0
+        ? Math.floor(travelledDay / CYCLE_DAYS) + 1
+        : 0;
     return {
       version: SAVE_VERSION, knowledgeVersion: KNOWLEDGE_VERSION, ...knowledge, ...ground, fieldMapId,
-      twinGeneration: parsed.twinGeneration === 2 ? 2 : 1
+      twinGeneration: parsed.twinGeneration === 2 ? 2 : 1,
+      caravanSchedule: caravanSchedule(firstCycle)
     };
   } catch {
     localStorage.removeItem(key(seed));
@@ -494,13 +509,15 @@ export function saveJourney(
       journey.progress === undefined ||
       journey.satchel === undefined ||
       journey.nodesByMap === undefined ||
-      journey.travelled === undefined
+      journey.travelled === undefined ||
+      journey.caravanSchedule === undefined
         ? loadJourney(seed)
         : null;
     const payload: Journey = {
       version: SAVE_VERSION,
       knowledgeVersion: KNOWLEDGE_VERSION,
       ...journey,
+      caravanSchedule: journey.caravanSchedule ?? stored?.caravanSchedule ?? caravanSchedule(),
       progress: journey.progress ?? stored!.progress,
       satchel: journey.satchel ?? stored!.satchel,
       nodesByMap: journey.nodesByMap ?? stored!.nodesByMap,

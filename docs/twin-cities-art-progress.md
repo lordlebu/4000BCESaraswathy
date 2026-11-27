@@ -1,5 +1,17 @@
 # Twin-city art implementation
 
+## Bow and Hearth shelter and Enkidu — 27 November 2026
+
+The owner selected the pangolin for Enkidu and supplied the shelter silhouette. The caravan shelter
+uses a felt-and-canvas dome with a short arched entry and a smoke vent. Its indigo, madder and cream
+trim takes its palette and geometry from Sindhi ajrak textiles. The built-in ImageGen output was
+cropped to the solid alpha bounds and point-resized to a camp shelter’s 176-pixel height. The
+compact asset is `assets/camps/elamite-dome.png`.
+
+Enkidu’s map sheet uses the approved pangolin with a pilot cap, bronze goggles, ochre scarf and
+pouch. Rebuild the 20-frame strip with `node tools/build-characters.js enkidu`. The caravan and
+companion gameplay are in development.
+
 
 ## Rail bridge, mixed verges and walkway follow-up - 18 November 2026
 

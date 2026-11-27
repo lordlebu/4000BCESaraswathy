@@ -1,6 +1,7 @@
 import type { BiomeId } from '../world/types';
 import { tileHash } from '../world/rng';
 import type { CampActivity, CampSlot } from './campLife';
+import { ELAMITE_DIALOGUE } from './elamiteDialogue';
 import type { CampKind } from './encampments';
 import type { Standing } from './standing';
 import type { StrangerCulture } from './travellers';
@@ -11,6 +12,12 @@ const LABELS = {
   work: 'Ask about the work',
   ground: 'Ask about the land',
   camp: 'Ask about camp',
+  homeland: 'Ask about their homeland',
+  textiles: 'Ask about textiles',
+  craft: 'Ask about pottery and seals',
+  animal: 'Ask about the animal',
+  westernRoad: 'Ask about the western road',
+  hutel: 'Ask about Hutel',
   parting: 'Wish them well',
   news: 'Ask for local news'
 };
@@ -28,7 +35,7 @@ export interface AmbientTopic {
 
 type Context =
   | { road: true; culture: StrangerCulture | null; biome: BiomeId; standing: Standing; warm: boolean }
-  | { road: false; kind: CampKind; slot: CampSlot; activity?: CampActivity };
+  | { road: false; kind: CampKind; slot: CampSlot; activity?: CampActivity; elamite?: boolean };
 
 interface Line {
   id: string;
@@ -86,6 +93,17 @@ const CAMP: readonly Line[] = [
   { id: 'next-fire', topic: 'parting', text: '“Travel easy. Say hello if you see our fire again.”' }
 ];
 
+const ELAMITE_TOPICS = Object.keys(ELAMITE_DIALOGUE) as (keyof typeof ELAMITE_DIALOGUE)[];
+const ELAMITE: readonly Line[] = ELAMITE_TOPICS.flatMap((topic) =>
+  ELAMITE_DIALOGUE[topic].map((line, index) => ({
+    id: `elamite-${topic}-${index}`, topic, text: `“${line.text}”`,
+    immediate: 'activity' in line,
+    fits: (context: Context) => !context.road &&
+      (!('slot' in line) || context.slot === line.slot) &&
+      (!('activity' in line) || context.activity === line.activity)
+  }))
+);
+
 export function ambientTopics(
   speaker: string,
   context: Context,
@@ -97,13 +115,14 @@ export function ambientTopics(
   const topic = (id: Topic, line: string, historyKey: string): AmbientTopic => ({
     id, label: LABELS[id], line, historyKey, day
   });
+  const elamite = !context.road && context.elamite === true;
   const intro: LocalTopic = context.road ? 'greeting' : 'camp';
   const subjects: LocalTopic[] = context.road
     ? ['work', 'ground', 'people', 'parting']
-    : ['work', 'greeting', 'people', 'parting'];
+    : elamite ? ELAMITE_TOPICS.filter((id) => id !== intro) : ['work', 'greeting', 'people', 'parting'];
   const rank = (id: string, at = 0) => tileHash(speaker, at, 0, id);
   subjects.sort((a, b) => rank(a, day) - rank(b, day));
-  const local = (context.road ? ROAD : CAMP).filter((line) => !line.fits || line.fits(context));
+  const local = (context.road ? ROAD : elamite ? ELAMITE : CAMP).filter((line) => !line.fits || line.fits(context));
   const options = news ? [topic('news', news.text, key(news.id))] : [];
   const age = (line: Line) => day - (history[key(line.id)] ?? -Infinity);
   for (const id of [intro, ...subjects]) {

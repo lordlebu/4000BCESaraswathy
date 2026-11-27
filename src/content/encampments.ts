@@ -21,6 +21,7 @@ import { Heap } from '../world/heap';
 import { orthogonalNeighbours } from '../world/rivers';
 import { TWIN_MAP } from '../world/twinGeneration';
 import { stepCostOn } from './species';
+import { elamiteCaravanVisit, type CaravanSchedule, type CaravanVisit } from './elamiteCaravan';
 
 export type CampKind = 'adventurers' | 'dacoits' | 'pilgrims' | 'drovers';
 
@@ -37,6 +38,8 @@ export interface Encampment {
   /** Stable for one camp's stay: `<map>:<cycle>`. What "seen" is kept against. */
   id: string;
   kind: CampKind;
+  /** A validated replacement for this cycle's usual camp. */
+  caravan?: CaravanVisit;
   at: Point;
   /** The first day it stands, and the day after its last. */
   from: number;
@@ -186,7 +189,8 @@ export function encampmentOn(
   world: World,
   fieldMapId: string,
   places: readonly { poiId: string; at: Point }[],
-  day: number
+  day: number,
+  schedule?: CaravanSchedule
 ): Encampment | null {
   if (day < FIRST_DAY) return null;
   const cycle = Math.floor(day / CYCLE_DAYS);
@@ -205,7 +209,13 @@ export function encampmentOn(
   // half of everywhere.
   const sky = hash('sky') % SKY_TURN_ONE_IN === 0 ? skyGround(world, ground) : [];
   const hidden = sky.length > 0 ? sky : ground.slice(0, Math.max(1, Math.ceil(ground.length / 2)));
-  const at = hidden[hash('tile') % hidden.length]!;
+  const candidate = hash('tile') % hidden.length;
+  const caravan = schedule && world.twinRegion
+    ? elamiteCaravanVisit(world, fieldMapId, cycle, schedule,
+      [...hidden.slice(candidate), ...hidden.slice(0, candidate), ...ground.slice(hidden.length)],
+      places.map((p) => p.at))
+    : null;
+  const at = caravan?.route.at(-1) ?? hidden[candidate]!;
   const kind = campKindFor(world.seed, fieldMapId, cycle, Boolean(world.twinRegion));
 
   let near: string | null = null;
@@ -217,7 +227,7 @@ export function encampmentOn(
       near = p.poiId;
     }
   }
-  return { id: `${fieldMapId}:${cycle}`, kind, at, from, to, near };
+  return { id: `${fieldMapId}:${cycle}`, kind, at, from, to, near, ...(caravan ? { caravan } : {}) };
 }
 
 /**

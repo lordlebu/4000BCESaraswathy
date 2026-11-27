@@ -196,6 +196,7 @@ export function App() {
   const [cardOpen, setCardOpen] = useState(false);
 
   const [seed, setSeed] = useState(seedFromUrl);
+  const [caravanSchedule, setCaravanSchedule] = useState(initialJourney.current.caravanSchedule);
   const [twinGeneration, setTwinGeneration] = useState(() =>
     twinGenerationFor(initialJourney.current.twinGeneration, new URLSearchParams(window.location.search).get('twinGen'), false));
   useEffect(() => {
@@ -576,6 +577,7 @@ export function App() {
     const flush = () =>
       saveJourney(seed, {
         twinGeneration,
+        caravanSchedule,
         characterId,
         discovered: discovered.current,
         collection,
@@ -610,7 +612,7 @@ export function App() {
       window.removeEventListener('pagehide', flush);
       flush();
     };
-  }, [seed, twinGeneration, collection, reached, progress, satchel, nodesByMap, fieldMapId, pinned, diaryEvents]);
+  }, [seed, twinGeneration, caravanSchedule, collection, reached, progress, satchel, nodesByMap, fieldMapId, pinned, diaryEvents]);
 
   /**
    * What the person being talked to is, if they are also somebody who walks a circuit.
@@ -734,6 +736,7 @@ export function App() {
     setReached(false);
     setSeed(next);
     setTwinGeneration(nextGeneration);
+    setCaravanSchedule(loaded.caravanSchedule);
     rememberSeed(next);
     const url = new URL(window.location.href);
     url.searchParams.set('seed', next);
