@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { fieldMap } from '../src/content/places';
 import { TWIN_PEOPLE } from '../src/content/twinPeople';
-import { caveHelperPresent } from '../src/content/twinStories';
+import { caveHerderIsVisiting } from '../src/content/twinStories';
 import { travellersOn } from '../src/content/travellers';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { planScene } from '../src/game/scenePlan';
@@ -19,7 +19,7 @@ describe('the stationary twin-city cast', () => {
       const walkers=travellersOn('field_map_twins',seed).filter(t=>t.npcId!==null);
       expect(new Set(residents.map(r=>r.npcId)).size).toBe(residents.length);
       expect(residents.map(r=>r.npcId).sort()).toEqual(Object.keys(TWIN_PEOPLE)
-        .filter(id=>!walkers.some(w=>w.npcId===id)&&caveHelperPresent(id,0)).sort());
+        .filter(id=>!walkers.some(w=>w.npcId===id)&&(id!=='npc_cave_herder'||caveHerderIsVisiting(0))).sort());
       for(const person of residents){
         const tile=built.world.tiles[person.y]![person.x]!;
         expect(tile.road||tile.track||tile.bridge).toBeFalsy();

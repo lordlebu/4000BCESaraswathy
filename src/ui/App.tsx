@@ -1,3 +1,5 @@
+import { RecoveryScreen } from './Fallback';
+import type { EncounterState } from '../content/encounterState';
 import { bindNpcAppearances } from '../content/npcAppearance';
 import { ENKIDU_ID, ENKIDU_STRANGER } from '../content/enkidu';
 import { useDiscoveryNotices } from './useDiscoveryNotices';
@@ -41,7 +43,6 @@ import { type Collection, emptyCollection, metOnTile, size } from '../content/co
 import { downloadImage, downloadText } from './exportJournal';
 import { buildTravelLog, travelLogFilename, travelLogToText } from '../content/travelLog';
 import { clearJourney, hasBegun, loadJourney, saveJourney } from '../save';
-import { twinGenerationFor, type TwinGeneration } from '../world/twinGeneration';
 import { Opening } from './Opening';
 import { bearingTo } from '../content/journal';
 const Journey = lazy(() => import('./Journey').then(module => ({ default: module.Journey })));
@@ -165,7 +166,7 @@ const ShelterMark = lazy(() =>
 );
 type FieldSession = typeof import('./fieldSession');
 
-export function App() {
+export function App({ resetNotice = false }: { resetNotice?: boolean } = {}) {
   const [fieldSession, setFieldSession] = useState<FieldSession | null>(null);
   const [fieldSessionFailed, setFieldSessionFailed] = useState(false);
   const {
@@ -198,19 +199,9 @@ export function App() {
   const [cardOpen, setCardOpen] = useState(false);
 
   const [seed, setSeed] = useState(seedFromUrl);
+  const encounters = useRef<EncounterState | undefined>(initialJourney.current.encounters);
   const npcAppearances = useRef(initialJourney.current.npcAppearances ?? {});
   bindNpcAppearances(seed, npcAppearances.current);
-  const [caravanSchedule, setCaravanSchedule] = useState(initialJourney.current.caravanSchedule);
-  const [twinGeneration, setTwinGeneration] = useState(() =>
-    twinGenerationFor(initialJourney.current.twinGeneration, new URLSearchParams(window.location.search).get('twinGen'), false));
-  useEffect(() => {
-    const url = new URL(window.location.href);
-    const requested = url.searchParams.get('twinGen');
-    if (twinGeneration === 2 && requested !== '2') url.searchParams.set('twinGen', '2');
-    else if (twinGeneration === 1 && requested === '2') url.searchParams.delete('twinGen');
-    else return;
-    window.history.replaceState(null, '', url);
-  }, [twinGeneration]);
   // Who is walking. Part of the journey rather than a setting: a save belongs to a traveller, so
   // the URL only decides it when the save has nothing to say.
   const [characterId, setCharacterId] = useState(
@@ -282,8 +273,6 @@ export function App() {
   // While it is, an arrival the new map reports is held rather than shown over the cards, and
   // `stepDown` decides what comes first once the traveller is off the cart.
   const crossing = useRef(false);
-  const heldArrival = useRef<string | null>(null);
-  const arrivedRef = useRef<((e: { poiId: string }) => void) | null>(null);
   // The opening, while it plays over the map booting behind it. See `Opening.tsx`.
   const [opening, setOpening] = useState(false);
   // A screen preference shared by live notes and the portalled diary.
@@ -462,22 +451,24 @@ export function App() {
   // Things that happen: the card, asking whether anything happens on a night, an arrival, the road
   // or at a camp, story beats first, and what a choice does -- `useHappenings.ts`.
   const [examining, setExamining] = useState(false);
+  const encountersBlocked = useRef(false);
+  encountersBlocked.current = Boolean(atTheDoor || titleUp || opening || arrivalPage || firstCard ||
+    talkingTo || placeOpen || (surface !== null && surface !== 'here') || Object.values(interrupts).some(Boolean));
   const { happening, setHappening, resolveEvent, happens, storyRef, card: eventCard } = useHappenings({
     latest,
     examining,
-    blocked:Boolean(atTheDoor||titleUp||opening||arrivalPage||firstCard||talkingTo||placeOpen||(surface!==null&&surface!=='here')||Object.values(interrupts).some(Boolean)),
+    blocked: encountersBlocked,
     seenEvents,
     eventDays,
     journeyFlags,
     metStrangers,
     npcAppearances,
+    encounters,
     fieldPlaced,
     cardOpenRef,
     pageOpenRef,
     setCardOpen,
     crossing,
-    heldArrival,
-    arrivedRef,
     dispatch,
     progress,
     setProgress,
@@ -536,8 +527,11 @@ export function App() {
     // Arriving opens the place once; leaving closes it. Both rules now live in the reducer,
     // where they are tested — including the one this handler could not express before: leaving
     // must not close the album or the diary, which are not about the tile being left.
-    const onStandingOn = ({ poiId: id }: GameToUi['standing-on']) =>
+    const onStandingOn = ({ poiId: id }: GameToUi['standing-on']) => {
+      // Phaser can report an authored arrival before React has committed the incoming place panel.
+      if (id) encountersBlocked.current = true;
       dispatch({ type: 'standing-on', poiId: id });
+    };
     const onMoment = (next: GameToUi['moment-changed']) => {
       latest.current.moment = next;
       setMoment(next);
@@ -550,6 +544,8 @@ export function App() {
     const onCharacter = ({ characterId: drawn }: GameToUi['character-changed']) => setDrawn(drawn);
 
     EventBus.onEvent('navigation-changed', setNavigation);
+    const onWorldFailed = () => setFieldSessionFailed(true);
+    EventBus.onEvent('world-load-failed', onWorldFailed);
     EventBus.onEvent('world-ready', onWorldReady);
     EventBus.onEvent('tile-entered', onTileEntered);
     EventBus.onEvent('journey-changed', onJourneyChanged);
@@ -562,6 +558,7 @@ export function App() {
     EventBus.onEvent('character-changed', onCharacter);
     return () => {
       EventBus.offEvent('navigation-changed', setNavigation);
+      EventBus.offEvent('world-load-failed', onWorldFailed);
       EventBus.offEvent('world-ready', onWorldReady);
       EventBus.offEvent('tile-entered', onTileEntered);
       EventBus.offEvent('journey-changed', onJourneyChanged);
@@ -581,8 +578,6 @@ export function App() {
   useEffect(() => {
     const flush = () =>
       saveJourney(seed, {
-        twinGeneration,
-        caravanSchedule,
         characterId,
         discovered: discovered.current,
         collection,
@@ -602,6 +597,7 @@ export function App() {
         // Strangers you have met, so somebody on the road can know you the second time.
         met: metStrangers.current,
         npcAppearances: npcAppearances.current,
+        encounters: encounters.current,
         // When each event last happened, and what earlier choices left behind.
         eventDays: eventDays.current,
         flags: journeyFlags.current,
@@ -618,7 +614,7 @@ export function App() {
       window.removeEventListener('pagehide', flush);
       flush();
     };
-  }, [seed, twinGeneration, caravanSchedule, collection, reached, progress, satchel, nodesByMap, fieldMapId, pinned, diaryEvents]);
+  }, [seed, collection, reached, progress, satchel, nodesByMap, fieldMapId, pinned, diaryEvents]);
 
   /**
    * What the person being talked to is, if they are also somebody who walks a circuit.
@@ -707,13 +703,12 @@ export function App() {
     };
   }, [world, arrival]);
 
-  const generate = useCallback((next: string, generation?: TwinGeneration) => {
+  const generate = useCallback((next: string) => {
     // A new map is a deliberate fresh start, so it must not inherit fog the player already lifted.
     discovered.current = [];
     // The collection is trip-scoped: a new world is a new walk, not a continuing album.
     setCollection(emptyCollection());
     const loaded = loadJourney(next);
-    const nextGeneration = generation ?? twinGenerationFor(loaded.twinGeneration, null, true);
     setJourneyEpoch(epoch => epoch + 1);
     setTargetDiscoveryId(null);
     setProgress(loaded.progress);
@@ -729,6 +724,7 @@ export function App() {
     setDiaryEvents(loaded.diaryEvents ?? []);
     metStrangers.current = loaded.met ?? [];
     npcAppearances.current = loaded.npcAppearances ?? {};
+    encounters.current = loaded.encounters;
     bindNpcAppearances(next, npcAppearances.current);
     eventDays.current = loaded.eventDays ?? {};
     journeyFlags.current = loaded.flags ?? [];
@@ -743,15 +739,11 @@ export function App() {
     setArrivalPage(null);
     setReached(false);
     setSeed(next);
-    setTwinGeneration(nextGeneration);
-    setCaravanSchedule(loaded.caravanSchedule);
     rememberSeed(next);
     const url = new URL(window.location.href);
     url.searchParams.set('seed', next);
-    if (nextGeneration === 2) url.searchParams.set('twinGen', '2');
-    else url.searchParams.delete('twinGen');
     window.history.replaceState(null, '', url);
-    EventBus.emitEvent('new-journey', { seed: next, twinGeneration: nextGeneration });
+    EventBus.emitEvent('new-journey', { seed: next });
   }, []);
 
   /**
@@ -1071,7 +1063,7 @@ export function App() {
     if (cardOpenRef.current || crossing.current || surface !== null && surface !== 'here') return;
     if (!enkiduEncounter) return;
     cardOpenRef.current = true;
-    setHappening({ event: enkiduEncounter(journeyFlags.current), shelter: null });
+    setHappening({ event: enkiduEncounter(journeyFlags.current) });
   }, [setHappening, surface, enkiduEncounter]);
 
   const { talk, campFolk, talkWith, callTo } = useRoadTalk({
@@ -1196,7 +1188,7 @@ export function App() {
           if (hospitalityOffer && camp && world && arrival && atCamp(camp, arrival.at) && campCanHost(world, camp, arrival.day) &&
               !journeyFlags.current.includes(hospitalityFlag(camp))) {
             cardOpenRef.current = true;
-            setHappening({ event: hospitalityOffer(camp, fieldMapId), shelter: 'camp' });
+            setHappening({ event: hospitalityOffer(camp, fieldMapId) });
             return;
           }
           startRest(shelter);
@@ -1595,8 +1587,6 @@ export function App() {
     setFieldMapId,
     journeyFlags,
     crossing,
-    heldArrival,
-    arrivedRef,
     discovered,
     latest,
     happens,
@@ -1682,6 +1672,8 @@ export function App() {
     void downloadImage(travelLog, travelLogFilename(world, 'png'));
   }, [travelLog, world]);
 
+  if (fieldSessionFailed) return <RecoveryScreen seed={seed} />;
+
   return (
     // The stage is the viewport. The canvas fills it and everything else floats on top, which is
     // why nothing here scrolls and there is no page chrome left to scroll past.
@@ -1696,7 +1688,6 @@ export function App() {
       {!atTheDoor && PhaserGame && (
         <PhaserGame
           seed={seed}
-          twinGeneration={twinGeneration}
           discovered={initialJourney.current.discovered}
           travelled={initialJourney.current.travelled}
           lent={lentVehicles(initialJourney.current.flags ?? [])}
@@ -1704,9 +1695,7 @@ export function App() {
           characterId={characterId}
         />
       )}
-      {!atTheDoor && !underfoot && (fieldSessionFailed ? (
-        <p role="alert">The map could not load. <button type="button" onClick={() => window.location.reload()}>Reload</button></p>
-      ) : <p role="status">Opening the map…</p>)}
+      {!atTheDoor && !underfoot && <p role="status">Opening the map…</p>}
 
       {journey && fieldMap(journey.from) && fieldMap(journey.to) && (
         <Suspense fallback={<Modal open label="The road" onClose={stepDown}><p role="status">Taking the road…</p></Modal>}>
@@ -1739,6 +1728,7 @@ export function App() {
       <FrontDoor
         open={atTheDoor && !(titleUp && OPENING_PROLOGUE)}
         canContinue={hasBegun(initialJourney.current)}
+        resetNotice={resetNotice}
         seed={seed}
         characterId={characterId}
         roster={roster}
@@ -1766,7 +1756,7 @@ export function App() {
           // arrived on -- a random one, or the one a shared link carried.
           const next = hasBegun(initialJourney.current) ? freshSeed() : seed;
           clearJourney(next);
-          generate(next, next === seed ? twinGeneration : undefined);
+          generate(next);
           // A new walk starts where the address asks, else on the opening map -- never on the map
           // the old walk ended on.
           const map = fieldMapFromUrl();

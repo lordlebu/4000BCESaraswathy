@@ -33,6 +33,10 @@ export function planCaveProps(built:FieldMapWorld, day=0):Placement[] {
   });
 }
 
+export function caveSceneryTiles(scenery: readonly Placement[]): string[] {
+  return scenery.filter(p => SOLID.has(p.sheet)).map(key);
+}
+
 export interface CaveWalk {npcId:string; points:{x:number;y:number}[]}
 /** Cache once per resident refresh. Short cardinal routes stay on opposite sides of the cave,
  * avoiding scenery, every other resident and the entrance. Saved POI anchors remain authoritative.
@@ -41,7 +45,7 @@ export function planCaveWalks(built:FieldMapWorld, scenery:readonly Placement[],
   if (!built.world.twinRegion) return [];
   const cave=built.placed.find(p=>p.poi.id===CAVE_POI)?.at;
   if (!cave) return [];
-  const blocked=new Set(scenery.filter(p=>SOLID.has(p.sheet)).map(key));
+  const blocked=new Set(caveSceneryTiles(scenery));
   for (const p of built.placed) blocked.add(key(p.at));
   blocked.add(key({x:cave.x,y:cave.y+1}));
   return CAVE_PEOPLE.flatMap((npcId,index) => {

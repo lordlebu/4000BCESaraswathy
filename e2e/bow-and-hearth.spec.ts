@@ -1,10 +1,9 @@
+import { journeyFixture, journeyStorageKey } from './journey-fixture';
 import { expect, test, type Page } from '@playwright/test';
-const SAVE_VERSION = 19;
-const KNOWLEDGE_VERSION = 1;
 const DAY_MS = 60 * 60 * 1000;
 
 const seed = 'camps';
-const path = `?map=field_map_twins&twinGen=2&seed=${seed}&door=open&events=off&firsts=off`;
+const path = `?map=field_map_twins&seed=${seed}&door=open&events=off&firsts=off`;
 type Point = { x: number; y: number };
 type Camp = {
   from: number; to: number; at: Point; id: string;
@@ -18,15 +17,14 @@ const campAt = (page: Page, day?: number) => page.evaluate((d) =>
   (window as unknown as { __camp?: (day?: number) => Camp | null }).__camp?.(d) ?? null, day);
 
 async function installCampClock(page: Page) {
-  await page.addInitScript(({ seed, version, knowledgeVersion, dayMs }) => {
+  await page.addInitScript(({ key, defaults, dayMs }) => {
     const marker = new URLSearchParams(location.search).get('caravanFixture');
     if (!marker || sessionStorage.getItem('caravanFixture') === marker) return;
     sessionStorage.setItem('caravanFixture', marker);
-    localStorage.setItem(`south-of-tethys:${seed}`, JSON.stringify({
-      version, knowledgeVersion, twinGeneration: 2, travelled: Number(marker.split('-')[0]) * dayMs,
-      caravanSchedule: { revision: 2, firstCycle: 0 }
+    localStorage.setItem(key, JSON.stringify({
+      ...defaults, travelled: Number(marker.split('-')[0]) * dayMs
     }));
-  }, { seed, version: SAVE_VERSION, knowledgeVersion: KNOWLEDGE_VERSION, dayMs: DAY_MS });
+  }, { key: journeyStorageKey(seed), defaults: journeyFixture(), dayMs: DAY_MS });
 }
 
 test('a western caravan arrives, pitches the dome and restores its stage after reload', async ({ page }) => {
@@ -41,11 +39,16 @@ test('a western caravan arrives, pitches the dome and restores its stage after r
   if (!visit?.caravan) throw new Error('The fixture seed must have a western visit');
   const { from, to, at, id } = visit;
   await installCampClock(page);
-  const open = async (day: number, hour: number) => {
-    await page.goto(path + `&hour=${hour}&at=${at.x},${at.y}&caravanFixture=${day}-${hour}`);
+  const open = async (day: number, hour: number, spot = at) => {
+    await page.goto(path + `&hour=${hour}&at=${spot.x},${spot.y}&caravanFixture=${day}-${hour}`);
   };
-  await open(from, 8);
+  const middle = visit.caravan.route[Math.round((visit.caravan.route.length - 1) / 2)]!;
+  await open(from, 8, middle);
   await expect.poll(() => campAt(page), { timeout: 20_000 }).toMatchObject({ id, caravanStage: 'travelling', wagon: { count: 1 } });
+  const arrival = page.getByRole('dialog', { name: 'A wagon from the west' });
+  await expect(arrival).toBeVisible({ timeout: 20000 });
+  await expect(arrival.locator('img.activity-scene')).toHaveAttribute('src', /woven-camp-elamite-arrival/);
+  await arrival.getByRole('button', { name: 'Greet the caravan' }).click();
   const moving = await campAt(page);
   await page.reload();
   await expect.poll(() => campAt(page), { timeout: 20_000 }).toMatchObject({ id, caravanStage: 'travelling', wagon: { count: 1, x: moving?.wagon?.x } });
@@ -53,8 +56,13 @@ test('a western caravan arrives, pitches the dome and restores its stage after r
   await expect.poll(() => campAt(page), { timeout: 20_000 }).toMatchObject({
     id, caravanStage: 'established', wagon: { count: 1 }, pieces: expect.arrayContaining(['camp-elamite-dome', 'caravan-canopy'])
   });
-  await open(to - 1, 17);
+  const outward = visit.caravan.route[Math.round((visit.caravan.route.length - 1) * 2 / 3)]!;
+  await open(to - 1, 17, outward);
   await expect.poll(() => campAt(page), { timeout: 20_000 }).toMatchObject({ id, caravanStage: 'departure', wagon: { count: 1 } });
+  const departure = page.getByRole('dialog', { name: 'The wheels turn west' });
+  await expect(departure).toBeVisible({ timeout: 20000 });
+  await expect(departure.locator('img.activity-scene')).toHaveAttribute('src', /woven-camp-elamite-departure/);
+  await departure.getByRole('button', { name: 'Wave farewell' }).click();
   await open(to - 1, 20);
   await expect.poll(() => campAt(page), { timeout: 20_000 }).toMatchObject({ id, caravanStage: 'aftermath' });
 });
@@ -63,7 +71,7 @@ type Enkidu = { at: Point | null; visible: boolean; following: boolean };
 const enkidu = (page: Page) => page.evaluate(() =>
   (window as unknown as { __walker?: () => { enkidu: Enkidu | null } }).__walker?.().enkidu ?? null);
 const readJourney = (page: Page) => page.evaluate((seed) =>
-  JSON.parse(localStorage.getItem(`south-of-tethys:${seed}`) ?? '{}'), seed);
+  JSON.parse(localStorage.getItem(`south-of-tethys-v20:journey:${seed}`) ?? '{}'), seed);
 const findVisit = (page: Page, withEnkidu: boolean) => page.evaluate((withEnkidu) => {
   const campAt = (window as unknown as { __camp: (day: number) => Camp | null }).__camp;
   for (let day = 5; day < 700; day++) {

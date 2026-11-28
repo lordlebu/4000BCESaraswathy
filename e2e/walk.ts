@@ -164,7 +164,7 @@ export async function approachPlace(
         biomes: string[];
         placed: [string, number, number][];
       } | null,
-    `south-of-tethys:world:${seed}:${map}`
+    `south-of-tethys-v20:world:${seed}:${map}`
   );
   if (!baked) throw new Error(`${map}/${seed}: no stored world to read the places from`);
   const found = baked.placed.find(([id]) => id === poiId);
@@ -223,7 +223,7 @@ export async function openGround(
         biomes: string[];
         placed: [string, number, number][];
       } | null,
-    `south-of-tethys:world:${seed}:${map}`
+    `south-of-tethys-v20:world:${seed}:${map}`
   );
   if (!baked) throw new Error(`${map}/${seed}: no stored world to read the ground from`);
   const places = new Set(baked.placed.map(([, x, y]) => `${x},${y}`));

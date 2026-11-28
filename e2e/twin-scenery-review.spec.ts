@@ -1,6 +1,6 @@
 import {expect,test,type Page} from '@playwright/test';
 
-const base='?map=field_map_twins&seed=hybrid-review-0&twinGen=2&at=poi_earthen_workshop&hour=12&door=open&title=skip&firsts=off&events=off';
+const base='?map=field_map_twins&seed=hybrid-review-0&at=poi_earthen_workshop&hour=12&door=open&title=skip&firsts=off&events=off';
 const scenery=(page:Page)=>page.evaluate(()=>(window as unknown as {__walker?:()=>{
   twinScenery:{relief:number;landmarks:string[];sites:string[];shadows:number};
 }}).__walker?.()?.twinScenery);

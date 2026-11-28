@@ -60,7 +60,7 @@ describe('Bow and Hearth Level 1', () => {
     expect(offers.map(({ art }) => art)).toEqual([...kinds, 'elamite'].map((kind) => `woven-camp-sleep-${kind}`));
     for (const offer of offers) {
       expect(offer.subjectId).toBe(camp.id);
-      expect(preferredArtSelection('events', [offer.art])).toMatchObject({ key: offer.art });
+      expect(preferredArtSelection('events', offer.art)).toMatchObject({ key: offer.art });
       expect(offer.choices.map(({ id, sets }) => ({ id, sets }))).toEqual([
         { id: 'stay', sets: ['hospitality:camp:2'] },
         { id: 'leave', sets: undefined }

@@ -1,3 +1,4 @@
+import { seedJourney } from './journey-fixture';
 import { expect, test } from '@playwright/test';
 
 const base = '?map=field_map_twins&seed=twin-art-review&hour=12&door=open&title=skip&chatter=off&firsts=off';
@@ -47,7 +48,7 @@ test('the three circuit walkers load their own undyed NES identities', async ({ 
     ]);
   await expect.poll(() => page.evaluate(() => (window as any).__walker?.().residents
     .map((r: any) => r.npcId).sort()), {timeout:45000}).toEqual([
-      'npc_cave_cook','npc_cove_watcher_ulenna','npc_mirlepa','npc_priest_kang','npc_reedwright_irekha','npc_twin_brickworker',
+      'npc_cove_watcher_ulenna','npc_mirlepa','npc_priest_kang','npc_reedwright_irekha','npc_twin_brickworker',
       'npc_twin_handler','npc_twin_landingkeeper','npc_twin_maintainer','npc_twin_stationkeeper','npc_yamantaka'
     ]);
   expect(errors).toEqual([]);
@@ -82,11 +83,11 @@ for (const mobile of [false, true]) {
       page.on('pageerror', e => errors.push(e.message));
       page.on('console', m => { if (/has no frame|Texture.*not found/i.test(m.text())) errors.push(m.text()); });
       page.on('response', r => { if (r.ok()) loaded.push(r.url()); });
-      await page.addInitScript(() => localStorage.setItem('south-of-tethys:twin-art-review', JSON.stringify({
-        knowledgeVersion: 1,
+      await seedJourney(page, 'twin-art-review', {
         progress: { rungs: { discovery_twin_shade: 3 }, words: [], recipes: [], made: [], answered: {}, questions: [] },
         seenEvents: ['happening_twin_closing', 'happening_valley_courtyard_return']
-      })));
+      });
+
       await page.goto(base + '&at=poi_harappa_court');
       const view = page.locator('img[src*="poi_harappa_court-painted"]');
       await expect(view).toBeVisible({ timeout: 45000 });

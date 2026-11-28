@@ -21,7 +21,7 @@ it('announces the current milestone and offers separate Read and Dismiss actions
 it('focuses and identifies the explicitly requested diary entry, preserving authored readings', () => {
   const d = discoveries.find(d => d.rungs.length > 1)!;
   const progress = { ...emptyProgress(), rungs: { [d.id]: 1 } };
-  render(<Diary open progress={progress} targetDiscoveryId={d.id} onClose={() => {}} onAnswer={() => {}} onOpenEnding={() => {}} onOpenKit={() => {}} />);
+  render(<Diary open progress={progress} targetDiscoveryId={d.id} onClose={() => {}} onAnswer={() => {}} onOpenKit={() => {}} />);
   const heading = screen.getByRole('heading', { name: d.name });
   expect(document.activeElement).toBe(heading);
   expect(heading.closest('article')?.className).toContain('discovery-updated');
@@ -29,6 +29,6 @@ it('focuses and identifies the explicitly requested diary entry, preserving auth
   expect(screen.getByText(d.rungs[1]!.entry).className).not.toContain('struck');
 });
 it('keeps the usual diary close focus for an ordinary open or missing target', () => {
-  render(<Diary open progress={emptyProgress()} targetDiscoveryId="missing" onClose={() => {}} onAnswer={() => {}} onOpenEnding={() => {}} onOpenKit={() => {}} />);
+  render(<Diary open progress={emptyProgress()} targetDiscoveryId="missing" onClose={() => {}} onAnswer={() => {}} onOpenKit={() => {}} />);
   expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Close' }));
 });

@@ -161,11 +161,10 @@ describe('the activity card', () => {
     expect(document.querySelector('img.activity-scene'), 'an image appeared with no art').toBeNull();
   });
 
-  /** A variant nobody has painted falls back to the gesture's own scene rather than to nothing. */
-  it('falls back to the gesture when a variant has no painting', () => {
+
+  it('omits the image when a variant has no painting', () => {
     open({ gesture: 'stoop', variant: 'firing' });
-    expect(document.querySelector('img.activity-scene'), 'an unpainted variant lost the picture')
-      .toBeTruthy();
+    expect(document.querySelector('img.activity-scene')).toBeNull();
   });
 
   it('shows the painting when there is one', () => {

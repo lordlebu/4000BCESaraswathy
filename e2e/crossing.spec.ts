@@ -1,3 +1,4 @@
+import { journeyFixture, journeyStorageKey } from './journey-fixture';
 // Changing map, in a browser: the card after the road has a picture, and somebody can tell you how
 // a map is left. The owner's report of 3 October 2026 -- "one art appears and the second one comes as
 // blank", and "we need someone to tell us how to change map".
@@ -47,10 +48,10 @@ test("Guyuk's word does not come over the road's cards, only once the traveller 
   // test passed with the fix taken out.
   const seed = `herbalist-${Date.now()}`;
   const DAY_MS = 60 * 60 * 1000;
-  await page.addInitScript(({ key, travelled }) => {
-    const saved = JSON.parse(localStorage.getItem(key) ?? '{"knowledgeVersion":1}');
+  await page.addInitScript(({ key, defaults, travelled }) => {
+    const saved = JSON.parse(localStorage.getItem(key) ?? defaults);
     localStorage.setItem(key, JSON.stringify({ ...saved, travelled }));
-  }, { key: `south-of-tethys:${seed}`, travelled: Math.round(DAY_MS * 1.8) });
+  }, { key: journeyStorageKey(seed), defaults: JSON.stringify(journeyFixture()), travelled: Math.round(DAY_MS * 1.8) });
   await page.goto(`?seed=${seed}&map=field_map_lothal&at=poi_lothal_camp`);
   await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
   await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });

@@ -1,3 +1,4 @@
+import { seedJourney } from './journey-fixture';
 // A pin you can see and change (`docs/satchel-and-hearth.md`, phase 2).
 //
 // **The owner pinned a recipe and could not find how to unpin it.** Unpinning lived on the recipe's
@@ -9,9 +10,8 @@
 import { expect, test } from '@playwright/test';
 
 test('tapping the pinned line opens the workshop with Unpin under your finger', async ({ page }) => {
-  await page.addInitScript(() => {
-    localStorage.setItem('south-of-tethys:pin-1', JSON.stringify({ knowledgeVersion: 1, pinned: 'recipe_reed_rope' }));
-  });
+  await seedJourney(page, 'pin-1', { pinned: 'recipe_reed_rope' });
+
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/?seed=pin-1&hour=12');
   await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });

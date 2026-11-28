@@ -191,11 +191,11 @@ answered Q7 and Q8 directly.
 | Q2 | May two travellers share a body? | Road company wear the body of their trade; dyes tell them apart. Canon's named people keep distinct bodies | **built** |
 | Q3 | Authored events: canon's or the game's? | Split: world-true events become a canon entity type; woven and player-only ones stay here. **Canon already uses `event_` for timeline history**, so the new type is `happening_` | **built** (canon 2.31.0, three drafts) |
 | Q4 | Can strangers have names? | Canon exports a per-people list of given names, and the game deals them by hash | **built** (canon 2.29.0) |
-| Q5 | May events remember between days? | Yes, in the what-you-know half of the save. First use: `met`, so a stranger recognises you | **built** |
+| Q5 | May events remember between days? | Yes, in the journey save. First use: `met`, so a stranger recognises you | **built** |
 | Q6 | How often? | Kept until the simulation spoke; then, 26 September, on the recommendation: gathering one take in nine, and tracks and being watched at half weight | **tuned** |
 | Q7 | Faces | 22 faces by people and gender: Harappan 6 men and 4 women, Kia 4 men and 2 women, Maru 2 and 2, `any` 2. Prompts in `docs/face-prompts.md` | **pool built; art with the owner** |
 | Q8 | Translation? | English only, with Jambhudweepan nouns. No message-format layer | recorded; nothing to build |
-| Q9 | Save split first? | Yes | **built** |
+| Q9 | Save split first? | Original design | Replaced by journey schema 20 |
 
 The owner's list said "Harappan settler male" twice, 6 and then 4. The second is read as
 **female**, which is what the prompts say. Correct it there if it meant something else.
@@ -206,11 +206,14 @@ The owner's list said "Harappan settler male" twice, 6 and then 4. The second is
   road. The second stranger follows canon's population: a Kia pilgrim where the map's named people
   mostly speak Kia, a Maru drover where they mostly speak Maru. Measured: the Narmada gets the
   drover; Lothal, Dwarka and the Aravali the pilgrim.
-- **The save in two halves (Q9).** `KNOWLEDGE_VERSION` versions what you know: progress,
-  collection, satchel, events seen, strangers met, the clock and who you are.
-  `SAVE_VERSION` versions where you are: fog, the landmark, drawn nodes. **Ground moving now bumps
-  only the second**, and the diary survives. A save from before the split reads as knowledge
-  version 1, so nobody loses anything to this change either.
+- **Journey storage.** The current save keeps progress, inventory, fog, event history, NPC
+  appearances and pending sightings in one snapshot. The release clears obsolete game saves and
+  bakes before looking up the starting seed. Display preferences remain under `varuna:showing`.
+- **Automatic cards.** The wagon, caravan witnesses, Beedu, camp arrivals and authored arrivals
+  share a queue. If a modal or transition holds the screen, the queue waits. Ordinary road
+  events get one roll per journey day following a completed walk. The Windward Cave cook
+  uses the same generated person, appearance and dialogue paths as other camp residents and
+  visits on days 0 and 1 of each six-day cycle.
 - **A stranger who knows you (Q5).** Choosing anything in a stranger's event records them in
   `met`. The next time the road brings them, it is *"A face you know"*, not a first meeting.
   Strangers are counted per map, since the carrier on Lothal and the carrier on Dwarka are two

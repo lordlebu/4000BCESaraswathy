@@ -30,7 +30,7 @@ boundary, and quieter grass/hills around Windward Cave. This extends the open la
 | Olive | `#9c9f79` | `#a09b7f` | Drier yellow-green, closest to the sand/grass palette |
 
 Review on the same seed, hour, position and zoom. Development-only `turf=sage`, `turf=lichen`
-and `turf=olive` select the samples; `turf=legacy` draws the accepted previous terrain for
+and `turf=olive` select the samples. The original terrain was retained during the
 comparison. The owner selected **A - Muted sage** after reviewing the three in-game samples. Production uses sage. No new
 player setting or save data. Captures live in already ignored `test-results/` and
 `dump/twin-city-art-review/terrain-softening/`, not in commits.

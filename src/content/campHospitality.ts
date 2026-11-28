@@ -48,7 +48,7 @@ export function hospitalityOffer(camp: Encampment, fieldMapId: string): GameEven
   };
 }
 
-export function caravanWitnessEvent(camp: Encampment, moment: 'arrival' | 'departure', fieldMapId: string): GameEvent {
+export function caravanWitnessEvent(camp: Pick<Encampment, 'id'>, moment: 'arrival' | 'departure', fieldMapId: string): GameEvent {
   const arriving = moment === 'arrival';
   return {
     id: `woven:elamite-${moment}:${camp.id}`,

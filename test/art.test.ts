@@ -14,7 +14,7 @@
 // out by it silently not appearing.
 
 import { describe, expect, it } from 'vitest';
-import { art, artCount, artFolders, artNames, firstArt, preferredArt } from '../src/ui/art';
+import { art, artCount, artFolders, artNames, preferredArt } from '../src/ui/art';
 import { plateFor } from '../src/ui/plates';
 import { markFor } from '../src/ui/marks';
 import { sceneFor } from '../src/ui/scenes';
@@ -26,14 +26,14 @@ describe('the art registry', () => {
   it('prefers the painted edition through the portrait and place callers', () => {
     expect(portraitFor('npc_twin_mason')).toBe(art('portraits', 'twin-mason-painted'));
     expect(portraitFor('npc_twin_mason')).not.toBe(art('portraits', 'twin-mason'));
-    expect(placeArt('poi_harappa_court', 'settlement')).toBe(art('places', 'poi_harappa_court-painted'));
-    expect(preferredArt('events', ['happening_twin_courtyard'])).toBe(art('events', 'happening_twin_courtyard-painted'));
+    expect(placeArt('poi_harappa_court')).toBe(art('places', 'poi_harappa_court-painted'));
+    expect(preferredArt('events', 'happening_twin_courtyard')).toBe(art('events', 'happening_twin_courtyard-painted'));
   });
 
-  it('keeps specific subjects ahead of broader fallbacks, and preserves missing-edition fallback', () => {
-    expect(preferredArt('portraits', ['no-such-person', 'thrali'])).toBe(art('portraits', 'thrali'));
-    expect(preferredArt('events', ['happening_twin_arrival', 'happening_twin_courtyard'])).toBe(art('events', 'happening_twin_arrival-painted'));
-    expect(preferredArt('places', [undefined, null, 'no-such-place'])).toBeNull();
+  it('keeps the original edition of a subject when there is no painted edition', () => {
+    expect(preferredArt('portraits', 'thrali')).toBe(art('portraits', 'thrali'));
+    expect(preferredArt('events', 'happening_twin_arrival')).toBe(art('events', 'happening_twin_arrival-painted'));
+    expect(preferredArt('places', 'no-such-place')).toBeNull();
   });
   it('found the folders that have art in them', () => {
     const folders = artFolders();
@@ -50,12 +50,7 @@ describe('the art registry', () => {
     expect(artCount('no-such-folder')).toBe(0);
   });
 
-  it('tries names in order and stops at the first that exists', () => {
-    expect(firstArt('scenes', ['no-such-scene', 'stoop'])).toBe(art('scenes', 'stoop'));
-    expect(firstArt('scenes', ['no-such-scene', 'also-not-there'])).toBeNull();
-    // A null or undefined in the chain is skipped rather than treated as a name.
-    expect(firstArt('scenes', [null, undefined, 'stoop'])).toBe(art('scenes', 'stoop'));
-  });
+
 });
 
 describe('the doors on top of it', () => {
@@ -67,11 +62,9 @@ describe('the doors on top of it', () => {
     expect(sceneFor('desert-fox')).toBeNull();
   });
 
-  it('narrows a scene by variant and falls back to the plain gesture', () => {
+  it('assigns one scene per variant', () => {
     expect(sceneFor('rest', 'camp')).toBe(art('scenes', 'rest-camp'));
-    // A variant nobody has painted -- which is every making variant today -- must not lose the
-    // picture. This is what lets `make-firing.png` land later as a file and no code.
-    expect(sceneFor('rest', 'no-such-shelter')).toBe(art('scenes', 'rest'));
+    expect(sceneFor('rest', 'no-such-shelter')).toBeNull();
   });
 
   it('keeps the marks namespaced, because `physic` is a word in two of them', () => {
@@ -102,27 +95,12 @@ describe('the two folders opened for the art still to come', () => {
   it('report nothing and draw nothing, without complaint', () => {
     expect(placeArtCount()).toBeGreaterThanOrEqual(0);
     expect(thingArtCount()).toBeGreaterThanOrEqual(0);
-    expect(placeArt('poi_nobody_will_ever_paint', 'not-a-kind')).toBeNull();
-    expect(thingArt('item_nobody_will_ever_paint', 'not-a-kind')).toBeNull();
+    expect(placeArt('poi_nobody_will_ever_paint')).toBeNull();
+    expect(thingArt('item_nobody_will_ever_paint')).toBeNull();
   });
 
-  /** A caller with only a kind passes it as both, which is legal and skips the first lookup. */
-  it('accept a kind with no id', () => {
-    expect(placeArt('kind-not-a-kind')).toBeNull();
-    expect(thingArt('kind-not-a-kind')).toBeNull();
-  });
-
-  /**
-   * **A place falls back to its kind**, which is what makes six paintings cover every place in the
-   * game. Canon's `poi.kind` carries underscores on three of its six values and the file keeps
-   * them: `idFor` hyphenates a species id and must not hyphenate this one, or the lookup misses
-   * and nothing is drawn, silently.
-   */
-  it('finds a kind painting for a place that has none of its own', () => {
-    for (const kind of ['settlement', 'travel_node', 'archaeological_site', 'eco_site', 'anomaly', 'wilderness']) {
-      expect(placeArt('poi_nobody_will_ever_paint', kind), `${kind} has no view`).toBe(
-        art('places', `kind-${kind}`)
-      );
-    }
+  it('draws a category painting only when explicitly assigned its key', () => {
+    expect(placeArt('kind-settlement')).toBe(art('places', 'kind-settlement'));
+    expect(placeArt('poi_nobody_will_ever_paint')).toBeNull();
   });
 });

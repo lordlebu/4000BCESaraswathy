@@ -161,33 +161,8 @@ export interface GameEvent {
   /** The passage, in the diary's voice. This is the event. */
   prose: string;
   topics?: readonly AmbientTopic[];
-  /**
-   * What the painting is called, in `src/ui/events/`.
-   *
-   * Defaults to the id, so a file named after the event simply appears. **Nothing is blocked while
-   * it is missing** -- the card draws the shelter's own scene instead, and an event with no art at
-   * all still fires, still reads and still resolves. Same contract as every other art slot; see
-   * `docs/art-placement.md`.
-   */
+  /** Assigned artwork key in src/ui/events. Missing optional art is omitted. */
   art: string;
-  /**
-   * A narrower painting to try first, when the owner has painted one: `woven-camp-dacoits` before
-   * `woven-camp`. Absent means the event's own `art` is the only one.
-   */
-  artVariant?: string;
-  /**
-   * Narrower still, tried before `artVariant`: a painting of this moment at that place -- the meal
-   * at a dacoit camp before the dacoit camp. Absent, or not yet painted, the card falls through.
-   */
-  artMoment?: string;
-  /**
-   * Last of all, after the event's own: a painting that will do when this moment has none. A road's
-   * happening gets the road's own painting -- the ferry song and the line where the sea was had no
-   * picture, and the card after the road's painted one came up blank (the owner, 3 October 2026).
-   */
-  artFallback?: string;
-  /** Ordered cross-folder fallbacks for contextual events whose useful image belongs to a place. */
-  artCandidates?: readonly { collection: 'events' | 'places' | 'scenes'; key: string }[];
   choices: Choice[];
   /**
    * Whether it can happen more than once.

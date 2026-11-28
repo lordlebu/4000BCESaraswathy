@@ -1,5 +1,7 @@
 # Rendering — how the map gets drawn, and what it costs
 
+Twin Cities uses the shared terrain atlas and its approved rail treatment. See the [current map profile](twin-cities-uplift.md#add-a-profile) for new maps.
+
 > **Mixed-art owner rule (18 November):** Inspect the element and approved references; ask if uncertain, and show new/replacement samples for selection before applying them, including code-native art. Preserve accepted exceptions. Current choices: JRPG rail bridge with proper shadow; lower road bridge retained; object shrubs/old grass; covered clay lamps. [Current delivery ledger](twin-walkway-phase.md).
 
 > **Current art forms (17 November 2026):** Follow [the element-by-element guide](art-direction.md#current-element-by-element-direction--17-november-2026). New overworld people, wandering animals and trams use **“nes jrpg sprite”**; Beedu alone keeps its accepted small SNES art. Terrain/buildings remain simple NES; off-map portraits/events/places/plates remain painted, with the two Denisovan portrait exceptions. Older prompts below are production history where they conflict; new delivery uses resize only, without colour reduction.
@@ -7,6 +9,9 @@
 `WorldScene` is the only file that knows Phaser exists. This is the part of it worth understanding
 before changing anything: what the layers are, what each one is allowed to do, and how to measure
 the cost of adding another.
+
+The original React boundary and separate field-load notice landed on November 27 in PR #278.
+Both now use the same recovery screen, with the current seed and actions to retry or begin a new journey.
 
 ## Twin-valley terrain exception - 18 November 2026
 

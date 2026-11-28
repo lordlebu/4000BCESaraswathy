@@ -28,7 +28,6 @@
 
 import type { Clade, GrowthForm } from '../world/types';
 import type { SpeciesMark } from '../content/journal';
-import { plateFor } from './plates';
 import { PlateButton } from './Specimen';
 
 /**
@@ -141,37 +140,7 @@ export function speciesMark(species: SpeciesMark): string {
   return 'clade' in species ? CLADE_MARK[species.clade] : plantMark(species);
 }
 
-/**
- * The mark for one species.
- *
- * Presentational only: it carries no label, because the name it sits beside already says what the
- * species is, and a screen reader announcing "tree icon, Mappa Mundi Banyan" is worse than one
- * announcing the name alone.
- */
+/** Only the named species' own plate can open from this slot. */
 export function SpeciesIcon({ species }: SpeciesIconProps) {
-  // A painted plate beats a glyph wherever one exists.
-  //
-  // The collection was showing every plated animal as 🐾, because this component only ever knew
-  // about marks -- the plate lookup lived in
-  // `JournalPanel` alone. So the plates appeared once, in the field notes, at the moment of
-  // meeting, and never again in the place built for looking back over what you have met. That is
-  // exactly backwards for the screen whose whole job is the collection.
-  //
-  // `JournalPanel` guards its own call with `!plate`, so it does not draw one twice.
-  //
-  // **And a plate is a way in rather than a decoration.** It used to render as a bare 2.4em image:
-  // the file is 384 square, so nine tenths of the painting was thrown away on the one screen a
-  // player opens to look back at what they met. `PlateButton` draws the same thumbnail and opens
-  // the painting at full size -- see `Specimen.tsx`. It returns null when there is no plate, so
-  // the mark below is still what every unpainted species gets.
-  const opens = plateFor(species.id) ? (
-    <PlateButton speciesId={species.id} name={species.name} variant="mark" />
-  ) : null;
-  if (opens) return opens;
-
-  return (
-    <span className="species-emoji" aria-hidden="true">
-      {speciesMark(species)}
-    </span>
-  );
+  return <PlateButton speciesId={species.id} name={species.name} variant="mark" />;
 }

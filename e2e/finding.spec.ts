@@ -1,3 +1,4 @@
+import { seedJourney } from './journey-fixture';
 // Where the nearest of what the pin wants lies (`docs/satchel-and-hearth.md`, phase 7).
 //
 // The owner could not find bamboo on the Narmada: nothing said which tile held it. `test/finding.test.ts`
@@ -9,16 +10,8 @@ import { expect, test } from '@playwright/test';
 const SEED = 'find-1';
 
 test('a pinned knife points at the nearest flint, in words and on the map', async ({ page }) => {
-  await page.addInitScript(
-    ({ key }) => {
-      try {
-        if (!localStorage.getItem(key)) localStorage.setItem(key, JSON.stringify({ knowledgeVersion: 1, pinned: 'recipe_flint_knife' }));
-      } catch {
-        // Storage refused: the spec fails on what it looks for, which is the honest outcome.
-      }
-    },
-    { key: `south-of-tethys:${SEED}` }
-  );
+  await seedJourney(page, SEED, { pinned: 'recipe_flint_knife' });
+
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto(`/?seed=${SEED}&hour=12`);
   await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
@@ -38,7 +31,7 @@ for (const view of [{ width: 1280, height: 800, touch: false }, { width: 390, he
     const page = await context.newPage();
     const errors: string[] = [];
     page.on('pageerror', error => errors.push(error.message));
-    await page.addInitScript(() => localStorage.setItem('south-of-tethys:find-1', JSON.stringify({ knowledgeVersion: 1, pinned: 'recipe_flint_knife' })));
+    await seedJourney(page, 'find-1', { pinned: 'recipe_flint_knife' });
     await page.goto('/?seed=find-1&hour=12');
     const hide = page.getByRole('button', { name: /^Hide marker:/ });
     await expect(hide).toBeVisible({ timeout: 20_000 });

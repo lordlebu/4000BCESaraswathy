@@ -37,7 +37,7 @@ export interface AmbientTopic {
 
 type Context = { map?: string; occupation?: string; familiar?: boolean } & (
   | { road: true; culture: StrangerCulture | null; biome: BiomeId; standing: Standing; warm: boolean }
-  | { road: false; kind: CampKind; slot: CampSlot; activity?: CampActivity; elamite?: boolean });
+  | { road: false; kind: CampKind; slot: CampSlot; activity?: CampActivity; elamite?: boolean; cook?: boolean });
 
 interface Line {
   id: string;
@@ -88,6 +88,14 @@ const ROAD: readonly Line[] = [
   { id: 'dust', topic: 'ground', text: '“The dust stays in the ruts after the rain. Walk on the shoulder and you can see who passed before you.”', fits: ground('plains', 'desert', 'settlement', 'landmark') },
   { id: 'shade-ahead', topic: 'parting', text: '“May the next stretch have shade where you need it.”' },
   { id: 'see-you', topic: 'parting', text: '“I’ll know to look for you on this road now.”' }
+];
+
+const COOK: readonly Line[] = [
+  { id: 'cave-cook-hearth', topic: 'camp', text: '“The hearth is here because the smoke leaves by the upper crack.”' },
+  { id: 'cave-cook-meal', topic: 'camp', text: '“Bring a bowl over. Nobody has to earn a place beside the fire.”', fits: doing('meal'), immediate: true },
+  { id: 'cave-cook-visits', topic: 'work', text: '“I cook here a little while, then take my pot to another household.”' },
+  { id: 'cave-cook-water', topic: 'people', text: '“If you bring news of the water jars, I will listen while this warms.”' },
+  { id: 'cave-cook-parting', topic: 'parting', text: '“Leave the threshold clear when you go. The evening walkers will need it.”' }
 ];
 
 const CAMP: readonly Line[] = [
@@ -146,7 +154,7 @@ export function ambientTopics(
     : elamite ? ELAMITE_TOPICS.filter((id) => id !== intro) : ['work', 'greeting', 'people', 'parting'];
   const rank = (id: string, at = 0) => tileHash(speaker, at, 0, id);
   subjects.sort((a, b) => rank(a, day) - rank(b, day));
-  const local = [...(context.road ? ROAD : elamite ? ELAMITE : CAMP), ...REGIONAL]
+  const local = [...(context.road ? ROAD : elamite ? ELAMITE : context.cook ? COOK : CAMP), ...REGIONAL]
     .filter((line) => !line.fits || line.fits(context));
   const options = news ? [topic('news', news.text, key(news.id))] : [];
   const age = (line: Line) => day - (history[key(line.id)] ?? -Infinity);

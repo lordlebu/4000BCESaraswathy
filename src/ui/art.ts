@@ -15,14 +15,12 @@
 // That matters because of what is coming. The art queue is long and deliberately not a blocker:
 // paintings for the points of interest, for the things the workshop makes, for each of canon's
 // seventeen processes, for the shelter a night is spent under. **None of it gates any mechanic.**
-// Every lookup here returns null for a missing file, every caller already draws something else
-// when it does, and `docs/art-placement.md` is the manifest of what can be dropped where.
+// Missing files return null. `docs/art-placement.md` records the names this registry resolves.
 //
 // The four named modules stay as the doors callers use. They are one line each now, and they keep
 // their headers, because the *naming rules* differ between folders and that is the part that has
 // actually cost time: a plate is named after the **engine** id and a portrait after the bare
-// person, and a file under the wrong convention matches nothing, throws nothing, and quietly
-// keeps drawing the fallback.
+// person.
 
 /**
  * Every image under a direct subfolder of `src/ui/`, keyed by folder and then by bare filename.
@@ -101,9 +99,7 @@ const EMPTY: readonly string[] = Object.freeze([]);
 /**
  * One painting of this thing, or null — which is the usual answer and not a problem.
  *
- * Null is the whole contract. Every caller has a fallback it draws instead, and that is a design
- * commitment rather than defensive coding: canon holds a few hundred species and one painted plate
- * is a good session's work, so the set will never be complete and no panel may wait for it.
+ * Optional illustrations are omitted when the exact asset is absent.
  *
  * **`pick` chooses between takes and must be seeded, never random.** The determinism rule in this
  * codebase is absolute — the same seed must produce the same world and the same journal text — and
@@ -119,26 +115,6 @@ export function art(folder: string, name: string, pick = 0): string | null {
   return takes[(pick >>> 0) % takes.length]!;
 }
 
-/**
- * The same, trying each name in turn.
- *
- * For art that narrows: a night at a camp before a night in general, `make-firing` before the
- * plain making scene. The fallback chain is the caller's to state, because only it knows which
- * way the narrowing runs.
- */
-export function firstArt(
-  folder: string,
-  names: readonly (string | null | undefined)[],
-  pick = 0
-): string | null {
-  for (const name of names) {
-    if (!name) continue;
-    const found = art(folder, name, pick);
-    if (found) return found;
-  }
-  return null;
-}
-
 export interface ArtSelection {
   folder: string;
   key: string;
@@ -146,50 +122,27 @@ export interface ArtSelection {
   url: string;
 }
 
-/** The same lookup as `firstArt`, retaining the semantic key needed by a saved diary entry. */
-export function firstArtSelection(
-  folder: string,
-  names: readonly (string | null | undefined)[],
-  pick = 0
-): ArtSelection | null {
-  for (const name of names) {
-    if (!name) continue;
-    const takes = artTakes(folder, name);
-    if (takes.length === 0) continue;
-    const take = (pick >>> 0) % takes.length;
-    return { folder, key: name, take, url: takes[take]! };
-  }
-  return null;
-}
-
-/** Prefer a reviewed painted edition, preserving the accepted original as a fallback.
- * Resolve each subject before moving to its broader fallback: a painted generic scene must
- * never displace a specific event. Take selection remains seeded within the chosen edition.
- */
+/** A reviewed edition, or the original edition of the same subject. */
 export function preferredArt(
   folder: 'portraits' | 'places' | 'events',
-  names: readonly (string | null | undefined)[],
+  name: string | null | undefined,
   pick = 0
 ): string | null {
-  for (const name of names) {
-    if (!name) continue;
-    const found = firstArt(folder, [`${name}-painted`, name], pick);
-    if (found) return found;
-  }
-  return null;
+  return preferredArtSelection(folder, name, pick)?.url ?? null;
 }
 
 export function preferredArtSelection(
   folder: 'portraits' | 'places' | 'events',
-  names: readonly (string | null | undefined)[],
+  name: string | null | undefined,
   pick = 0
 ): ArtSelection | null {
-  for (const name of names) {
-    if (!name) continue;
-    const found = firstArtSelection(folder, [`${name}-painted`, name], pick);
-    if (found) return found;
-  }
-  return null;
+  if (!name) return null;
+  const painted = `${name}-painted`;
+  const key = artTakes(folder, painted).length ? painted : name;
+  const takes = artTakes(folder, key);
+  if (!takes.length) return null;
+  const take = (pick >>> 0) % takes.length;
+  return { folder, key, take, url: takes[take]! };
 }
 
 /**
@@ -214,9 +167,7 @@ export function artFolders(): string[] {
  *
  * For the tests that check a folder against the thing it draws -- a portrait naming nobody, a
  * plate naming no species. Those checks are the only thing that can see a file under the wrong
- * naming convention, which matches nothing, throws nothing, and quietly keeps drawing the
- * fallback. An empty or absent folder gives an empty list rather than throwing, because that is
- * the state every art queue starts in.
+ * naming convention. An empty or absent folder gives an empty list.
  */
 export function artNames(folder: string): string[] {
   return [...(byFolder.get(folder)?.keys() ?? [])].sort();

@@ -111,7 +111,7 @@ test('sheltering a stranger is remembered, so the kindness can come back', async
     .poll(
       () =>
         page.evaluate(() => {
-          const raw = localStorage.getItem('south-of-tethys:happenings');
+          const raw = localStorage.getItem('south-of-tethys-v20:journey:happenings');
           return raw ? ((JSON.parse(raw) as { flags?: string[] }).flags ?? []) : [];
         }),
       { timeout: 15_000 }
@@ -219,9 +219,9 @@ test("the Aravali's cards each wait for their own place", async ({ page }) => {
 test('a card opened as the landmark is reached waits behind the page, and returns after it', async ({ page }) => {
   await page.goto('?seed=happenings&door=open&hour=10');
   await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
-  await page.waitForFunction(() => Object.keys(localStorage).some((k) => k.startsWith('south-of-tethys:world:happenings')), null, { timeout: 60_000 });
+  await page.waitForFunction(() => Object.keys(localStorage).some((k) => k.startsWith('south-of-tethys-v20:world:happenings')), null, { timeout: 60_000 });
   const spot = await page.evaluate(() => {
-    const key = Object.keys(localStorage).find((k) => k.startsWith('south-of-tethys:world:happenings'))!;
+    const key = Object.keys(localStorage).find((k) => k.startsWith('south-of-tethys-v20:world:happenings'))!;
     const baked = JSON.parse(localStorage.getItem(key)!) as { landmark: { x: number; y: number }; biomes: string[] };
     return { ...baked.landmark, width: baked.biomes[0]!.length, height: baked.biomes.length };
   });
@@ -273,9 +273,9 @@ test('a card opened as the landmark is reached waits behind the page, and return
 test('no card opens over the landmark page, and asking again once it closes is answered', async ({ page }) => {
   await page.goto('?seed=happenings&door=open&hour=10');
   await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
-  await page.waitForFunction(() => Object.keys(localStorage).some((k) => k.startsWith('south-of-tethys:world:happenings')), null, { timeout: 60_000 });
+  await page.waitForFunction(() => Object.keys(localStorage).some((k) => k.startsWith('south-of-tethys-v20:world:happenings')), null, { timeout: 60_000 });
   const spot = await page.evaluate(() => {
-    const key = Object.keys(localStorage).find((k) => k.startsWith('south-of-tethys:world:happenings'))!;
+    const key = Object.keys(localStorage).find((k) => k.startsWith('south-of-tethys-v20:world:happenings'))!;
     const baked = JSON.parse(localStorage.getItem(key)!) as { landmark: { x: number; y: number }; biomes: string[] };
     const { x, y } = baked.landmark;
     return { x, y, width: baked.biomes[0]!.length, height: baked.biomes.length };

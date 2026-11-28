@@ -1,3 +1,4 @@
+import { seedJourney } from './journey-fixture';
 // The next step, always (`docs/satchel-and-hearth.md`, phase 8).
 //
 // With the first morning over and nothing pinned, the dock used to say nothing about what to do. Now
@@ -17,16 +18,8 @@ const AGREED = [
 ];
 
 test('the next step offers the next building stage, and pins it', async ({ page }) => {
-  await page.addInitScript(
-    ({ key, flags }) => {
-      try {
-        if (!localStorage.getItem(key)) localStorage.setItem(key, JSON.stringify({ knowledgeVersion: 1, flags }));
-      } catch {
-        // Storage refused: the spec fails on what it looks for, which is the honest outcome.
-      }
-    },
-    { key: `south-of-tethys:${SEED}`, flags: AGREED }
-  );
+  await seedJourney(page, SEED, { flags: AGREED });
+
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(`/?seed=${SEED}&map=${MAP}&hour=12`);
   await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });

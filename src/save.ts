@@ -1,163 +1,18 @@
-// Saved journeys, keyed by seed.
-//
-// Ported from `src/main.js`. The rule that matters: the payload carries a version, and a save
-// written by an older shape is **discarded rather than misread**. A half-understood save is worse
-// than a fresh start — it shows the player fog and sketches that do not match the world they are
-// standing in.
-
 import { type Collection, readCollection } from './content/collection';
 import { type Satchel, emptySatchel } from './content/satchel';
 import { type Drawn, type Nodes, noNodes } from './content/nodes';
 import { type Progress, emptyProgress } from './journey';
 import type { DiaryEventEntry, EventOrigin } from './content/diaryEvents';
-import { ENKIDU_FOLLOWS, ENKIDU_JOINED } from './content/enkidu';
+import { readEncounters, type EncounterState } from './content/encounterState';
 import { readNpcAppearances, type NpcAppearanceJournal } from './content/npcAppearance';
-import { caravanSchedule, type CaravanSchedule } from './content/elamiteCaravan';
-import { CYCLE_DAYS } from './content/encampments';
-import { DAY_MS } from './game/dayNight';
-import { journeyStorageKey as key } from './storageKeys';
+import { JOURNEY_VERSION, journeyStorageKey as key } from './storageKeys';
 
-/**
- * Bump when the payload shape changes. The Phaser shell reset it to 1; `reached` made it 3;
- * carrying what the player has come to understand made it 4; the collection replacing the
- * sketch list made it 6, because `observed` changed from an array of names to a record keyed
- * by species id and a save written under the old shape cannot be read into the new one.
- *
- * **7 is the first bump where the shape did not change at all.** Lothal and Dwarka gained
- * biomes in their canon palettes, and the palette decides what every tile becomes -- so the
- * same seed now generates different ground, the authored places sit on different tiles, and
- * the fog and the sketches in an old save describe a world that is no longer there. The
- * payload would still parse, which is exactly the danger: it would be read, and be wrong.
- * Discarding it is the whole point of this constant.
- *
- * **8 adds the satchel.** A save written under 7 has no `satchel` key, and reading one as an
- * empty satchel would be defensible -- the player simply has nothing yet. It is discarded
- * anyway, on the rule this constant exists for: the payload shape changed, and a save that
- * parses under a shape it was not written for is the danger rather than the inconvenience.
- * The cost is real and small; the alternative is a special case that has to be remembered
- * every time the shape moves again.
- *
- * **9 adds what `Progress` learned about making**: `recipes`, the crafts somebody taught you,
- * and `made`, the crafts you have performed. Both would read as empty from a version 8 save
- * and both would be wrong in the same quiet way — the people would look as though they had
- * never taught you anything, and the keepsake at the end would list none of what you built.
- *
- * `recipes` landed one commit before this bump did, which is the mistake this constant exists
- * to catch and did not, because the edit that was supposed to raise it failed silently. Both
- * fields are covered by this one bump: the branch has not merged, so no save carries either.
- *
- * **10 is a bump where the shape did not change at all, like 7 before it.** Twenty-five plants
- * were added to canon without a `source_index`. Unindexed species sort last *by id*, so each
- * new one landed in the middle of that group and moved every species after it -- and the game
- * picks a tile's flora by indexing into a per-biome list. The same seed therefore grows
- * different plants than it did, and a save written before that describes a world that is no
- * longer there. It would parse perfectly, which is exactly the danger.
- *
- * Canon has frozen every species order and now refuses one without an index, so this cannot
- * recur. This bump is for the shift that already shipped.
- *
- * **11 is the last bump of that kind, and that is the point of it.** Species are no longer
- * picked by indexing into a per-biome list; they are picked by rendezvous hashing over their
- * ids, so a species' tile depends on nothing but that species and that tile. Adding one to
- * canon can now only take the tiles it wins outright -- measured at 4.8% of a biome's ground,
- * all of it the newcomer arriving -- where the old scheme moved 95.4%, of which 94.8% was
- * existing species swapping places for no reason at all.
- *
- * This bump is the one-time cost of crossing over: every tile is re-picked under the new
- * scheme, so a save written under 10 describes plants that are no longer there. After it,
- * **adding canon content is not a save-breaking change** and must not bump this again.
- *
- * ---
- *
- * **The world is now baked, which changes what this constant is for.** `world/bake.ts` resolves
- * a map once and stores it, so a journey keeps the ground it started on and a generator change
- * reaches only new journeys. Versions 7, 10 and 11 all existed *because the ground had moved
- * under an unchanged payload* -- and that reason is gone. There should not be another of that
- * kind.
- *
- * What still bumps this: the payload shape below changing, and a bump of `BAKE_VERSION`, since
- * a bake format change forces every world to be generated afresh and the fog and sketches are
- * tied to their ground. Both should be rare, and neither is the price of touching the generator.
- *
- * ---
- *
- * **12 is the payload changing, which is the first kind.** Resource nodes need two things no
- * save held: what the traveller has drawn down, and how much of the journey's time has passed.
- * Neither can be inferred from an older save -- an absent `nodes` genuinely means "nothing taken"
- * and would read correctly, but an absent `travelled` would claim every journey is on its first
- * morning, and every node a returning player had emptied would look freshly cut.
- *
- * **14 is the ground moving under a saved journey**, which is the other kind and needs no payload
- * change at all. The Aravali grew to 52 x 78, its far shore climbs into stone instead of drowning
- * at the rim, and its islands are wider -- so the same seed generates different tiles, and every
- * remembered position, node and fog mask in an older save refers to a map that no longer exists.
- *
- * **15 is the same kind again**, and it will not be the last: the Aravali's islands grew a pool
- * and a channel over the side, so tiles that were walkable island top are unwalkable water now.
- * A remembered position could be standing in one.
- *
- * **16 is the ground moving twice over.** The sky pools are walkable now, so a route a save
- * remembers may be a different walk; and `groundTheLandmark` moves the landmark onto reachable
- * ground, which on six of twelve Aravali seeds it was not. A remembered compass bearing points
- * somewhere else.
- *
- * **17 is the payload changing, which is the first kind and the first of those since 12.** A tile
- * grew a `road` flag. Nothing about the ground moved -- a road is worn into whatever was already
- * there and changes no biome, no walkability and no cost -- but a baked world from an older save
- * has no such flag on any tile, so it would load as a map with the route between its places
- * invisible. That is not a broken save; it is a save that quietly looks like the bug this change
- * exists to fix, which is worse to leave than to drop.
- *
- * **19 is the ground moving again, on one map.** Dwarka's dry ground is desert now rather than
- * plains (`desertNeedsHeat` in `world/classify.ts`): canon calls it a cold desert, and the hot-desert
- * rule had left it 11 to 48 tiles of desert. A remembered position, fog and node on Dwarka name tiles
- * whose biome changed. The diary is in the knowledge half and survives.
- *
- * Read strictly rather than migrated: a version mismatch drops what it versions. That is the
- * existing behaviour and it stays, because a half-understood journey is worse than a fresh one --
- * but since `KNOWLEDGE_VERSION` it drops only the half that moved. See there.
- */
-export const SAVE_VERSION = 19;
-
-/**
- * The version of **what the player knows**, counted separately from `SAVE_VERSION` above.
- *
- * **Why there are two now.** Of the eighteen bumps above, most were the ground moving -- 7, 10,
- * 11, 14, 15, 16 and 18 -- and every one of them threw away the diary with the fog. A remembered
- * tile genuinely means nothing on ground that moved; a rung climbed, a word learned, a plant met
- * and a satchel of reeds mean exactly what they meant. So the payload is two halves with two
- * versions:
- *
- * | half | fields | versioned by |
- * |---|---|---|
- * | where you are | `discovered`, `nodes`, `reached` | `SAVE_VERSION` |
- * | what you know | `progress`, `collection`, `satchel`, `seenEvents`, `met`, `eventDays`, `flags`, `travelled`, `characterId` | this |
- *
- * **Ground moving bumps `SAVE_VERSION` only**: the player keeps everything they learned and wakes
- * with fresh fog on the new ground. A change to the *shape* of the second half bumps this, and
- * drops it exactly as a mismatch always has -- the rule that a half-understood journey is worse
- * than a fresh one still holds, one half at a time.
- *
- * `travelled` is knowledge, not ground: it is the journey's clock, and a day count means the same
- * on any map. Nodes regrow against it, and the nodes are dropped with the ground.
- *
- * 1 is the shape `SAVE_VERSION` 18 wrote, which is why a save from before the split carrying 18
- * reads as knowledge version 1: nothing about those fields changed when the halves were named.
- */
-export const KNOWLEDGE_VERSION = 1;
-
-/** The `SAVE_VERSION` whose payload already had knowledge version 1's shape, before it was stamped. */
-const KNOWLEDGE_1_UNSTAMPED = 18;
+/** The current journey and its cached ground share a storage lifecycle. */
+export const SAVE_VERSION = JOURNEY_VERSION;
 
 export interface Journey {
-  /** A valid stored journey without this field predates the hybrid valley. */
-  twinGeneration?: 1 | 2;
-  /** The first cycle that may use the revised Twin Cities schedule. */
-  caravanSchedule?: CaravanSchedule;
-  /** The where-you-are half's version. See `SAVE_VERSION`. */
   version: number;
-  /** The what-you-know half's version. See `KNOWLEDGE_VERSION`. */
-  knowledgeVersion: number;
+  encounters?: EncounterState;
   /**
    * Who was walking.
    *
@@ -265,8 +120,6 @@ export interface Journey {
 
 const empty = (): Journey => ({
   version: SAVE_VERSION,
-  knowledgeVersion: KNOWLEDGE_VERSION,
-  caravanSchedule: caravanSchedule(),
   discovered: [],
   collection: {},
   reached: false,
@@ -366,25 +219,14 @@ function readSatchel(value: unknown): Satchel {
 /** What a journey has drawn down, by field map. */
 export type NodesByMap = Record<string, Nodes>;
 
-/** The map every save from before `nodesByMap` was walking on. */
-const NODES_BEFORE_MAPS = 'field_map_lothal';
-
-/**
- * `nodesByMap` if the save has one, else the older flat `nodes` read as Lothal's. Each map's record
- * goes through `readNodes`, so a malformed one is an untouched map rather than a thrown save.
- */
-function readNodesByMap(parsed: { nodesByMap?: unknown; nodes?: unknown }): NodesByMap {
-  const byMap = parsed.nodesByMap;
-  if (byMap && typeof byMap === 'object' && !Array.isArray(byMap)) {
-    const out: NodesByMap = {};
-    for (const [mapId, nodes] of Object.entries(byMap as Record<string, unknown>)) {
-      const read = readNodes(nodes);
-      if (Object.keys(read).length > 0) out[mapId] = read;
-    }
-    return out;
+function readNodesByMap(value: unknown): NodesByMap {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+  const out: NodesByMap = {};
+  for (const [mapId, nodes] of Object.entries(value)) {
+    const read = readNodes(nodes);
+    if (Object.keys(read).length > 0) out[mapId] = read;
   }
-  const legacy = readNodes(parsed.nodes);
-  return Object.keys(legacy).length > 0 ? { [NODES_BEFORE_MAPS]: legacy } : {};
+  return out;
 }
 
 function readNodes(value: unknown): Nodes {
@@ -412,130 +254,43 @@ export function loadJourney(seed: string): Journey {
 
   try {
     const parsed = JSON.parse(raw) as Partial<Journey>;
-    // Each half is read if its own version matches, and emptied if it does not. Only when neither
-    // half can be read is the save removed -- which is what a mismatch used to do to all of it.
-    const groundOk = parsed.version === SAVE_VERSION;
-    const knowledgeOk =
-      (parsed.knowledgeVersion ??
-        (parsed.version === KNOWLEDGE_1_UNSTAMPED ? 1 : undefined)) === KNOWLEDGE_VERSION;
-    if (!groundOk && !knowledgeOk) {
+    if (parsed.version !== SAVE_VERSION || !Array.isArray(parsed.discovered) ||
+        !parsed.progress || !parsed.collection || !parsed.satchel || !parsed.nodesByMap ||
+        !Number.isFinite(parsed.travelled) || parsed.travelled! < 0) {
       localStorage.removeItem(key(seed));
       return empty();
     }
-    const fresh = empty();
-    const knowledge = knowledgeOk
-      ? {
-          // A string or nothing. An id the build no longer knows resolves to Varuna at the point of
-          // use rather than here, so an old save naming a retired character still loads.
-          characterId: typeof parsed.characterId === 'string' ? parsed.characterId : undefined,
-          collection: readCollection(parsed.collection),
-          progress: readProgress(parsed.progress),
-          satchel: readSatchel(parsed.satchel),
-          // A clock that is not a finite number is no clock. Nought is a fresh journey, which is
-          // exactly what every save written before nodes existed is.
-          travelled:
-            typeof parsed.travelled === 'number' && Number.isFinite(parsed.travelled) && parsed.travelled >= 0
-              ? parsed.travelled
-              : 0,
-          // Only strings, and absent reads as none. A stored value from some future shape must not
-          // reach `canHappen` as an object, where it would silently never match an id and quietly
-          // replay every `once` event the player has already had.
-          seenEvents: readIds(parsed.seenEvents),
-          diaryEvents: readDiaryEvents(parsed.diaryEvents),
-          met: readIds(parsed.met),
-          eventDays: readDays(parsed.eventDays),
-          flags: readIds(parsed.flags),
-          pinned: typeof parsed.pinned === 'string' ? parsed.pinned : undefined
-        }
-      : {
-          characterId: undefined,
-          collection: fresh.collection,
-          progress: fresh.progress,
-          satchel: fresh.satchel,
-          travelled: 0,
-          seenEvents: [],
-          diaryEvents: [],
-          met: [],
-          eventDays: {},
-          flags: [],
-          pinned: undefined
-        };
-    const ground = groundOk
-      ? {
-          discovered: Array.isArray(parsed.discovered) ? parsed.discovered : [],
-          reached: parsed.reached === true,
-          nodesByMap: readNodesByMap(parsed)
-        }
-      : // The ground moved under this journey. What was known stands; the fog, the landmark and
-        // what was drawn from each tile named ground that is not there any more.
-        { discovered: [], reached: false, nodesByMap: fresh.nodesByMap };
-    // Outside both halves, like `characterId`: which country you are in survives either half moving.
-    const fieldMapId = typeof parsed.fieldMapId === 'string' ? parsed.fieldMapId : undefined;
-    const travelledDay = Math.floor(knowledge.travelled / DAY_MS);
-    const savedSchedule = parsed.caravanSchedule;
-    const firstCycle = savedSchedule?.revision === 2 &&
-      Number.isSafeInteger(savedSchedule.firstCycle) && savedSchedule.firstCycle >= 0
-      ? savedSchedule.firstCycle
-      : knowledge.travelled > 0 || ground.discovered.length > 0
-        ? Math.floor(travelledDay / CYCLE_DAYS) + 1
-        : 0;
-    if (!knowledge.flags.includes(ENKIDU_JOINED) && (knowledge.flags.includes(ENKIDU_FOLLOWS) ||
-        knowledge.diaryEvents.some((entry) => entry.eventId === 'woven:enkidu' && ['invite', 'dismiss'].includes(entry.choiceId)))) {
-      knowledge.flags.push(ENKIDU_JOINED);
-    }
     return {
-      version: SAVE_VERSION, knowledgeVersion: KNOWLEDGE_VERSION, ...knowledge, ...ground, fieldMapId,
-      twinGeneration: parsed.twinGeneration === 2 ? 2 : 1,
-      caravanSchedule: caravanSchedule(firstCycle),
-      npcAppearances: readNpcAppearances(knowledgeOk ? parsed.npcAppearances : undefined)
+      version: SAVE_VERSION,
+      characterId: typeof parsed.characterId === 'string' ? parsed.characterId : undefined,
+      fieldMapId: typeof parsed.fieldMapId === 'string' ? parsed.fieldMapId : undefined,
+      discovered: readIds(parsed.discovered),
+      reached: parsed.reached === true,
+      collection: readCollection(parsed.collection),
+      progress: readProgress(parsed.progress),
+      satchel: readSatchel(parsed.satchel),
+      nodesByMap: readNodesByMap(parsed.nodesByMap),
+      travelled: parsed.travelled!,
+      seenEvents: readIds(parsed.seenEvents),
+      diaryEvents: readDiaryEvents(parsed.diaryEvents),
+      met: readIds(parsed.met),
+      eventDays: readDays(parsed.eventDays),
+      flags: readIds(parsed.flags),
+      pinned: typeof parsed.pinned === 'string' ? parsed.pinned : undefined,
+      npcAppearances: readNpcAppearances(parsed.npcAppearances),
+      encounters: readEncounters(parsed.encounters)
     };
   } catch {
-    localStorage.removeItem(key(seed));
+    clearJourney(seed);
     return empty();
   }
 }
 
-/**
- * `progress` is optional so a caller that does not yet track knowledge keeps working.
- *
- * The diary UI is being built separately; until it passes progress, saving without it is
- * correct rather than lossy — there is nothing to lose. Omitting it on a save that already
- * had some would be, so an absent value is read as empty only when nothing was stored.
- */
-export function saveJourney(
-  seed: string,
-  journey: Omit<Journey, 'version' | 'knowledgeVersion' | 'progress' | 'satchel' | 'nodesByMap' | 'travelled'> & {
-    progress?: Progress;
-    satchel?: Satchel;
-    nodesByMap?: NodesByMap;
-    travelled?: number;
-  }
-): void {
+export function saveJourney(seed: string, journey: Omit<Journey, 'version'>): void {
   try {
-    // One read, not one per optional field. Every optional field falls back to what is already
-    // stored, and calling `loadJourney` once per field would parse the same payload four times
-    // on every save -- which happens on every step the player takes.
-    const stored =
-      journey.progress === undefined ||
-      journey.satchel === undefined ||
-      journey.nodesByMap === undefined ||
-      journey.travelled === undefined ||
-      journey.caravanSchedule === undefined
-        ? loadJourney(seed)
-        : null;
-    const payload: Journey = {
-      version: SAVE_VERSION,
-      knowledgeVersion: KNOWLEDGE_VERSION,
-      ...journey,
-      caravanSchedule: journey.caravanSchedule ?? stored?.caravanSchedule ?? caravanSchedule(),
-      progress: journey.progress ?? stored!.progress,
-      satchel: journey.satchel ?? stored!.satchel,
-      nodesByMap: journey.nodesByMap ?? stored!.nodesByMap,
-      travelled: journey.travelled ?? stored!.travelled
-    };
-    localStorage.setItem(key(seed), JSON.stringify(payload));
+    localStorage.setItem(key(seed), JSON.stringify({ ...journey, version: SAVE_VERSION }));
   } catch {
-    // Storage full or blocked. Losing the save is survivable; crashing mid-walk is not.
+    // The current session remains playable if storage is blocked or full.
   }
 }
 

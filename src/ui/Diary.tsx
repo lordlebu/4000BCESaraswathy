@@ -134,8 +134,6 @@ export interface DiaryProps {
   open: boolean;
   onClose: () => void;
   onAnswer: (questionId: string, index: number) => void;
-  /** Retained as an ignored compatibility prop; the ending now belongs to Goals. */
-  onOpenEnding?: () => void;
   onOpenKit: () => void;
   /**
    * Anything that belongs after the record, when this is being shown as the Progress surface.

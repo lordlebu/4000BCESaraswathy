@@ -416,10 +416,6 @@ function woven(
     stranger?: EventStranger;
     flags?: Readonly<Record<string, string>>;
     art?: string;
-    /** A painting for this card other than the template's own variant, when it borrows one. */
-    artVariant?: string;
-    /** A painting of this moment, tried before the variant. See `GameEvent.artMoment`. */
-    artMoment?: string;
   } = {}
 ): GameEvent {
   const words = TEXT[kind];
@@ -430,18 +426,7 @@ function woven(
     occasion,
     conditions: anyConditions(),
     prose: fill(pick(words.prose, options.variant), slots),
-    // Named for the template rather than the subject, so one painting of tracks serves every animal.
-    // Missing today, like every event painting, and the card borrows the night's scene or a blank.
-    // Or a painting named for itself, when the owner painted one for this kind of moment.
     art: options.art ?? `woven-${kind}`,
-    // Per-variant paintings first where they exist: a camp card is the dacoits' own, not one picture
-    // of every camp (the owner's camp art, 1 October 2026). The card falls back to `art`.
-    ...(options.artVariant
-      ? { artVariant: options.artVariant }
-      : options.variant
-        ? { artVariant: `woven-${kind}-${options.variant}` }
-        : {}),
-    ...(options.artMoment ? { artMoment: options.artMoment } : {}),
     choices: choices.map((spec) => {
       const text = words.choices[spec.id];
       if (!text) throw new Error(`data/happenings.json: '${kind}' has no choice '${spec.id}'`);
@@ -639,7 +624,7 @@ const campScene: Template = ({ camp, biome, taken }, roll, now) => {
   if (camp.caravan) {
     return woven('arriving', 'camp', camp.id, {
       place: near ? placeName(near) : 'the last place', ground: ground(biome), material: ''
-    }, [{ id: 'sit', eases: COMPANY_EASES }, { id: 'ask' }], { variant: 'elamite' });
+    }, [{ id: 'sit', eases: COMPANY_EASES }, { id: 'ask' }], { variant: 'elamite', art: 'woven-camp-elamite' });
   }
   const common = droppable(biome, taken);
   const gift = camp.kind === 'drovers' ? 'material_goat_hair' : (common.length > 0 ? common[roll('camp-gift') % common.length]!.id : null);
@@ -656,7 +641,7 @@ const campScene: Template = ({ camp, biome, taken }, roll, now) => {
     camp.id,
     { place: near ? placeName(near) : 'the last place', ground: ground(biome), material: giftName || 'goat hair' },
     choices,
-    { variant: camp.kind }
+    { variant: camp.kind, art: `woven-camp-${camp.kind}` }
   );
 };
 
@@ -681,20 +666,16 @@ const campTalk: Template = ({ campPerson }, _roll, now) => {
     `${id}:${now.day}`,
     {
       name, title: person.title, doing,
-      eats: person.elamiteRole ? 'warm barley and lentils' : words.eats
+      eats: person.cook ? 'You share a warm bowl beside the sheltered hearth.' : person.elamiteRole ? 'warm barley and lentils' : words.eats
     },
     meal ? [{ id: 'eat', eases: MEAL_EASES }, { id: 'go' }] : [{ id: 'sit', eases: COMPANY_EASES }, { id: 'go' }],
     {
       variant: known ? 'again' : 'first',
       stranger: { id, role: person.role, look: person.look, culture: person.culture, givenName: person.givenName },
-      art: 'woven-camp',
-      artVariant: `woven-camp-${person.elamiteRole ? 'elamite' : person.kind}`,
-      // At the meal, the kind's own evening at the fire, when it has been painted: the four prompts
-      // are `woven-camp-meal-*` in docs/event-prompts.md. Until then, the camp's painting as before.
-      ...(meal ? { artMoment: `woven-camp-meal-${person.elamiteRole ? 'elamite' : person.kind}` } : {})
+      art: person.cook ? 'discovery_twin_cave' : `woven-camp${meal ? '-meal' : ''}-${person.elamiteRole ? 'elamite' : person.kind}`
     }
   );
-  const context = { road: false as const, kind: person.kind, slot: person.slot, activity: campPerson.activity, elamite: person.elamiteRole !== undefined, map: now.fieldMapId, occupation: person.role, familiar: known };
+  const context = { road: false as const, kind: person.kind, slot: person.slot, activity: campPerson.activity, elamite: person.elamiteRole !== undefined, cook: person.cook, map: now.fieldMapId, occupation: person.role, familiar: known };
   const topics = ambientTopics(id, context, now.day, now.last);
   return { ...event, topics };
 };
@@ -704,7 +685,7 @@ const campTalk: Template = ({ campPerson }, _roll, now) => {
  *
  * **No errand hangs on it**, on the owner's word of 4 October 2026 -- a card that you saw it, once a
  * journey, and nothing to take or give. Asked for by coming alongside (`WandererView.reportBeside`),
- * and not in the first steps on the map (`PASSING_AFTER_STEPS`): the Caravan Ground is where a
+ * after leaving the arrival area: the Caravan Ground is where a
  * traveller is set down and where the wagon keeps its round, and meeting it the moment you arrive
  * would make it scenery rather than a sight.
  */
@@ -719,7 +700,7 @@ const passing: Template = ({ passing: craft, biome }, _roll, now) => {
     craft.id,
     { ground: ground(biome), driver: driver?.name ?? 'the driver' },
     [{ id: 'watch' }, { id: 'raise' }],
-    { variant: craft.id }
+    { art: 'woven-passing' }
   );
 };
 
@@ -764,8 +745,7 @@ const fireside: Template = ({ camp }, roll, now) => {
   const said = sayingFor('fireside', now.fieldMapId, roll);
   return woven('night', 'fireside', camp.id, { kind: CAMP_PEOPLE[effectiveCampKind(camp)] ?? 'the people at the fire', saying: said?.text.replace(/\n/g, ' ') ?? 'The fire travels with us.' }, [{ id: 'listen' }, { id: 'tell' }], {
     variant: effectiveCampKind(camp),
-    art: 'camp-night-fireside',
-    ...(camp.caravan ? { artVariant: 'woven-camp-sleep-elamite' } : {})
+    art: camp.caravan ? 'woven-camp-sleep-elamite' : 'camp-night-fireside'
   });
 };
 

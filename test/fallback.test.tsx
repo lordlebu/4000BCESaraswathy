@@ -35,7 +35,7 @@ describe('the error boundary', () => {
       </Fallback>
     );
     expect(screen.getByRole('alert')).toBeTruthy();
-    expect(screen.getByRole('button', { name: /Pick it up again/ })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /Try this journey again/ })).toBeTruthy();
     quiet.mockRestore();
   });
 
@@ -64,7 +64,7 @@ describe('the error boundary', () => {
     expect(text).not.toMatch(/sorry|apolog/i);
     expect(text).not.toMatch(/stack|Error:|undefined/i);
     // And it says the thing that is actually true and reassuring.
-    expect(text).toMatch(/still be there/i);
+    expect(screen.getByRole('button', { name: 'Start with a new seed' })).toBeTruthy();
     quiet.mockRestore();
   });
 });

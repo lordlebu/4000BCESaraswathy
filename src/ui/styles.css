@@ -3477,10 +3477,6 @@ button.pinned-recipe:focus-visible { outline: 2px solid currentColor; outline-of
   box-shadow: 0 4px 12px rgba(27, 20, 32, 0.35);
 }
 
-.activity-scene-blank {
-  background: linear-gradient(160deg, #e8dcc0, #d6c6a4);
-}
-
 .activity-body {
   padding: 1rem 1.15rem 1.15rem;
   overflow-y: auto;

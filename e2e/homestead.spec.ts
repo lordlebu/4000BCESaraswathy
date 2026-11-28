@@ -1,3 +1,4 @@
+import { seedJourney } from './journey-fixture';
 // Settling Lothal, in a browser.
 //
 // `test/homestead.test.ts` walks the whole loop under Node against canon's Lothal homestead. This is
@@ -31,25 +32,11 @@ const AGREED = [
 ];
 
 async function seeded(page: Page, save: { flags?: string[]; satchel?: Record<string, number>; map?: string; at?: string }) {
-  await page.addInitScript(
-    ({ key, journey }) => {
-      try {
-        if (!localStorage.getItem(key)) localStorage.setItem(key, JSON.stringify(journey));
-      } catch {
-        // Storage refused: the spec fails on what it looks for, which is the honest outcome.
-      }
-    },
-    {
-      key: `south-of-tethys:${SEED}`,
-      journey: {
-        knowledgeVersion: 1,
-        progress: { rungs: FINISHED, words: ['word_kia_uvai'], recipes: [], made: [], answered: {}, questions: [] },
-        satchel: save.satchel ?? {},
-        flags: save.flags ?? [],
-        met: []
-      }
-    }
-  );
+  await seedJourney(page, SEED, {
+    progress: { rungs: FINISHED, words: ['word_kia_uvai'], recipes: [], made: [], answered: {}, questions: [] },
+    satchel: save.satchel ?? {}, flags: save.flags ?? []
+  });
+
   await page.goto(`/?seed=${SEED}&map=${save.map ?? MAP}&hour=12&at=${save.at ?? 'poi_eastern_field'}`);
   await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
   await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });

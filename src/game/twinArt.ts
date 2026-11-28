@@ -69,11 +69,11 @@ export function twinGroundFrame(world:World,tile:Tile,variant:number):number {
     : ({desert:0,hills:1,plains:2,river:3,wetland:4,coast:5,sea:6,landmark:5} as Record<string,number>)[tile.biome]??0;
   return index*4+variant%4;
 }
-export function planTwinScene(built:FieldMapWorld,finished:ReadonlySet<string>=new Set(),smoothRail=true):Placement[] {
+export function planTwinScene(built:FieldMapWorld,finished:ReadonlySet<string>=new Set()):Placement[] {
   const {world,placed}=built;const region=world.twinRegion!;const out:Placement[]=[];
   const generatedLots = region.residentialLots && new Set(region.residentialLots.map(pointKey));
   const railRoute = [region.stations[0]!, ...region.rail, region.stations[1]!];
-  const orderedRail = smoothRail ? new Map(railRoute.map((point, index) => [pointKey(point), railMask(railRoute, index)])) : null;
+  const orderedRail = new Map(railRoute.map((point, index) => [pointKey(point), railMask(railRoute, index)]));
   const railArt=planTwinRailBridges(world),spans=railArt.filter(p=>p.sheet==='twinRailBridge');
   const onRailSpan=(x:number,y:number)=>spans.some(p=>p.y===y&&Math.abs(x-(p.x+(p.offset?.x??0)))<=(p.spanTiles!-1)/2);
   const clear=new Set<string>();
@@ -110,9 +110,9 @@ export function planTwinScene(built:FieldMapWorld,finished:ReadonlySet<string>=n
       if(tile.bridge&&tile.road&&!tile.track)continue;
       if(tile.track&&onRailSpan(x,y))continue;
       if(tile.bridge)add('twinObjects',18,x,y);
-      const material=twinRoadMaterial(built,tile),mask=(tile.track ? orderedRail?.get(pointKey(tile)) : undefined)
+      const material=twinRoadMaterial(built,tile),mask=(tile.track ? orderedRail.get(pointKey(tile)) : undefined)
         ?? neighbours(x,y,tile.track?'track':'road');
-      if (tile.track && smoothRail && usesRailDetailFrame(mask)) {
+      if (tile.track && usesRailDetailFrame(mask)) {
         out.push({ sheet:'twinRailDetail', frame:mask, x, y, depth:70, name:'rail:corner' });
       } else if(tile.track||material==='sand')add('twinRoutes',(tile.track?16:0)+mask,x,y);
       else out.push({sheet:'twinRoads',frame:({stone:0,sandstone:16,brick:32} as const)[material]+mask,

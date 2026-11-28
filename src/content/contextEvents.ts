@@ -20,28 +20,18 @@ export function discoveryEvent(progress: Progress, id: string, poiId: string): G
     conditions: anyConditions(),
     prose: next.prompt ?? entryFor(progress, id) ?? place?.arrival ?? place?.description ?? `You begin with what ${d.discipline} can show you here.`,
     art: id,
-    artCandidates: [
-      { collection: 'events', key: id },
-      ...(place ? [{ collection: 'places' as const, key: place.id }, { collection: 'places' as const, key: `kind-${place.kind}` }] : [])
-    ],
     choices: [{ id: 'examine', label: VERB[d.discipline] ?? 'Examine', needs: [], line: next.entry, grants: [] }],
     once: true
   };
 }
 
 export function subLocationEvent(progress: Progress, poiId: string, sub: SubLocation): GameEvent | null {
-  const place = poi(poiId);
   if (!canEnter(progress, poiId, sub.id)) return null;
   return {
     id: `sub_location_event:${poiId}:${sub.id}`,
     origin: 'sub-location', subjectId: sub.id, title: sub.name, occasion: 'arriving',
     conditions: anyConditions(), prose: sub.description,
-    art: `${poiId}-${sub.id}`, artFallback: poiId,
-    artCandidates: [
-      { collection: 'events', key: `${poiId}-${sub.id}` },
-      { collection: 'places', key: poiId },
-      ...(place ? [{ collection: 'places' as const, key: `kind-${place.kind}` }] : [])
-    ],
+    art: `${poiId}-${sub.id}`,
     choices: [{ id: 'enter', label: 'Go in', needs: [], line: sub.arrival ?? `You enter ${sub.name}.`, grants: [] }],
     once: true
   };

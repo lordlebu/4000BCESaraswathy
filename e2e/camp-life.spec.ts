@@ -1,3 +1,4 @@
+import { journeyFixture, journeyStorageKey } from './journey-fixture';
 // The people at a camp, the way in to it, and who comes and goes, in a browser.
 //
 // `test/campLife.test.ts` holds the rules and proves each thing happens on the real maps. This proves
@@ -69,15 +70,15 @@ async function findDay(page: Page, want: (c: Camp, day: number) => boolean): Pro
  */
 async function openOn(page: Page, seed: string, day: number, hour: number, at?: Point): Promise<boolean> {
   await page.addInitScript(
-    ({ key, travelled }) => {
+    ({ key, defaults, travelled }) => {
       try {
-        const saved = JSON.parse(localStorage.getItem(key) ?? '{"knowledgeVersion":1}');
+        const saved = JSON.parse(localStorage.getItem(key) ?? defaults);
         localStorage.setItem(key, JSON.stringify({ ...saved, travelled }));
       } catch {
         // Storage refused: the spec fails on what it looks for, which is the honest outcome.
       }
     },
-    { key: `south-of-tethys:${seed}`, travelled: day * DAY_MS + 1000 }
+    { key: journeyStorageKey(seed), defaults: JSON.stringify(journeyFixture()), travelled: day * DAY_MS + 1000 }
   );
   await boot(page, seed, hour, at);
   await expect.poll(() => walker(page), { timeout: 30_000 }).not.toBeNull();
@@ -296,15 +297,15 @@ test('a camp can pitch on the northern sky island, and its people are drawn ther
   expect(found, 'no camp on a sky island in a month on any seed tried').not.toBeNull();
   const { seed, day, camp } = found!;
   await page.addInitScript(
-    ({ key, travelled }) => {
+    ({ key, defaults, travelled }) => {
       try {
-        const saved = JSON.parse(localStorage.getItem(key) ?? '{"knowledgeVersion":1}');
+        const saved = JSON.parse(localStorage.getItem(key) ?? defaults);
         localStorage.setItem(key, JSON.stringify({ ...saved, travelled }));
       } catch {
         // Storage refused: the spec fails on what it looks for.
       }
     },
-    { key: `south-of-tethys:${seed}`, travelled: day * DAY_MS + 1000 }
+    { key: journeyStorageKey(seed), defaults: JSON.stringify(journeyFixture()), travelled: day * DAY_MS + 1000 }
   );
   await page.goto(`/?seed=${seed}&map=field_map_aravali&hour=13`);
   await expect.poll(() => walker(page), { timeout: 30_000 }).not.toBeNull();

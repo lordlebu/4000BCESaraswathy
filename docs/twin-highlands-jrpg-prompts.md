@@ -1,5 +1,7 @@
 # Northeast highlands — NES JRPG terrain
 
+This document records the art delivery at the time. The [current Twin Cities profile and save rules](twin-cities-uplift.md) and the [generated cook schedule](strangers-and-happenings.md#what-was-built-for-them) apply to the running game.
+
 
 ## Rail bridge, mixed verges and walkway follow-up - 18 November 2026
 

@@ -1,5 +1,7 @@
 # Harappan art plan — completion audit
 
+This document records the art delivery at the time. The [current Twin Cities profile and save rules](twin-cities-uplift.md) and the [generated cook schedule](strangers-and-happenings.md#what-was-built-for-them) apply to the running game.
+
 The [Twin Cities uplift](twin-cities-uplift.md) records the current seven-phase architecture,
 versioned generation, railway review, and release decision.
 

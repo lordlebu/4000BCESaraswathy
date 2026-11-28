@@ -8,7 +8,6 @@
 // schedule. Letting either drive the other directly is how canvas apps end up re-mounting the game
 // on every keystroke in a text input.
 
-import type { GameEvent } from '../content/events';
 import type { Encampment } from '../content/encampments';
 import type { Shelter } from './night';
 import type { JournalEntry } from '../content/journal';
@@ -17,7 +16,7 @@ import type { TravellerState } from '../content/travellers';
 
 /** Scene → React. */
 export interface GameToUi {
-  'caravan-witnessed': { event: GameEvent };
+  'caravan-witnessed': { id: string; moment: 'arrival' | 'departure' };
   'beedu-sighted': {flightId:string};
   'beedu-nearby': {near:boolean; safe?:boolean};
   /** The scene's actual movement capabilities, for route-aware guidance. */
@@ -27,6 +26,7 @@ export interface GameToUi {
    * The map is drawn. `places` is where its points of interest landed, which only the scene knows;
    * React needs it to ask whether a homestead's ground has dry land near enough to build on.
    */
+  'world-load-failed': undefined;
   'world-ready': { world: World; places?: { poiId: string; at: Point }[] };
   /**
    * Who the scene is actually drawing.
@@ -39,6 +39,8 @@ export interface GameToUi {
   'character-changed': { characterId: string };
   /** The player finished a step onto this tile. */
   'tile-entered': {
+    fieldMapId: string;
+    walked: boolean;
     at: Point;
     entry: JournalEntry;
     surroundings: string;
@@ -249,7 +251,7 @@ export interface GameToUi {
 export interface UiToGame {
   'twin-knowledge': { completed: string[]; flags?: string[] };
 
-  'new-journey': { seed: string; twinGeneration?: 1 | 2 };
+  'new-journey': { seed: string };
   /**
    * Walk as somebody else, without restarting the journey.
    *
@@ -262,7 +264,7 @@ export interface UiToGame {
   'camp': { hospitality?: string };
   /** Lay down a different field map. The overworld sends this. */
   'travel-to': { fieldMapId: string; seed: string; ride?: number };
-  'resume-journey': { seed: string; discovered: string[]; twinGeneration?: 1 | 2 };
+  'resume-journey': { seed: string; discovered: string[] };
   /**
    * How much of the canvas the overlays are covering, in CSS pixels.
    *

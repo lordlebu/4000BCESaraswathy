@@ -115,15 +115,10 @@ function Held({ satchel, id }: { satchel: Satchel; id: string }) {
   // panel makes, and for the same reason: reed fibre and reed rope must not share a glyph at the
   // moment a player is learning they are not the same thing.
   const mark = stuff ? materialMark(stuff.classes) : made ? (KIND_MARK[made.kind] ?? '•') : '•';
-  const word = stuff
-    ? ({ namespace: 'class', value: stuff.classes[0] ?? 'stone' } as const)
-    : made
-      ? ({ namespace: 'kind', value: made.kind } as const)
-      : undefined;
 
   return (
     <li className="satchel-held">
-      <ThingIcon mark={mark} label={what?.name ?? id} word={word} />
+      <ThingIcon mark={mark} label={what?.name ?? id} />
       {/* The count is the point of the strip, so it is never hidden at one -- unlike the full
           panel, where a bare name reads better. Somebody scanning this is counting. */}
       <span className="satchel-held-n">{n}</span>

@@ -29,37 +29,6 @@ describe('the painting an activity shows', () => {
   });
 
   /**
-   * **A variant with no painting falls back rather than failing.**
-   *
-   * This is what makes `rest-roof.png` a file and no code the day somebody paints it — and the
-   * first version of this test asserted the opposite of its own comment. It named `roof` among
-   * the kinds that fall back, so **painting `rest-roof.png` broke it**, and the failure read as a
-   * regression in the loader rather than as art arriving. A test that pins which files exist
-   * cannot also be the test that says a new file needs no code.
-   *
-   * So it asserts the invariant instead: every shelter kind resolves to *something*, and that
-   * something is either its own painting or the plain one. That holds however many of the six
-   * have been painted, which is the property worth guarding.
-   */
-  it('falls back to the gesture when a variant has no painting', () => {
-    const plain = sceneFor('rest');
-    for (const shelter of ['palace', 'settlement', 'roof', 'camp', 'tent', 'bedroll', 'none']) {
-      const shown = sceneFor('rest', shelter);
-      expect(shown, `${shelter} showed nothing`).toBeTruthy();
-      if (shown !== plain) {
-        expect(shown, `${shelter} showed a painting that is not its own`).toContain(
-          `rest-${shelter}`
-        );
-      }
-    }
-  });
-
-  /** And a variant nobody will ever paint still falls back rather than throwing. */
-  it('falls back for a variant that does not exist at all', () => {
-    expect(sceneFor('rest', 'not-a-shelter-kind')).toBe(sceneFor('rest'));
-  });
-
-  /**
    * **A knapping bench and a quarry both show the striking hands.**
    *
    * `work.png` was a grain harvest for three weeks while the hammerstone take sat unused beside it,
@@ -85,11 +54,11 @@ describe('the painting an activity shows', () => {
    * A night is two pictures: the dark while you choose it, the light once it is over. A shelter
    * with neither painted falls back to its own night, then to the plain one.
    */
-  it('paints a night at midnight and at dawn, and falls back when a moment is unpainted', () => {
+  it('assigns different paintings to exposed night and dawn', () => {
     expect(sceneFor('rest', 'none', 0, 'midnight')).toContain('rest-none-midnight');
     expect(sceneFor('rest', 'none', 0, 'dawn')).toContain('rest-none-dawn');
     expect(sceneFor('rest', 'camp', 0, 'dawn')).toBe(sceneFor('rest', 'camp'));
-    expect(sceneFor('rest', 'not-a-shelter-kind', 0, 'dawn')).toBe(sceneFor('rest'));
+    expect(sceneFor('rest', 'not-a-shelter-kind', 0, 'dawn')).toBeNull();
   });
 
   it('answers null for a gesture nobody has painted', () => {
@@ -99,30 +68,6 @@ describe('the painting an activity shows', () => {
 });
 
 describe('a night painted for its ground', () => {
-  it('tries the shelter on the biome, then on its group, each at the moment first, then the shelter alone', async () => {
-    const { sceneNames } = await import('../src/ui/scenes');
-    expect(sceneNames('rest', 'bedroll', 'dawn', 'snow')).toEqual([
-      'rest-bedroll-snow-dawn',
-      'rest-bedroll-snow',
-      'rest-bedroll-high-dawn',
-      'rest-bedroll-high',
-      'rest-bedroll-dawn',
-      'rest-bedroll',
-      'rest'
-    ]);
-    expect(sceneNames('rest', 'bedroll', 'midnight', 'hills').slice(0, 3)).toEqual([
-      'rest-bedroll-hills-midnight',
-      'rest-bedroll-hills',
-      'rest-bedroll-high-midnight'
-    ]);
-  });
-
-  it('is exactly the old chain with no ground, or on ground no group names', async () => {
-    const { sceneNames } = await import('../src/ui/scenes');
-    expect(sceneNames('rest', 'camp', 'dawn')).toEqual(['rest-camp-dawn', 'rest-camp', 'rest']);
-    expect(sceneNames('rest', 'camp', 'dawn', 'plains').slice(2)).toEqual(['rest-camp-dawn', 'rest-camp', 'rest']);
-  });
-
   it('draws the owner\'s paintings: the ridge, the lady at dawn, snow, and a night afloat', () => {
     const night = (variant: string, moment: 'midnight' | 'dawn', ground: string) =>
       sceneFor('rest', variant, 0, moment, ground);
@@ -137,10 +82,10 @@ describe('a night painted for its ground', () => {
   });
 
   it('sleeps a sky island as high ground, and leaves the island\'s stooping painting alone', async () => {
-    const { sceneNames } = await import('../src/ui/scenes');
-    expect(sceneNames('rest', 'bedroll', 'dawn', 'sky_island')).toContain('rest-bedroll-high-dawn');
+    const { sceneKey } = await import('../src/ui/scenes');
+    expect(sceneKey('rest', 'bedroll', 'dawn', 'sky_island')).toEqual(expect.stringContaining('rest-bedroll-high-dawn'));
     expect(sceneFor('rest', 'bedroll', 0, 'dawn', 'sky_island')).toMatch(/rest-bedroll-high-dawn/);
     // Stooping on an island still asks for its own painting first and never for `high`.
-    expect(sceneNames('stoop', 'sky_island')).toEqual(['stoop-sky_island', 'stoop']);
+    expect(sceneKey('stoop', 'sky_island')).toBe('stoop-sky_island');
   });
 });

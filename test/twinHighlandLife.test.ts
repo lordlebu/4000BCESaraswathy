@@ -37,8 +37,9 @@ describe('cave household proportions, paths and shared rest',()=>{
     expect(plan.find(p=>p.name==='cave:cooker')?.scale).toBe(.75);
     expect(JSON.stringify(built)).toBe(before);
   });
-  it('reuses one stable Maru face/body and always selects the communal cave night at that place',()=>{
-    expect(TWIN_PEOPLE.npc_cave_cook).toBe('traveller-nomad');expect(portraitFor('npc_cave_cook')).toContain('maru-m-01');
+  it('retires the authored cook and selects the communal cave night at that place',()=>{
+    expect(TWIN_PEOPLE.npc_cave_cook).toBeUndefined();
+    expect(portraitFor('npc_cave_cook')).toBeNull();
     for(const pick of [0,1,50,999])for(const moment of ['midnight','dawn'] as const){
       expect(sceneFor('rest','settlement',pick,moment,'plains','poi_northwest_cave_camp')).toContain(`rest-windward-cave-${moment}`);
       expect(sceneFor('rest','settlement',pick,moment,'plains','poi_harappa_court')).not.toContain('windward-cave');

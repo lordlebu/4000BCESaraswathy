@@ -20,7 +20,8 @@ import { rumourAt } from '../content/rumours';
 import { APPROACHES, approachAt, approachId } from '../content/visitors';
 import { beatNow, type BeatWhen } from '../content/storylines';
 import { add as addToSatchel, remove as takeFromSatchel, type Satchel } from '../content/satchel';
-import { PASSING_AFTER_STEPS } from '../content/tiers';
+import { hasLeftArrival, type EncounterState, type PendingSighting } from '../content/encounterState';
+import { caravanWitnessEvent } from '../content/campHospitality';
 import { tileHash } from '../world/rng';
 import type { World } from '../world/types';
 import type { SurfaceAction } from './surface';
@@ -51,13 +52,12 @@ export function useHappenings({
   journeyFlags,
   metStrangers,
   npcAppearances,
+  encounters,
   fieldPlaced,
   cardOpenRef,
   pageOpenRef,
   setCardOpen,
   crossing,
-  heldArrival,
-  arrivedRef,
   dispatch,
   progress,
   setProgress,
@@ -65,7 +65,7 @@ export function useHappenings({
   setDiaryEvents,
   setMemory,
   examining = false,
-  blocked = false
+  blocked
 }: {
   latest: MutableRefObject<Latest>;
   seenEvents: MutableRefObject<string[]>;
@@ -73,6 +73,7 @@ export function useHappenings({
   journeyFlags: MutableRefObject<string[]>;
   metStrangers: MutableRefObject<string[]>;
   npcAppearances: MutableRefObject<NpcAppearanceJournal>;
+  encounters: MutableRefObject<EncounterState | undefined>;
   /** Where this map's places landed, from the scene's `world-ready`. */
   fieldPlaced: MutableRefObject<{ poiId: string; at: { x: number; y: number } }[]>;
   /** Set the instant a card opens, so an effect in the same commit sees it. */
@@ -84,47 +85,23 @@ export function useHappenings({
    */
   pageOpenRef: MutableRefObject<boolean>;
   setCardOpen: (open: boolean) => void;
-  /** True while the crossing is being told; an arrival then waits in `heldArrival`. */
+  /** Hold the shared encounter queue while the crossing is being told. */
   crossing: MutableRefObject<boolean>;
-  heldArrival: MutableRefObject<string | null>;
-  /** Filled here with the arrival handler, so stepping down off the cart can replay one. */
-  arrivedRef: MutableRefObject<((e: { poiId: string }) => void) | null>;
   dispatch: Dispatch<SurfaceAction>;
   progress: Progress;
   setProgress: Dispatch<SetStateAction<Progress>>;
   setSatchel: Dispatch<SetStateAction<Satchel>>;
   setDiaryEvents: Dispatch<SetStateAction<DiaryEventEntry[]>>;
   setMemory: (line: string) => void;
-  blocked?: boolean;
+  blocked: MutableRefObject<boolean>;
   examining?: boolean;
 }) {
   const [happening, setHappening] = useState<{
     event: GameEvent;
-    shelter: string | null;
   } | null>(null);
   const completedHospitality = useRef<{ visit: string; day?: number; residents?: string[] } | null>(null);
-  const blockedRef=useRef(blocked);blockedRef.current=blocked;
-  const pendingBeedu=useRef<string|null>(null);
-  const beeduSafe=useRef(true);
-  const [beeduNearby,setBeeduNearby]=useState(false);
-  useEffect(()=>{
-    const sight=({flightId}:GameToUi['beedu-sighted'])=>{pendingBeedu.current=flightId;};
-    const nearby=({near,safe=true}:GameToUi['beedu-nearby'])=>{beeduSafe.current=safe;setBeeduNearby(near);};
-    const timer=window.setInterval(()=>{
-      if(!pendingBeedu.current)return;
-      const current=latest.current;
-      if(current.fieldMapId!=='field_map_twins'||!current.world||!pendingBeedu.current.startsWith(current.world.seed+':')){pendingBeedu.current=null;return;}
-      if(current.activityOpen||!beeduSafe.current||blockedRef.current||cardOpenRef.current||pageOpenRef.current||crossing.current)return;
-      const event=events.find(e=>e.id==='happening_twin_beedu_flight');
-      if(!event||seenEvents.current.includes(event.id)){pendingBeedu.current=null;return;}
-      pendingBeedu.current=null;
-      seenEvents.current=[...seenEvents.current,event.id];
-      if(!journeyFlags.current.includes('beedu:witnessed'))journeyFlags.current=[...journeyFlags.current,'beedu:witnessed'];
-      cardOpenRef.current=true;setCardOpen(true);setHappening({event,shelter:null});
-    },500);
-    EventBus.onEvent('beedu-sighted',sight);EventBus.onEvent('beedu-nearby',nearby);
-    return()=>{window.clearInterval(timer);EventBus.offEvent('beedu-sighted',sight);EventBus.offEvent('beedu-nearby',nearby);};
-  },[]);
+  const beeduSafe = useRef(true);
+  const [beeduNearby, setBeeduNearby] = useState(false);
   useEffect(() => {
     cardOpenRef.current = happening !== null || examining;
     setCardOpen(cardOpenRef.current);
@@ -134,12 +111,29 @@ export function useHappenings({
   const happens = useRef<Happens | null>(null);
   // The story check, handed out of the effect like `happens`; see `storyNow`.
   const storyRef = useRef<((when: BeatWhen, poiId: string | null, requestedArc?: string) => boolean) | null>(null);
-  /** The last day a road event was asked about, so the question is one a day and not one a step. */
-  const lastRoadDay = useRef(-1);
-  /** Steps walked on the map in hand, and which map that is: see `PASSING_AFTER_STEPS`. */
-  const stepsOnMap = useRef({ fieldMapId: '', steps: 0 });
+  const road = useRef<{ at: { x: number; y: number }; day: number; map: string } | null>(null);
 
   useEffect(() => {
+    const canOpen = () => !blocked.current && !latest.current.activityOpen &&
+      !cardOpenRef.current && !pageOpenRef.current && !crossing.current;
+    const openCard = (event: GameEvent, remember = true) => {
+      if (remember) {
+        if (!seenEvents.current.includes(event.id)) seenEvents.current = [...seenEvents.current, event.id];
+        eventDays.current = { ...eventDays.current, [event.id]: latest.current.day };
+      }
+      cardOpenRef.current = true;
+      setCardOpen(true);
+      setHappening({ event });
+    };
+
+    const enqueue = (item: PendingSighting) => {
+      const visit = encounters.current;
+      if (!visit) return;
+      if (visit.pending.some((p) => p.kind === item.kind && p.id === item.id &&
+        (p.kind !== 'caravan' || item.kind !== 'caravan' || p.moment === item.moment))) return;
+      visit.pending.push(item);
+    };
+
     /**
      * Ask whether anything happens, and open it if so.
      *
@@ -164,8 +158,6 @@ export function useHappenings({
         cameFrom?: string | null;
         /** A craft on its patrol, just come alongside: the Sinauli wagon. */
         passing?: { id: string; vehicle: string } | null;
-        /** The painting of the road just travelled, for a road's happening that has none of its own. */
-        roadArt?: string | null;
         force?: { kind?: string; asked?: boolean };
       } = {}
     ): boolean => {
@@ -207,13 +199,7 @@ export function useHappenings({
         extra.force ?? null
       );
       if (!next) return false;
-      // A storylet can come round again, so `seen` must not grow a copy of it each time.
-      if (!seenEvents.current.includes(next.id)) seenEvents.current = [...seenEvents.current, next.id];
-      eventDays.current = { ...eventDays.current, [next.id]: latest.current.day };
-      // Said at once, not on the next render: an effect earlier in this component can run in the
-      // same commit and must already see the card it would otherwise open a second one over.
-      cardOpenRef.current = true;
-      setHappening({ event: extra.roadArt ? { ...next, artFallback: next.artFallback ?? extra.roadArt } : next, shelter });
+      openCard(next);
       return true;
     };
 
@@ -274,23 +260,21 @@ export function useHappenings({
      * every time you walk back onto the tile, so an arrival event would replay on every visit.
      * This one means what its name says.
      */
-    const onArrived = ({ poiId }: GameToUi['poi-reached']) => {
-      // On the cart, the arrival waits: the cards are still telling the road. See `stepDown`.
-      if (crossing.current) {
-        heldArrival.current = poiId;
-        return;
-      }
+    const openArrival = ({ id: poiId, at: here, returning }: Extract<PendingSighting, { kind: 'place' }>) => {
       if (storyNow('arriving', poiId)) return;
       // Somebody who comes over, the first time you arrive where they are. They take the arrival:
       // a card and a person walking up at once would be two things asking for the same moment.
+      if (returning) {
+        if (events.some(e => e.id.startsWith('happening_valley_') && e.conditions.requires.length > 0 && e.conditions.pois.includes(poiId))) {
+          maybeHappens('arriving', here, null, `returning:${poiId}`, { poiId });
+        }
+        return;
+      }
       const approach = approachAt(poiId, seenEvents.current);
       if (approach) {
-        seenEvents.current = [...seenEvents.current, approachId(approach)];
         EventBus.emitEvent('approach', { npcId: approach.npcId, sheet: approach.sheet });
         return;
       }
-      const here = latest.current.at;
-      if (!here) return;
       // A place a stranger sent you to keeps the promise first, unrationed: see `rumourKept`.
       if (
         rumourAt(poiId, journeyFlags.current) &&
@@ -307,61 +291,29 @@ export function useHappenings({
       maybeHappens('arriving', here, null, `arriving:${poiId}`, { poiId });
     };
 
-    /**
-     * Something on the road, at most once a day.
-     *
-     * **The rarity is the caller's, not the event's, and that is the design.** `tile-entered` fires
-     * on every step -- eighty or so a day -- and asking on each one would make a road event either
-     * constant or, if each event guarded its own odds, a die rolled eighty times a day in eighty
-     * different authored places. A day is a rhythm the game already has and a player already feels,
-     * so the question is asked once per day of walking and the event's own `conditions` decide the
-     * rest. No new field, and nothing for an author to remember.
-     */
-    const onRoad = ({ at, day }: GameToUi['tile-entered']) => {
-      // **Not while the cart is still on the road.** A crossing switches the map at once and builds the
-      // next one behind its cards, and the scene reports the traveller set down at the cart point --
-      // on a new day, since the ride spends half of one. Asked then, Guyuk's "Word of a herbalist"
-      // opened over the road's cards, before the traveller had arrived (the owner, 4 October 2026).
-      // The day is not spent either: the first step after stepping down asks it instead.
-      if (crossing.current) return;
-      if (day === lastRoadDay.current) return;
-      lastRoadDay.current = day;
-      if (storyNow('road', null)) return;
-      maybeHappens('road', at, null, `road:${day}`);
-    };
-
-    /**
-     * Walking up to a camp opens its scene, once a camp. Asked for rather than rationed: a camp is
-     * somewhere the player went, and the road's pacing is for what happens to them on the way.
-     */
-    const onCampSeen = ({ at, day }: GameToUi['tile-entered']) => {
+    const onTile = ({ at, day, fieldMapId, walked }: GameToUi['tile-entered']) => {
+      let visit = encounters.current;
+      if (!visit || visit.map !== fieldMapId) {
+        visit = { map: fieldMapId, arrival: at, leftArrival: false, roadDay: visit?.roadDay, pending: [] };
+        encounters.current = visit;
+        road.current = null;
+      }
+      if (walked && hasLeftArrival(visit.arrival, at)) visit.leftArrival = true;
+      if (walked && visit.roadDay !== day && road.current?.day !== day) road.current = { at, day, map: fieldMapId };
       const world = latest.current.world;
-      if (!world) return;
-      const camp = encampmentOn(world, latest.current.fieldMapId, fieldPlaced.current, day);
-      if (!camp || !campIsOpen(world, camp, day) || !atCamp(camp, at) || seenEvents.current.includes(`woven:camp:${camp.id}`)) return;
-      // Not over another card: the next step beside the fire asks again.
-      if (cardOpenRef.current) return;
-      maybeHappens('arriving', at, null, `camp:${camp.id}`, { camp, force: { kind: 'camp', asked: true } });
+      if (!world || latest.current.fieldMapId !== fieldMapId) return;
+      const camp = encampmentOn(world, fieldMapId, fieldPlaced.current, day);
+      if (camp && campIsOpen(world, camp, day) && atCamp(camp, at) &&
+          !seenEvents.current.includes(`woven:camp:${camp.id}`)) {
+        enqueue({ kind: 'camp', id: camp.id, at, day });
+      }
     };
 
-    /** Count the steps on this map, from nought again whenever the map changes. */
-    const onStep = () => {
-      const here = latest.current.fieldMapId;
-      if (stepsOnMap.current.fieldMapId !== here) stepsOnMap.current = { fieldMapId: here, steps: 0 };
-      stepsOnMap.current.steps += 1;
-    };
-
-    /**
-     * Coming alongside the Sinauli wagon on its round opens its card: once a journey, and not in the
-     * first steps on the map (`PASSING_AFTER_STEPS`) -- the owner's "not immediately after reaching
-     * the map". Asked for rather than rationed, like a camp. An animal's meeting opens nothing here.
-     */
     const onAlongside = ({ id, vehicle, at }: GameToUi['wanderer-alongside']) => {
-      if (!vehicle || crossing.current || cardOpenRef.current) return;
-      const walked = stepsOnMap.current.fieldMapId === latest.current.fieldMapId ? stepsOnMap.current.steps : 0;
-      if (walked < PASSING_AFTER_STEPS) return;
-      if (seenEvents.current.includes(`woven:passing:${id}`)) return;
-      maybeHappens('road', at, null, `passing:${id}`, { passing: { id, vehicle }, force: { kind: 'passing', asked: true } });
+      const visit = encounters.current;
+      if (!vehicle || visit?.map !== 'field_map_dwarka' || !visit.leftArrival ||
+          seenEvents.current.includes(`woven:passing:${id}`)) return;
+      enqueue({ kind: 'wagon', id, vehicle, at });
     };
 
     // Handed out of the effect so the activity card can ask too: a take is not a bus event, it is a
@@ -388,28 +340,21 @@ export function useHappenings({
         carried: (id) => carried[id] ?? 0
       });
       if (!event) return false;
-      cardOpenRef.current = true;
-      setHappening({ event, shelter: null });
+      openCard(event, false);
       return true;
     };
     storyRef.current = storyNow;
 
     happens.current = maybeHappens;
-    arrivedRef.current = (e) => onArrived(e as GameToUi['poi-reached']);
-
-    // Knowledge learned since the first visit can unlock a written valley follow-up.
-    // A return is a fresh entry, never a tile refresh or another camera arrival beat.
-    const onReturned = ({ poiId, fieldMapId }: GameToUi['poi-returned']) => {
-      const here = latest.current.at;
-      if (!here || fieldMapId !== latest.current.fieldMapId) return;
-      if (storyNow('arriving', poiId)) return;
-      if (!events.some(e => e.id.startsWith('happening_valley_') && e.conditions.requires.length > 0 && e.conditions.pois.includes(poiId))) return;
-      maybeHappens('arriving', here, null, `returning:${poiId}`, { poiId });
+    const queuePlace = (poiId: string, returning: boolean) => {
+      const at = fieldPlaced.current.find(place => place.poiId === poiId)?.at;
+      if (at) enqueue({ kind: 'place', id: poiId, at, returning });
     };
-
-    /** They have walked up and are standing beside you: open what they have to say. */
-    const onApproached = ({ npcId }: GameToUi['approached']) => dispatch({ type: 'talk-to', npcId });
-
+    const onArrived = ({ poiId }: GameToUi['poi-reached']) => queuePlace(poiId, false);
+    const onReturned = ({ poiId, fieldMapId }: GameToUi['poi-returned']) => {
+      if (fieldMapId === encounters.current?.map) queuePlace(poiId, true);
+    };
+    const onApproached = ({ npcId }: GameToUi['approached']) => enqueue({ kind: 'approach', id: npcId });
     /**
      * The inspector for approaches, beside `__happen`: bring somebody over now, wherever you are.
      * The same bus message a first arrival sends, so what it proves is the walk and the wiring.
@@ -421,31 +366,91 @@ export function useHappenings({
       return true;
     };
 
-    EventBus.onEvent('approached', onApproached);
-    const onCaravanWitnessed = ({ event }: GameToUi['caravan-witnessed']) => {
-      if (blockedRef.current || cardOpenRef.current || pageOpenRef.current || latest.current.activityOpen || crossing.current) return;
-      if (seenEvents.current.includes(event.id)) return;
-      seenEvents.current = [...seenEvents.current, event.id];
-      cardOpenRef.current = true;
-      setHappening({ event, shelter: null });
+    const onCaravanWitnessed = ({ id, moment }: GameToUi['caravan-witnessed']) => {
+      if (encounters.current?.map === 'field_map_twins' &&
+          !seenEvents.current.includes(`woven:elamite-${moment}:${id}`)) enqueue({ kind: 'caravan', id, moment });
     };
+    const sight = ({ flightId }: GameToUi['beedu-sighted']) => {
+      if (!seenEvents.current.includes('happening_twin_beedu_flight')) enqueue({ kind: 'beedu', id: flightId });
+    };
+    const nearby = ({ near, safe = true }: GameToUi['beedu-nearby']) => {
+      beeduSafe.current = safe;
+      setBeeduNearby(near);
+    };
+    const deliver = () => {
+      const visit = encounters.current;
+      const current = latest.current;
+      if (!canOpen() || !current.world || !visit || visit.map !== current.fieldMapId) return;
+      const index = visit.pending.findIndex((item) => item.kind !== 'beedu' || beeduSafe.current);
+      const pending = index >= 0 ? visit.pending.splice(index, 1)[0] : undefined;
+      if (pending) {
+        switch (pending.kind) {
+          case 'place': openArrival(pending); break;
+          case 'approach': {
+            const approach = APPROACHES.find(({ npcId }) => npcId === pending.id);
+            if (approach && !seenEvents.current.includes(approachId(approach))) {
+              seenEvents.current = [...seenEvents.current, approachId(approach)];
+              dispatch({ type: 'talk-to', npcId: pending.id });
+            }
+            break;
+          }
+          case 'camp': {
+            const camp = encampmentOn(current.world, visit.map, fieldPlaced.current, pending.day);
+            if (camp?.id === pending.id) maybeHappens('arriving', pending.at, null, `camp:${camp.id}`, {
+              camp, force: { kind: 'camp', asked: true }
+            });
+            break;
+          }
+          case 'wagon': {
+            maybeHappens('road', pending.at, null, `passing:${pending.id}`, {
+              passing: { id: pending.id, vehicle: pending.vehicle }, force: { kind: 'passing', asked: true }
+            });
+            break;
+          }
+          case 'caravan': {
+            const event = caravanWitnessEvent({ id: pending.id }, pending.moment, visit.map);
+            if (!seenEvents.current.includes(event.id)) openCard(event);
+            break;
+          }
+          case 'beedu': {
+            const event = events.find(e => e.id === 'happening_twin_beedu_flight');
+            if (event && pending.id.startsWith(current.world.seed + ':') && !seenEvents.current.includes(event.id)) {
+              if (!journeyFlags.current.includes('beedu:witnessed')) journeyFlags.current = [...journeyFlags.current, 'beedu:witnessed'];
+              openCard(event);
+            }
+            break;
+          }
+        }
+        return;
+      }
+      const next = road.current;
+      if (next && next.map === visit.map && current.day >= next.day) {
+        road.current = null;
+        if (next.day !== current.day || visit.roadDay === next.day) return;
+        visit.roadDay = next.day;
+        if (!storyNow('road', null)) maybeHappens('road', next.at, null, `road:${next.day}`);
+      }
+    };
+    const timer = window.setInterval(deliver, 120);
+    EventBus.onEvent('approached', onApproached);
+    EventBus.onEvent('beedu-sighted', sight);
+    EventBus.onEvent('beedu-nearby', nearby);
     EventBus.onEvent('caravan-witnessed', onCaravanWitnessed);
     EventBus.onEvent('night-passed', onNight);
     EventBus.onEvent('poi-reached', onArrived);
     EventBus.onEvent('poi-returned', onReturned);
-    EventBus.onEvent('tile-entered', onRoad);
-    EventBus.onEvent('tile-entered', onCampSeen);
-    EventBus.onEvent('tile-entered', onStep);
+    EventBus.onEvent('tile-entered', onTile);
     EventBus.onEvent('wanderer-alongside', onAlongside);
     return () => {
+      window.clearInterval(timer);
       EventBus.offEvent('approached', onApproached);
+      EventBus.offEvent('beedu-sighted', sight);
+      EventBus.offEvent('beedu-nearby', nearby);
       EventBus.offEvent('night-passed', onNight);
       EventBus.offEvent('caravan-witnessed', onCaravanWitnessed);
       EventBus.offEvent('poi-reached', onArrived);
       EventBus.offEvent('poi-returned', onReturned);
-      EventBus.offEvent('tile-entered', onRoad);
-      EventBus.offEvent('tile-entered', onCampSeen);
-      EventBus.offEvent('tile-entered', onStep);
+      EventBus.offEvent('tile-entered', onTile);
       EventBus.offEvent('wanderer-alongside', onAlongside);
     };
     // Registered once, like the rest of the bus: every handler reads the refs, never the closure.
@@ -537,7 +542,6 @@ export function useHappenings({
   const card: EventCardProps | null = happening
     ? {
         event: happening.event,
-        shelter: happening.shelter,
         met: metStrangers.current,
         holds: [...progress.words, ...Object.keys(progress.rungs), ...progress.recipes],
         onChoose: (choice, art, topic) => resolveEvent(happening.event, choice, art, topic),

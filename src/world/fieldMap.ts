@@ -1,4 +1,4 @@
-import { buildTwinCities, TWIN_MAP } from './twinCities';
+import { TWIN_MAP } from './twinCities';
 import { buildHybridTwinCities } from './twinHybrid';
 // Turning a canon field map into ground the player can walk.
 //
@@ -595,7 +595,6 @@ const EXTENT: Record<'square' | 'portrait', Record<'small' | 'large', { width: n
 
 export interface BuildOptions {
   seed?: string;
-  twinGeneration?: 1 | 2;
   width?: number;
   height?: number;
   /** Manhattan distance points of interest are kept apart, where the map allows. */
@@ -620,8 +619,7 @@ export interface BuildOptions {
  */
 export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): FieldMapWorld {
   if (fieldMap.id === TWIN_MAP) {
-    const build = options.twinGeneration === 2 ? buildHybridTwinCities : buildTwinCities;
-    return build(fieldMap, options.seed ?? fieldMap.id, poisOn(fieldMap.id));
+    return buildHybridTwinCities(fieldMap, options.seed ?? fieldMap.id, poisOn(fieldMap.id));
   }
   const {
     seed = fieldMap.id,

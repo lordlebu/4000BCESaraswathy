@@ -4,7 +4,7 @@ This is the follow-up to [the versioned Twin Cities uplift](twin-cities-uplift.m
 
 ## Review in the game
 
-Use `npm run dev` and the same `seed`, `twinGen`, hour, position, and zoom on both sides. Use `twinScenery=original` for the baseline and omit it for the default release. The review seed is `hybrid-review-0` with `twinGen=2`. Close the place panel to see the walking scene.
+Use `npm run dev` and the same `seed`, hour, position, and zoom on both sides. Use `twinScenery=original` for the baseline and omit it for the default release. The review seed is `hybrid-review-0`. Close the place panel to see the walking scene.
 
 | `twinScenery` value | Views |
 | --- | --- |

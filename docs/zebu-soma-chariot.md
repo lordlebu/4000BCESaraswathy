@@ -28,7 +28,7 @@ traveller takes. It now keeps the scene's own clock, as the strait's ship does (
 between tiles at `PATROL_PACE` (0.4 tiles a second, a little under the ship) with its legs walking,
 and halts `PATROL_HALT_S` (20 seconds) at each stop. Sudama drives it for Jarro (canon's `npc_sudama`, read
 through `drives`), with a zebu bull in the traces. Coming alongside opens one card a journey
-(`passing`), and never before `PASSING_AFTER_STEPS` steps on the map. No errand hangs on it.
+(`passing`). Eligibility begins after a completed walk puts the player at least three tiles from the map arrival, diagonals included. Coming alongside then queues the card until the map is free. Eligibility and queued sightings survive reload.
 `test/patrol.test.ts`.
 
 **It walks.** The owner's sheet was a full walk cycle, four rows of four. `tools/build-wanderers.js`

@@ -37,11 +37,9 @@ out of frame, the same register as `src/ui/scenes/` — the difference is that a
 traveller is *doing* and this is a thing that is *happening*. Firelight, weather, an animal at a
 distance, a figure on a road.
 
-## Fallback order
+## Choosing the painted subject
 
-1. `src/ui/events/<art>.png` — this event
-2. `src/ui/scenes/rest-<shelter>.png` — the kind of night it happened in
-3. `src/ui/scenes/rest.png` — a night
-4. a blank panel, and the card is unchanged in every other respect
+The card uses the event’s assigned artwork key under `src/ui/events/`. When the asset is absent,
+the card shows the prose and choices without an illustration.
 
 See `docs/art-placement.md` for the whole queue and `docs/events-plan.md` for the framework.

@@ -1,3 +1,4 @@
+import { journeyFixture, journeyStorageKey } from './journey-fixture';
 // A camp where the roads do not reach, in a browser.
 //
 // `test/encampments.test.ts` holds when and where a camp stands. This proves the two halves only a
@@ -42,17 +43,17 @@ test('a camp stands on its day, and walking up to it opens its scene', async ({ 
   // The clock at that day, and the traveller beside the camp. Tried round it until the game will
   // start there: an unwalkable `?at=` falls back to the map's start.
   await page.addInitScript(
-    ({ key, travelled }) => {
+    ({ key, defaults, travelled }) => {
       // Into whatever is saved: the first visit above already wrote a journey under this seed, and
       // the clock is the one field that has to say it is that day.
       try {
-        const saved = JSON.parse(localStorage.getItem(key) ?? '{"knowledgeVersion":1}');
+        const saved = JSON.parse(localStorage.getItem(key) ?? defaults);
         localStorage.setItem(key, JSON.stringify({ ...saved, travelled }));
       } catch {
         // Storage refused: the spec fails on the card, which is the honest outcome.
       }
     },
-    { key: `south-of-tethys:${SEED}`, travelled: day * DAY_MS + DAY_MS / 4 }
+    { key: journeyStorageKey(SEED), defaults: JSON.stringify(journeyFixture()), travelled: day * DAY_MS + DAY_MS / 4 }
   );
   const card = page.locator('.activity-card');
   let opened = false;

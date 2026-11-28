@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './ui/App';
 import { Fallback } from './ui/Fallback';
+import { eraseRetiredStorage } from './storageKeys';
 import { seedFromUrl } from './ui/seed';
 import './ui/styles.css';
 import './ui/notebook.css';
@@ -13,10 +14,21 @@ if (!root) throw new Error('Missing #root — index.html and main.tsx have drift
 // React unmounts the whole tree when a render fails and nothing was catching it. Outside
 // `StrictMode` so it also catches a fault during the double-render StrictMode performs in
 // development, which is exactly where a new bug shows up first.
+let reset = false;
+try {
+  reset = eraseRetiredStorage(window.localStorage);
+} catch {
+  // A browser can forbid storage access entirely.
+}
+const url = new URL(window.location.href);
+if (url.searchParams.has('twinGen')) {
+  url.searchParams.delete('twinGen');
+  window.history.replaceState(null, '', url);
+}
 createRoot(root).render(
   <Fallback seed={seedFromUrl()}>
     <StrictMode>
-      <App />
+      <App resetNotice={reset} />
     </StrictMode>
   </Fallback>
 );

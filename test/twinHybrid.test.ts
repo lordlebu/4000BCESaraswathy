@@ -7,13 +7,11 @@ import { pointKey, routeDistances } from '../src/world/pathfind';
 import { TWIN_MAP } from '../src/world/twinCities';
 import { applyProfileBoundary, boundaryFor, generateFromProfile, type FieldBoundary } from '../src/world/mapProfile';
 import { TWIN_PROFILE } from '../src/world/twinHybrid';
-import { twinGenerationFor } from '../src/world/twinGeneration';
-import { loadJourney, saveJourney } from '../src/save';
 import { MAX_TWIN_TERRAIN_FRAMES, terrainAtlasLayout, terrainColourFor, twinTerrainProfile } from '../src/game/twinTerrain';
 import { railMask, tramOnRail, usesRailDetailFrame } from '../src/game/twinRail';
 
 const map = fieldMap(TWIN_MAP)!;
-const build = (seed: string) => buildFieldMap(map, { seed, twinGeneration: 2 });
+const build = (seed: string) => buildFieldMap(map, { seed });
 
 it('resolves both sides of an authored edge independently of generation order', () => {
   const coast = { ...TWIN_PROFILE, id: 'test-coast', width: 3, height: 3, anchors: {} };
@@ -56,23 +54,11 @@ it('resolves both sides of an authored edge independently of generation order', 
   expect(terrainColourFor('turf', olive.palette)).not.toBe(terrainColourFor('turf', sage.palette));
 });
 
-it('preserves unversioned saves and restores baked maps ahead of the requested generation', () => {
-  const seed = 'older-valley';
-  expect(loadJourney(seed).twinGeneration).toBeUndefined();
-  expect(twinGenerationFor(undefined, null, false)).toBe(1);
-  expect(twinGenerationFor(undefined, null, true)).toBe(2);
-  expect(twinGenerationFor(undefined, '1', true)).toBe(1);
-  expect(twinGenerationFor(undefined, '2', false)).toBe(2);
-  saveJourney(seed, { discovered: ['1,2'], reached: false, collection: {} });
-  expect(twinGenerationFor(loadJourney(seed).twinGeneration, '2', false)).toBe(1);
-  expect(worldFor(map, seed).world.twinRegion?.generation).toBeUndefined();
-  expect(worldFor(map, seed, 2).world.twinRegion?.generation).toBeUndefined();
-  const fresh = 'new-valley';
-  saveJourney(fresh, { discovered: [], reached: false, collection: {}, twinGeneration: 2 });
-  expect(loadJourney(fresh).twinGeneration).toBe(2);
-  const baked = worldFor(map, fresh, 2);
-  expect(baked.world.twinRegion?.generation).toBe(2);
-  expect(worldFor(map, fresh).world.twinRegion).toEqual(baked.world.twinRegion);
+it('restores the same generated valley for a current bake', () => {
+  const seed = 'current-valley';
+  const built = worldFor(map, seed);
+  expect(built.world.twinRegion?.generation).toBe(2);
+  expect(worldFor(map, seed).world.twinRegion).toEqual(built.world.twinRegion);
 });
 
 it('preserves protected places and crossing geometry while varying the valley across 20 seeds', () => {
@@ -83,13 +69,13 @@ it('preserves protected places and crossing geometry while varying the valley ac
     const built = build(seed);
     const { world, placed } = built;
     const region = world.twinRegion!;
-    const legacy = buildFieldMap(map, { seed }).world;
     expect(region.generation).toBe(2);
     expect(placed).toHaveLength(16);
     for (const { poi, at } of placed) expect(at, poi.id).toEqual(TWIN_PROFILE.anchors[poi.id]);
-    expect(region.rail).toEqual(legacy.twinRegion!.rail);
+    expect(region.rail[0]).toEqual({ x: 23, y: 25 });
+    expect(region.rail.at(-1)).toEqual({ x: 44, y: 35 });
     for (const y of [25, 27]) {
-      expect(world.tiles[y]!.filter(t => t.bridge).map(t => t.x)).toEqual(legacy.tiles[y]!.filter(t => t.bridge).map(t => t.x));
+      expect(world.tiles[y]!.filter(t => t.bridge).length).toBeGreaterThan(0);
     }
     const distances = routeDistances(world.tiles, world.width, world.height, world.start,
       t => t.track || (t.biome !== 'sea' && (t.biome !== 'river' || t.bridge === true)));

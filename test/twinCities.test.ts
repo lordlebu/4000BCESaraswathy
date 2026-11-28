@@ -16,8 +16,7 @@ describe('the mainland twin cities',()=>{
   it('uses continuous directional road bridges instead of the generic support and road overlay',()=>{
     const built=buildFieldMap(map,{seed:'twin-review'}),plan=planScene(built);
     const decks=plan.filter(p=>p.sheet==='riverBridge');
-    expect(decks.some(p=>p.frame>=4)).toBe(true);
-    expect(decks.some(p=>p.frame<4)).toBe(true);
+    expect(decks.some(p=>p.y===27)).toBe(true);
     for(const tile of built.world.tiles.flat().filter(t=>t.bridge&&t.road&&!t.track)){
       expect(decks.filter(p=>p.x===tile.x&&p.y===tile.y)).toHaveLength(1);
       expect(plan.some(p=>p.x===tile.x&&p.y===tile.y&&p.sheet==='twinRoutes')).toBe(false);

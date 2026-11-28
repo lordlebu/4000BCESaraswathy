@@ -12,7 +12,7 @@ export interface TwinRegion {
   districts: CityDistrict[];
   rail: Point[];
   stations: Point[];
-  highlands?: 1 | 2;
+  highlands?: 2;
   generation?: 2;
   residentialLots?: Point[];
   channels?: Point[][];
@@ -28,34 +28,6 @@ export const TWIN_ANCHORS: Record<string, Point> = {
   poi_nesting_cove: { x: 54, y: 51 }
   ,poi_northwest_cave_camp: { ...CAVE_AT }
 };
-
-const EXPANSION_PLACES = ['poi_dune_windbreak', 'poi_reedwright_bank', 'poi_nesting_cove','poi_northwest_cave_camp'];
-
-/** Add only newly authored stops to a saved valley; never regenerate its existing ground. */
-export function addTwinPlaces(world: World, missing: readonly PointOfInterest[]) {
-  if (!world.twinRegion) return [];
-  return missing.filter(p => EXPANSION_PLACES.includes(p.id)).map(poi => {
-    const at = { ...TWIN_ANCHORS[poi.id]! };
-    if(poi.id!=='poi_northwest_cave_camp')twinRoad(world, at, { x: at.x < 30 ? 22 : 46, y: at.x < 30 ? 27 : 39 });
-    const tile = world.tiles[at.y]![at.x]!;
-    if (!poi.terrain.includes(tile.biome) && tile.biome !== 'river') tile.biome = poi.terrain[0] ?? 'plains';
-    return { poi, at };
-  });
-}
-
-function twinRoad(world: World, a: Point, b: Point): void {
-  let { x, y } = a;
-  const put = () => {
-    const tile = world.tiles[y]![x]!;
-    if (tile.track) return;
-    if (tile.biome === 'sea') tile.biome = 'coast';
-    tile.road = true;
-    if (tile.biome === 'river') tile.bridge = true;
-  };
-  put();
-  while (x !== b.x) { x += Math.sign(b.x - x); put(); }
-  while (y !== b.y) { y += Math.sign(b.y - y); put(); }
-}
 
 export function districtAt(region: TwinRegion, p: Point): CityDistrict | undefined {
   // Dwarka uses the same radius-four diamond: 41 settlement tiles, nine across.
@@ -87,8 +59,8 @@ interface TwinLandform {
   coastOffset: (x: number) => number;
 }
 
-export function buildTwinCities(
-  map: FieldMap, seed: string, pois: readonly PointOfInterest[], landform?: TwinLandform
+export function buildTwinValleyBase(
+  map: FieldMap, seed: string, pois: readonly PointOfInterest[], landform: TwinLandform
 ): FieldMapWorld {
   seed = twinWorldSeed(seed);
   const width = 64, height = 64;
@@ -100,11 +72,11 @@ export function buildTwinCities(
   const river: Point[] = [];
   for (let y = 0; y < height; y++) {
     const row: Tile[] = [];
-    const rx = landform?.centre(y) ?? riverX(seed, y);
+    const rx = landform.centre(y);
     for (let x = 0; x < width; x++) {
       const h = tileHash(seed, x, y, 'twin-ground');
-      const coast = 56 - Math.max(0, x - 32) / 4 + Math.sin(x / 4) * 1.5 + (landform?.coastOffset(x) ?? 0);
-      const water = Math.abs(x - rx) <= (landform?.halfWidth(y) ?? 1)
+      const coast = 56 - Math.max(0, x - 32) / 4 + Math.sin(x / 4) * 1.5 + landform.coastOffset(x);
+      const water = Math.abs(x - rx) <= landform.halfWidth(y)
         || (y > 44 && [rx - (y - 44) / 2, rx + (y - 44) / 2].some(v => Math.abs(x - v) < 1.5));
       let biome: BiomeId = y > coast ? 'sea' : y > coast - 2 ? 'coast' : 'desert';
       let elevation = 0.25;
@@ -121,13 +93,6 @@ export function buildTwinCities(
       if (!district && x <= 18 && y <= 18 && Math.abs(x - 18) + Math.abs(y - 18) === 5) {
         biome = 'hills'; elevation = 0.73;
       }
-      // A minor Saraswati channel follows the eastern terrace and rejoins the delta below.
-      const terrace = (row: number) => row <= 40 ? 50 - Math.abs(row - 36) : 46;
-      const side = terrace(y);
-      if (!landform && ((y >= 33 && y <= 44 && x >= side && x <= Math.max(side, terrace(y - 1), terrace(y + 1))) || (y === 44 && x >= rx && x <= 46))) {
-        biome = 'river'; elevation = 0.12;
-        if (!river.some(p => p.x === x && p.y === y)) river.push({x, y});
-      }
       row.push({ x, y, biome, elevation, moisture: water ? 0.9 : biome === 'desert' ? 0.05 : 0.4, temperature: 0.65, riverBias: h / 0xffffffff });
     }
     tiles.push(row);
@@ -135,18 +100,11 @@ export function buildTwinCities(
   const world: World = { width, height, seed, tiles, camp: null, twinRegion: region,
     start: { x: 22, y: 25 }, settlement: {x:18,y:18,name:'Harappa'},
     landmark: {x:49,y:50,name:'The Quiet Coves',terrain:'coast'}, rivers:[{name:'The Saraswati',path:river}] };
-  stampTwinHighlands(world, !landform);
+  stampTwinHighlands(world);
   // Surveyed rail: a bend at the east end, not a straight animation between stations.
   for (let x=23;x<=44;x++) region.rail.push({x,y:25});
   for (let y=26;y<=35;y++) region.rail.push({x:44,y});
   for (const p of region.rail) { const t=tiles[p.y]![p.x]!;t.track=true;if(t.biome==='river')t.bridge=true; }
-  const road = (a:Point,b:Point) => twinRoad(world,a,b);
-  // A separate road deck, two rows south of the railway, then two columns east.
-  if (!landform) {
-    road({x:22,y:27},{x:46,y:27});road({x:46,y:27},{x:46,y:39});
-    for (const [id,p] of Object.entries(TWIN_ANCHORS)) if(id!=='poi_northwest_cave_camp')road(p,{x:p.x<30?22:46,y:p.x<30?27:39});
-    road({x:22,y:25},{x:22,y:27});road({x:44,y:35},{x:46,y:35});
-  }
   const placed=pois.map(poi=>({poi,at:{...TWIN_ANCHORS[poi.id]!}}));
   for (const p of placed) {
     // Authored anchor terrain is authoritative; do not block the main river for a place.

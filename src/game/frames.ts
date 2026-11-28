@@ -1401,20 +1401,8 @@ export const FALL_FRAMES = 2;
  * The box keeps what was right about each: nothing is small, and only the giraffid looks down on
  * the traveller, and not by much.
  *
- * `long` and `tall` below are the stand-in's size, in tiles, and are the painted side view fitted
- * to the box -- `test/wanderers.test.ts` fails by name when a repainted animal changes shape
- * without them.
- *
- * `shape` picks the stand-in's body:
- *   `wader`   a long low body on four short legs, head raised -- the walking whale
- *   `browser` a deep body on four long legs with a raised neck and head -- the giraffid
- *   `serpent` a thick tapering S-curve, no legs at all
- *   `chariot` a solid-wheeled car with a driver standing in it and a humped ox at the pole
  */
 export const WANDERER_BOX = { long: 2, tall: 1.09 } as const;
-
-/** The stand-in bodies. `chariot` is a car and its driver rather than an animal. */
-export type WandererShape = 'wader' | 'browser' | 'serpent' | 'chariot';
 
 /**
  * The one animal allowed out of the whale's box, and how far.
@@ -1446,38 +1434,6 @@ const SHORTER: Record<string, number> = {
 
 export function boxFor(speciesId: string): { long: number; tall: number } {
   return { long: SHORTER[speciesId] ?? WANDERER_BOX.long, tall: TALLER[speciesId] ?? WANDERER_BOX.tall };
-}
-
-const BUILDS: Record<string, { long: number; tall: number; shape: WandererShape }> = {
-  // Three metres and low to the ground. Side-on 586 x 319: it fills the box, and defines it.
-  'narmada-walking-whale': { long: 2, tall: 1.09, shape: 'wader' },
-  // Taller than it is long, 463 x 698 side-on, so it touches the top of its own box: see `TALLER`.
-  sivatherium: { long: 1.0, tall: 1.51, shape: 'browser' },
-  // Eleven to fifteen metres, coiled and flat. 740 x 280 touches the ends: two tiles, 0.76 high.
-  'vasuki-indicus': { long: 2, tall: 0.76, shape: 'serpent' },
-  // Not an animal: the Sinauli wagon on its patrol, a humped ox at the pole and a driver standing.
-  // The stand-in until the owner's painting arrives -- see `PATROLS` in `content/wanderers.ts`.
-  // Painted 4 October 2026 as a walk sheet, side view 305 x 270: a tile and a quarter long on the
-  // owner's word, so 1.11 high -- the driver's head a little under the traveller's (see `SHORTER`).
-  'sinauli-wagon': { long: 1.25, tall: 1.11, shape: 'chariot' },
-  default: { long: 1.5, tall: 0.94, shape: 'wader' }
-};
-
-/** The build for one wanderer, or the fallback. */
-export function wandererBuild(speciesId: string): { long: number; tall: number; shape: WandererShape } {
-  return BUILDS[speciesId] ?? BUILDS.default!;
-}
-
-/**
- * How big a wanderer's marker is drawn.
- *
- * Here rather than in `tileTextures.ts` for the reason at the top of this file: that module pulls
- * in the whole engine and cannot be imported under Node, and this is exactly the kind of number a
- * test wants to check against `player.ts`.
- */
-export function markerSize(speciesId: string): { w: number; h: number } {
-  const build = wandererBuild(speciesId);
-  return { w: Math.round(GRID * build.long), h: Math.round(GRID * build.tall) };
 }
 
 /**

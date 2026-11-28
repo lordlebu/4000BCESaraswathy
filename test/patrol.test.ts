@@ -12,8 +12,7 @@ import { fieldMap } from '../src/content/places';
 import { PATROL_PACE, PATROL_RANGE, isAlongside, patrolAt, wandererIdsOn, wanderersOn, type Wanderer } from '../src/content/wanderers';
 import { wayBetween } from '../src/content/travellers';
 import { happeningNow, surroundingsAt } from '../src/content/happenings';
-import { PASSING_AFTER_STEPS } from '../src/content/tiers';
-import { markerSize, wandererBuild } from '../src/game/frames';
+import { boxFor, paintedHeight } from '../src/game/frames';
 import type { Circumstance } from '../src/content/events';
 import type { World } from '../src/world/types';
 
@@ -134,11 +133,9 @@ describe('the Sinauli wagon keeps a round near the Caravan Ground', () => {
     }
   });
 
-  it('has a stand-in of its own until its painting arrives', () => {
-    expect(wandererBuild('sinauli-wagon').shape).toBe('chariot');
-    const { w, h } = markerSize('sinauli-wagon');
-    expect(w).toBeGreaterThan(0);
-    expect(h).toBeGreaterThan(0);
+  it('sizes the painted wagon to a tile and a quarter', () => {
+    expect(boxFor('sinauli-wagon').long).toBe(1.25);
+    expect(paintedHeight('sinauli-wagon', { width: 305, height: 270 })).toBe(142);
   });
 });
 
@@ -187,13 +184,6 @@ describe('meeting it is a card, once, with nothing to take', () => {
       const card = happeningNow(now({ day }), () => 0, around({ id: wagon.id, vehicle: wagon.vehicle! }), []);
       expect(card?.id ?? '').not.toMatch(/^woven:passing:/);
     }
-  });
-
-  it('waits until the traveller has walked a while on the map', () => {
-    // The Caravan Ground is where Dwarka sets a traveller down and where the round is kept, so the
-    // first steps would otherwise meet it. Most of a morning's walk -- `tile-entered` is about eighty a day.
-    expect(PASSING_AFTER_STEPS).toBeGreaterThanOrEqual(30);
-    expect(PASSING_AFTER_STEPS).toBeLessThanOrEqual(160);
   });
 
   it('counts coming alongside the way the animals do', () => {

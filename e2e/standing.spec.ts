@@ -1,3 +1,4 @@
+import { seedJourney } from './journey-fixture';
 // Can a player see what is on the tile they are standing on, without opening anything?
 //
 // **Before this row, the answer was no, at every device size.** Measured, the complete text of the
@@ -124,9 +125,8 @@ test('the row steps aside once the dock is opened, rather than saying it all twi
 // same, at any size, and must itself be readable.
 for (const { name, w, h } of SIZES) {
   test(`a pinned recipe leaves the standing row on screen — ${name}`, async ({ page }) => {
-    await page.addInitScript(() => {
-      localStorage.setItem('south-of-tethys:dock-8', JSON.stringify({ knowledgeVersion: 1, pinned: 'recipe_reed_rope' }));
-    });
+    await seedJourney(page, 'dock-8', { pinned: 'recipe_reed_rope' });
+
     await boot(page, w, h);
     await expect(page.locator('.pinned-recipe')).toContainText('rope', { ignoreCase: true });
     const unseen = await page.evaluate(() => {

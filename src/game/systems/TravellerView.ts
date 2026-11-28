@@ -19,6 +19,7 @@ import { animFor, dyeSheet, facingFromStep, forgetSheet, frameOf, travellerScale
 import { WADE_ALPHA, wadeFor } from '../wading';
 import { PIP_NEWS, PIP_RING } from '../marks';
 import {
+  caveCookCamp,
   campPeople,
   campPlacements,
   campVisitors,
@@ -68,6 +69,7 @@ export interface TravellerHost {
   standingClock(): number;
   readonly startPhase: number;
   day(): number;
+  caveOccupied?(): string[];
   /** Today's camp as drawn, if one stands. */
   camp(): DrawnCamp | null;
   /** How tall the player is drawn, for the browser suite to compare a traveller against. */
@@ -109,6 +111,8 @@ export class TravellerView {
   private targetMark: Phaser.GameObjects.Graphics | null = null;
   /** The last phase the travellers were moved for, so they are not recomputed every frame. */
   private movedAt = -1;
+  private caveVisit: Encampment | null = null;
+  private caveVisitDay = -1;
   /** What each of the camp's people is doing, as last placed, for `travellers-nearby`. */
   private campDoing = new Map<string, string>();
   /** Today's errand and visitors for the camp, worked out once a day. See `refreshCampDay`. */
@@ -253,33 +257,32 @@ export class TravellerView {
 
   /** Draw the people who keep this camp: travellers who do not travel. See `campLife.ts`. */
   addCampFolk(camp: Encampment): void {
-    const scale = travellerScale(TILE_SIZE);
-    for (const person of campPeople(camp, this.host.fieldMapId, this.host.world.seed)) {
-      const body = person.art;
-      const frame = frameOf(body);
-      const key = person.elamiteRole ? body : dyeSheet(this.scene, body, person.look, frame);
-      const sprite = this.scene.add
-        .sprite(0, 0, key, 0)
-        .setOrigin(0.5, 1)
-        .setDisplaySize(frame.width * scale, frame.height * scale)
-        .setVisible(false);
-      sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
-      sprite.setName(`traveller:${person.id}`);
-      this.list.push({ traveller: person, person, circuit: [], stops: [], sprite });
-    }
+    for (const person of campPeople(camp, this.host.fieldMapId, this.host.world.seed)) this.addCampPerson(person);
     this.movedAt = -1;
+  }
+
+  private addCampPerson(person: CampPerson): void {
+    const scale = travellerScale(TILE_SIZE);
+    const body = person.art;
+    const frame = frameOf(body);
+    const key = person.elamiteRole ? body : dyeSheet(this.scene, body, person.look, frame);
+    const sprite = this.scene.add.sprite(0, 0, key, 0).setOrigin(0.5, 1)
+      .setDisplaySize(frame.width * scale, frame.height * scale).setVisible(false);
+    sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
+    sprite.setName(`traveller:${person.id}`);
+    this.list.push({ traveller: person, person, circuit: [], stops: [], sprite });
   }
 
   /** Take the struck camp's people off the map, and let go of anybody among them who was waiting. */
   dropCampFolk(): void {
-    const leaving = this.list.filter((t) => t.person);
+    const leaving = this.list.filter((t) => t.person && !t.person.cook);
     if (leaving.length === 0) return;
     for (const t of leaving) {
       t.sprite.destroy();
       this.tiles.delete(t.traveller.id);
       if (this.waiting?.id === t.traveller.id) this.waiting = null;
     }
-    this.list = this.list.filter((t) => !t.person);
+    this.list = this.list.filter((t) => !t.person || t.person.cook);
     this.campDay = null;
     this.movedAt = -1;
     this.reportNearby();
@@ -298,13 +301,27 @@ export class TravellerView {
    * at a place lives; the map is where a person between places lives.
    */
   update(phase: number): void {
+    const day = this.host.day();
+    if (day !== this.caveVisitDay) {
+      this.caveVisitDay = day;
+      this.caveVisit = caveCookCamp(this.host.fieldMapId, this.host.built.placed.map(({ poi, at }) => ({ poiId: poi.id, at })), day);
+    }
+    const cookCamp = this.caveVisit;
+    const previousCook = this.list.find(({ person }) => person?.cook);
+    if (previousCook && previousCook.person?.campId !== cookCamp?.id) {
+      previousCook.sprite.destroy();
+      this.tiles.delete(previousCook.traveller.id);
+      this.list = this.list.filter(t => t !== previousCook);
+      if (this.waiting?.id === previousCook.traveller.id) this.waiting = null;
+      this.movedAt = -1;
+    }
+    if (cookCamp && previousCook?.person?.campId !== cookCamp.id) this.addCampFolk(cookCamp);
     if (this.list.length === 0) return;
     // A traveller crosses a tile every few in-game minutes; a hundredth of a day is about fifteen.
     const step = Math.floor(phase * 100);
     if (step === this.movedAt) return;
     this.movedAt = step;
 
-    const day = this.host.day();
     this.refreshCampDay(day);
     const camp = this.host.camp();
     const campDay = this.campDay;
@@ -312,6 +329,13 @@ export class TravellerView {
     // The camp's people for this hour, and somewhere at the fire for a visitor to sit that none of
     // them is using.
     const folk = camp ? campPlacements(this.host.world, camp.camp, day, phase, errand) : [];
+    if (cookCamp) {
+      const reserved = new Set<string>([
+        `${cookCamp.at.x},${cookCamp.at.y}`, `${cookCamp.at.x},${cookCamp.at.y + 1}`,
+        ...(this.host.caveOccupied?.() ?? [])
+      ]);
+      folk.push(...campPlacements(this.host.world, cookCamp, day, phase, null, reserved));
+    }
     this.campDoing = new Map(folk.map((f) => [f.id, f.activity]));
     const hour = hourOf(phase);
     const seats = camp
@@ -326,7 +350,7 @@ export class TravellerView {
     // stops to trade with a camp's runner is held at the turn-off for it, and goes on that much later.
     const onTheirWay = this.list.map(({ traveller, stops, person }) => {
       if (person) {
-        const f = folk.find((x) => x.slot === person.slot);
+        const f = folk.find((x) => x.id === person.id);
         const where = f?.at ? { at: f.at, heading: null, resting: false, from: f.at, to: f.at } : null;
         return { id: traveller.id, where, folk: f ?? null, faceTo: null as Point | null };
       }

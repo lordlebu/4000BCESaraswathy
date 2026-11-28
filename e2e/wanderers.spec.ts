@@ -138,3 +138,42 @@ test('the wagon glides at an ox’s pace, walking its painted steps, and halts f
   // Twice that allows for the reading's own timing; the old wagon jumped a tile or more at a step.
   expect(fastest, `the wagon ran at ${Math.round(fastest)} px/s`).toBeLessThan(102);
 });
+
+test('Sinauli opens after three real tiles and records the sighting once across reloads', async ({ page }) => {
+  const query = '?seed=patrol-0&map=field_map_dwarka&hour=8&door=open&title=skip&events=off&firsts=off&at=26,36';
+  const card = page.getByRole('dialog', { name: 'The wagon on the dry ground' });
+  const walker = () => page.evaluate(() => (window as unknown as {
+    __walker?: () => { x: number; y: number; moving: boolean };
+  }).__walker?.());
+  const saved = () => page.evaluate(() => JSON.parse(localStorage.getItem('south-of-tethys-v20:journey:patrol-0') ?? '{}'));
+  const walk = async (key: string, x: number, y: number) => {
+    await page.keyboard.press(key);
+    await expect.poll(walker, { timeout: 15000 }).toMatchObject({ x, y, moving: false });
+  };
+  await page.goto(query);
+  await expect.poll(walker, { timeout: 45000 }).toMatchObject({ x: 26, y: 36, moving: false });
+  await expect(card).toHaveCount(0);
+  await walk('ArrowLeft', 25, 36);
+  await walk('ArrowLeft', 24, 36);
+  await expect(card).toHaveCount(0);
+  await expect.poll(async () => (await saved()).encounters?.leftArrival).toBe(false);
+
+  // Booting closer to the patrol counts as a reload, not a completed walk.
+  await page.goto(query.replace('26,36', '24,36'));
+  await expect.poll(walker, { timeout: 45000 }).toMatchObject({ x: 24, y: 36, moving: false });
+  await expect(card).toHaveCount(0);
+  await walk('ArrowLeft', 23, 36);
+  await expect.poll(async () => (await saved()).encounters?.leftArrival).toBe(true);
+  await walk('ArrowUp', 23, 35);
+  await expect(card).toBeVisible({ timeout: 45000 });
+  await expect(card.locator('img.activity-scene')).toHaveAttribute('src', /woven-passing/);
+  await card.getByRole('button', { name: 'Stand and watch it' }).click();
+  await expect.poll(async () => (await saved()).diaryEvents?.filter(
+    (entry: { eventId: string }) => entry.eventId === 'woven:passing:sinauli-wagon'
+  ).length).toBe(1);
+
+  await page.goto(query.replace('26,36', '23,35'));
+  await expect.poll(walker, { timeout: 45000 }).toMatchObject({ x: 23, y: 35, moving: false });
+  await expect.poll(async () => (await saved()).encounters?.leftArrival).toBe(true);
+  await expect(card).toHaveCount(0);
+});

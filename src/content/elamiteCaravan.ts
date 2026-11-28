@@ -6,15 +6,6 @@ import { TWIN_MAP } from '../world/twinGeneration';
 import type { ElamiteRole } from './elamitePeople';
 import { CAMP_DAY } from './tiers';
 
-export interface CaravanSchedule {
-  revision: 2;
-  firstCycle: number;
-}
-
-export function caravanSchedule(firstCycle = 0): CaravanSchedule {
-  return { revision: 2, firstCycle };
-}
-
 export interface CaravanVisit {
   id: string;
   wagon: 'covered' | 'open';
@@ -80,11 +71,11 @@ export function westernCaravanRoute(
 }
 
 export function elamiteCaravanVisit(
-  world: World, fieldMapId: string, cycle: number, schedule: CaravanSchedule,
+  world: World, fieldMapId: string, cycle: number,
   campsites: readonly Point[], places: readonly Point[]
 ): CaravanVisit | null {
-  if (fieldMapId !== TWIN_MAP || !world.twinRegion || cycle < schedule.firstCycle) return null;
-  const roll = (salt: string) => tileHash(world.seed, cycle, 0, `elamite:v${schedule.revision}:${salt}`);
+  if (fieldMapId !== TWIN_MAP || !world.twinRegion) return null;
+  const roll = (salt: string) => tileHash(world.seed, cycle, 0, `elamite:v2:${salt}`);
   if (roll('visit') % 4 !== 0) return null;
   let routes = routeCache.get(world);
   if (!routes) routeCache.set(world, (routes = new Map()));
@@ -95,7 +86,7 @@ export function elamiteCaravanVisit(
     const route = routes.get(cacheKey);
     if (!route) continue;
     return {
-      id: `${fieldMapId}:${cycle}:elamite-v${schedule.revision}`,
+      id: `${fieldMapId}:${cycle}:elamite-v2`,
       wagon: roll('wagon') % 2 === 0 ? 'covered' : 'open',
       cargoLayout: roll('cargo') % 2 === 0 ? 0 : 1,
       thirdRole: THIRD_ROLES[roll('roster') % THIRD_ROLES.length]!,
