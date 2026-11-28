@@ -717,9 +717,6 @@ export class WorldScene extends Phaser.Scene {
       get at() {
         return scene.at;
       },
-      get playerKey() {
-        return scene.character.key;
-      },
       clock: () => scene.time.now + scene.travelled,
       standingClock: () => scene.time.now,
       get startPhase() {

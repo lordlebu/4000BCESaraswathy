@@ -25,7 +25,6 @@ import type { Point, World } from '../world/types';
 import { tileHash, weightedPickFor } from '../world/rng';
 import { givenNames } from './places';
 import { npcAppearance } from './npcAppearance';
-import { lookFor } from './looks';
 import { elamiteIdentity, elamiteResidentId, type ElamiteRole } from './elamitePeople';
 import { CAMP_DAY, MEET_HOURS, RUNNER_PACE, VISIT_HOURS, VISIT_PACE_CAP } from './tiers';
 import { FIRST_DAY, PROPS_AROUND, campIsOpen, caravanPhase, campKindFor, campSpots, campable, type CampKind, type Encampment, type WayIn } from './encampments';
@@ -34,14 +33,12 @@ import {
   STRANGER_CULTURES,
   alongAt,
   atHour,
-  givenNameFor,
   hourOf,
   hoursFor,
   indexAlong,
   travellersOn,
   wayBetween,
-  type StrangerCulture,
-  type Traveller
+  type GeneratedTraveller
 } from './travellers';
 
 /** The three people a camp has, by what they do there. */
@@ -69,7 +66,6 @@ export type CampActivity =
 interface KindWords {
   people: Record<CampSlot, { title: string; about: string; body: string; culture: string }>;
   doing: Record<string, string | Record<CampSlot, string>>;
-  says: Record<CampSlot, string>;
   trades: string;
   eats: string;
 }
@@ -93,7 +89,7 @@ export function busyLine(doing: string | null | undefined, who: string, kind: Ca
 }
 
 /** Somebody who keeps a camp. A `Traveller`, so the road's machinery is theirs too. */
-export interface CampPerson extends Traveller {
+export interface CampPerson extends GeneratedTraveller {
   campId: string;
   slot: CampSlot;
   kind: CampKind;
@@ -102,7 +98,7 @@ export interface CampPerson extends Traveller {
   elamiteRole?: ElamiteRole;
 }
 
-const isCulture = (c: string): c is StrangerCulture => (STRANGER_CULTURES as readonly string[]).includes(c);
+const isCulture = (c: string): c is (typeof STRANGER_CULTURES)[number] => (STRANGER_CULTURES as readonly string[]).includes(c);
 
 /**
  * The people who keep this camp.
@@ -125,18 +121,21 @@ function campRoster(campId: string, kind: CampKind, fieldMapId: string, seed: st
   const turn = campId.split(':').pop() ?? '0';
   const taken = new Set(
     travellersOn(fieldMapId, seed)
-      .map((t) => t.givenName ?? (t.npcId === null ? givenNameFor(`${fieldMapId}:${t.id}`, seed) : null))
+      .map((t) => t.givenName)
       .filter((n): n is string => Boolean(n))
   );
   return CAMP_SLOTS.map((slot) => {
     const who = words.people[slot];
     const id = `camp-${turn}-${slot}`;
-    const culture = isCulture(who.culture) ? who.culture : null;
-    const names = culture ? (givenNames[culture] ?? []) : [];
+    const culture = who.culture;
+    if (!isCulture(culture)) throw new Error(`Unknown camp resident culture: ${culture}`);
+    const names = givenNames[culture];
+    if (!names?.length) throw new Error(`No names for camp resident culture: ${culture}`);
     const free = names.filter((n) => !taken.has(n));
     const givenName =
-      weightedPickFor(free.length > 0 ? free : names, 'camp-name', { x: 0, y: 0 }, `${campId}:${slot}`, (n) => n, () => 1) ?? null;
-    if (givenName) taken.add(givenName);
+      weightedPickFor(free, 'camp-name', { x: 0, y: 0 }, `${campId}:${slot}`, (n) => n, () => 1);
+    if (!givenName) throw new Error(`No name dealt to ${fieldMapId}:${id}`);
+    taken.add(givenName);
     const kit = npcAppearance(fieldMapId, seed, id, who.body, culture);
     return {
       id,
@@ -145,8 +144,8 @@ function campRoster(campId: string, kind: CampKind, fieldMapId: string, seed: st
       npcId: null,
       circuit: [],
       conveyance: null,
-      art: kit?.body ?? who.body,
-      look: kit ?? lookFor(`${fieldMapId}:${id}`, who.body),
+      art: kit.body,
+      look: kit,
       culture,
       givenName,
       campId,
@@ -183,7 +182,7 @@ function elamiteCampPerson(fieldMapId: string, id: string, seed: string): CampPe
     circuit: [],
     conveyance: null,
     art: kit.spriteId,
-    look: { body: kit.spriteId, skin: 'as-painted', cloth: 'undyed', second: 'indigo' },
+    look: { body: kit.spriteId, skin: 'as-painted', cloth: 'undyed', second: 'indigo', portraitId: kit.portraitId },
     culture,
     givenName,
     campId: `${fieldMapId}:${cycle}`,

@@ -62,13 +62,13 @@ import {
   WOVEN_ONE_IN
 } from './tiers';
 import { rendezvousPick } from '../world/rng';
-import { givenNameFor, travellersOn } from './travellers';
+import { givenNameFor, isGeneratedTraveller, travellersOn } from './travellers';
 import type { Standing } from './standing';
 import { rumourAt, type Rumour } from './rumours';
 import { sayingFor } from './sayings';
 import type { Encampment } from './encampments';
 import { CAMP_WORDS, type CampActivity, type CampPerson } from './campLife';
-import { ambientTopics } from './twinAmbientTalk';
+import { ambientTopics } from './npcDialogue';
 
 /** A seeded roll, as `eventNow` takes it: the same salt always gives the same number. */
 export type Roll = (salt: string) => number;
@@ -195,10 +195,11 @@ export function surroundingsAt(
     .filter((id) => id !== place?.id)
     .map((id) => poi(id))
     .filter((p): p is PointOfInterest => p !== null);
-  const company = travellersOn(fieldMapId, world.seed).filter((t) => t.npcId === null && t.look !== null);
+  const company = travellersOn(fieldMapId, world.seed).filter(isGeneratedTraveller);
   // The stranger the player walked up to, when there is one. Otherwise the road chooses.
-  const chosen = extra.strangerId ? (company.find((t) => t.id === extra.strangerId) ?? null) : null;
-  const who = chosen ?? (company.length > 0 ? company[roll('stranger') % company.length]! : null);
+  const who = extra.strangerId
+    ? company.find((t) => t.id === extra.strangerId)
+    : company[roll('stranger') % company.length];
   return {
     seed: world.seed,
     biome: tile.biome,
@@ -216,7 +217,7 @@ export function surroundingsAt(
       ? {
           id: `${fieldMapId}:${who.id}`,
           role: who.role,
-          look: who.look!,
+          look: who.look,
           culture: who.culture,
           givenName: who.givenName
         }
@@ -480,7 +481,6 @@ function flagFor(
 }
 
 /** Whether you would know this stranger's name, which decides the variant a line is told in. */
-const named = (stranger: EventStranger) => (stranger.givenName ? 'named' : 'unnamed');
 
 /** Road company are only on the road by day -- `whereabouts` has them at a place from dusk. */
 const byDay = (moment: Surroundings['moment']) => !moment || ['morning', 'afternoon'].includes(moment.timeOfDay);
@@ -509,26 +509,36 @@ const dropped: Template = ({ onRoad, biome, taken, wanted }, roll) => {
   ]);
 };
 
-const company: Template = ({ stranger, elsewhere, moment, onWater }, _roll, now, asked = false) => {
+function roadTopics(
+  stranger: EventStranger, now: Circumstance, biome: BiomeId, talk?: Talk, news?: { id: string; text: string }
+) {
+  return ambientTopics(stranger.id, {
+    road: true, biome, culture: stranger.culture, standing: talk?.standing ?? 'stranger',
+    warm: talk?.warm ?? false, map: now.fieldMapId, occupation: stranger.role, familiar: now.met?.includes(stranger.id) === true
+  }, now.day, now.last, news);
+}
+
+const company: Template = ({ stranger, elsewhere, moment, onWater, biome }, _roll, now, asked = false) => {
   // A traveller can still be walking at dusk. Daylight paces chance encounters,
   // but must not silence somebody the player can see and explicitly calls to.
   if (onWater || !stranger || !elsewhere || (!asked && !byDay(moment))) return null;
   // Somebody you have met is met differently -- see `companyAgain`.
   if (now.met?.includes(stranger.id)) return null;
-  return woven(
+  const event = woven(
     'road',
     'company',
     stranger.id,
     {
       role: stranger.role,
       elsewhere: placeName(elsewhere),
-      name: stranger.givenName ?? ''
+      name: stranger.givenName
     },
     // Their name is in the line of whichever choice you make: walking with somebody or asking them
     // the way is how you learn what they are called.
     [{ id: 'walk', eases: COMPANY_EASES }, { id: 'ask' }],
-    { variant: named(stranger), stranger }
+    { stranger }
   );
+  return { ...event, topics: roadTopics(stranger, now, biome) };
 };
 
 /**
@@ -538,16 +548,17 @@ const company: Template = ({ stranger, elsewhere, moment, onWater }, _roll, now,
  * that makes a road feel lived on, and it needs exactly one fact kept between days. By now you
  * know their name, because every first meeting ends with it.
  */
-const companyAgain: Template = ({ stranger, moment, onWater }, _roll, now, asked = false) => {
+const companyAgain: Template = ({ stranger, moment, onWater, biome }, _roll, now, asked = false) => {
   if (onWater || !stranger || !now.met?.includes(stranger.id) || (!asked && !byDay(moment))) return null;
-  return woven(
+  const event = woven(
     'road',
     'company-again',
     stranger.id,
-    { trade: stranger.role.split(',')[0]!, name: stranger.givenName ?? '' },
+    { trade: stranger.role.split(',')[0]!, name: stranger.givenName },
     [{ id: 'catch-up', eases: COMPANY_EASES }, { id: 'wave' }],
-    { variant: named(stranger), stranger }
+    { stranger }
   );
+  return { ...event, topics: roadTopics(stranger, now, biome) };
 };
 
 /**
@@ -564,7 +575,7 @@ const smallTalk: Template = ({ stranger, talk, biome }, _roll, now) => {
   const words = TEXT['small-talk']!;
   const rumour = talk.warm ? talk.rumour : null;
   const slots = {
-    name: stranger.givenName ?? `the ${stranger.role.split(',')[0]}`,
+    name: stranger.givenName,
     trade: stranger.role.split(',')[0]!,
     ground: ground(biome),
     place: rumour?.place ?? '',
@@ -587,11 +598,7 @@ const smallTalk: Template = ({ stranger, talk, biome }, _roll, now) => {
     const variant = rumour.kind === 'camp' ? rumour.campKind : rumour.person ? 'someone' : 'nobody';
     news = { id: rumour.id, text: fill(pick(words.lines?.[rumour.kind] ?? '', variant), slots) };
   }
-  const context = {
-    road: true as const, biome, culture: stranger.culture, standing: talk.standing, warm: talk.warm,
-    map: now.fieldMapId, occupation: stranger.role
-  };
-  return { ...event, topics: ambientTopics(stranger.id, context, now.day, now.last, news) };
+  return { ...event, topics: roadTopics(stranger, now, biome, talk, news) };
 };
 
 /**
@@ -667,22 +674,19 @@ const campTalk: Template = ({ campPerson }, _roll, now) => {
   const words = CAMP_WORDS[person.kind];
   const id = `${now.fieldMapId}:${person.id}`;
   const known = Boolean(now.met?.includes(id));
-  const name = person.givenName ?? `the ${person.title}`;
+  const name = person.givenName;
   const event = woven(
     'road',
     'camp-talk',
     `${id}:${now.day}`,
     {
       name, title: person.title, doing,
-      says: person.elamiteRole ? 'Come sit. We have been travelling since first light.' : words.says[person.slot],
       eats: person.elamiteRole ? 'warm barley and lentils' : words.eats
     },
     meal ? [{ id: 'eat', eases: MEAL_EASES }, { id: 'go' }] : [{ id: 'sit', eases: COMPANY_EASES }, { id: 'go' }],
     {
       variant: known ? 'again' : 'first',
-      ...(person.look
-        ? { stranger: { id, role: person.role, look: person.look, culture: person.culture, givenName: person.givenName } }
-        : {}),
+      stranger: { id, role: person.role, look: person.look, culture: person.culture, givenName: person.givenName },
       art: 'woven-camp',
       artVariant: `woven-camp-${person.elamiteRole ? 'elamite' : person.kind}`,
       // At the meal, the kind's own evening at the fire, when it has been painted: the four prompts
@@ -690,11 +694,9 @@ const campTalk: Template = ({ campPerson }, _roll, now) => {
       ...(meal ? { artMoment: `woven-camp-meal-${person.elamiteRole ? 'elamite' : person.kind}` } : {})
     }
   );
-  if (!known) return event;
-  const context = { road: false as const, kind: person.kind, slot: person.slot, activity: campPerson.activity, elamite: person.elamiteRole !== undefined, map: now.fieldMapId, occupation: person.role };
+  const context = { road: false as const, kind: person.kind, slot: person.slot, activity: campPerson.activity, elamite: person.elamiteRole !== undefined, map: now.fieldMapId, occupation: person.role, familiar: known };
   const topics = ambientTopics(id, context, now.day, now.last);
-  if (!topics.length) return event;
-  return { ...event, prose: `${name} ${doing}, and nods as if you had only stepped away.`, topics };
+  return { ...event, topics };
 };
 
 /**
@@ -795,16 +797,17 @@ const dream: Template = ({ biome }) =>
 /** Nights with a threshold somebody could come to. A bedroll in the open has none. */
 const KNOCKABLE = ['tent', 'camp', 'roof', 'settlement', 'palace'];
 
-const knock: Template = ({ stranger, elsewhere }, _roll, now) => {
+const knock: Template = ({ stranger, elsewhere, biome }, _roll, now) => {
   if (!stranger || !elsewhere || !now.shelter || !KNOCKABLE.includes(now.shelter)) return null;
-  return woven(
+  const event = woven(
     'night',
     'knock',
     stranger.id,
-    { role: stranger.role, elsewhere: placeName(elsewhere), name: stranger.givenName ?? '' },
+    { role: stranger.role, elsewhere: placeName(elsewhere), name: stranger.givenName },
     [{ id: 'room', eases: COMPANY_EASES }, { id: 'point' }],
-    { variant: named(stranger), stranger }
+    { stranger }
   );
+  return { ...event, topics: roadTopics(stranger, now, biome) };
 };
 
 // ---------------------------------------------------------------------------------------------
@@ -860,21 +863,22 @@ const underneath: Template = ({ biome, taken, wanted, onWater }, roll) => {
  * pilgrim, goat hair from a Maru drover -- so the gift says who they are. Both choices are real:
  * turning it down is a kindness too, and costs nothing.
  */
-const kindnessReturned: Template = ({ stranger, moment, onWater }, _roll, now) => {
+const kindnessReturned: Template = ({ stranger, moment, onWater, biome }, _roll, now) => {
   if (onWater || !stranger || !byDay(moment)) return null;
   const words = TEXT['kindness-returned']!;
   if (!(words.requires ?? []).every((flag) => now.flags?.includes(flagFor(flag, stranger)))) return null;
   const giftId = stranger.culture ? words.gifts?.[stranger.culture] : undefined;
   const gift = giftId ? material(giftId) : null;
   if (!gift) return null;
-  return woven(
+  const event = woven(
     'road',
     'kindness-returned',
     stranger.id,
-    { name: stranger.givenName ?? '', gift: lower(gift.name), trade: stranger.role.split(',')[0]! },
+    { name: stranger.givenName, gift: lower(gift.name), trade: stranger.role.split(',')[0]! },
     [{ id: 'accept', gives: [{ id: gift.id, n: 1 }] }, { id: 'decline' }],
-    { variant: named(stranger), stranger }
+    { stranger }
   );
+  return { ...event, topics: roadTopics(stranger, now, biome) };
 };
 
 /**

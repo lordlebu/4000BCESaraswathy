@@ -139,17 +139,16 @@ export function useRoadTalk({
         });
         return;
       }
-      const doing = (nearbyTravellers.find((t) => t.id === travellerId)?.doing ?? 'chore') as CampActivity;
+      const activity = nearbyTravellers.find((t) => t.id === travellerId)?.doing as CampActivity | null | undefined;
+      if (!activity) return;
       happens.current?.('road', arrival.at, null, `camp-talk:${arrival.day}:${travellerId}`, {
-        campPerson: { person, activity: doing, doing: doingLine(person.kind, person.slot, doing, person.elamiteRole), meal: doing === 'meal' },
+        campPerson: { person, activity, doing: doingLine(person.kind, person.slot, activity, person.elamiteRole), meal: activity === 'meal' },
         force: { kind: 'camp-talk', asked: true }
       });
       return;
     }
-    // A stranger has no lines of their own: walking with them is the company card, about this
-    // stranger, opened because the player asked rather than rationed by the road. The first time,
-    // the company card, which is how you learn their name. After that, small talk: how the map
-    // knows you, and what they have heard.
+    // Both encounters use NPC dialogue topics. The first card introduces the stranger, while
+    // repeat talk adds local standing and rumours.
     const key = `${fieldMapId}:${travellerId}`;
     const met = metStrangers.current.includes(key);
     const opened = happens.current?.('road', arrival.at, null, `walk-with:${arrival.day}:${travellerId}`, {

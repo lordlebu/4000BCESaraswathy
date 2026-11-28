@@ -22,8 +22,8 @@ import {
   untangle,
   WAITS_FOR,
   placedCircuit,
-  sheetsToUse,
   stopsOf,
+  isGeneratedTraveller,
   travellerAttributes,
   travellerState,
   travellersOn,
@@ -351,53 +351,17 @@ describe('nothing about a traveller is saved', () => {
 });
 
 describe('travellers stop wearing the player\'s face', () => {
-  // **The switchover is tested before the art exists, not after it lands.** The whole point of
-  // `sheetsToUse` being pure and parameterised is that the rule can be proven now -- a test written
-  // afterwards describes what happened rather than checking it, and this repository has a documented
-  // habit of shipping a rule with no caller and a green suite.
-
   const PLAYABLE = ['mithra', 'mehtar', 'malacite', 'guyuk', 'varuna'];
-  const TRAVELLER = ['traveller-carrier', 'traveller-drover', 'traveller-pilgrim'];
 
-  it('falls back to the playable five while there is no traveller art', () => {
-    expect(sheetsToUse([], PLAYABLE, 3)).toEqual(PLAYABLE);
-  });
-
-  it('switches the day the third sheet lands, and not before', () => {
-    // All or nothing. One or two traveller sheets would put a stranger beside two player faces,
-    // which reads as a bug rather than as progress -- and a name in both lists can be dealt twice,
-    // which breaks the no-repeat guarantee outright.
-    expect(sheetsToUse(TRAVELLER.slice(0, 1), PLAYABLE, 3)).toEqual(PLAYABLE);
-    expect(sheetsToUse(TRAVELLER.slice(0, 2), PLAYABLE, 3)).toEqual(PLAYABLE);
-    expect(sheetsToUse(TRAVELLER, PLAYABLE, 3)).toEqual(TRAVELLER);
-  });
-
-  it('needs exactly TRAVELLERS_PER_MAP sheets, which is why three is the ask', () => {
-    // The number in `docs/art-brief.md` Asset 7 is this constant, and if the cap ever rises the
-    // brief is wrong rather than the code. Asserted so the two cannot drift apart silently.
-    const justUnder = Array.from({ length: TRAVELLERS_PER_MAP - 1 }, (_, i) => `t${i}`);
-    const exact = Array.from({ length: TRAVELLERS_PER_MAP }, (_, i) => `t${i}`);
-    expect(sheetsToUse(justUnder, PLAYABLE)).toEqual(PLAYABLE);
-    expect(sheetsToUse(exact, PLAYABLE)).toEqual(exact);
-  });
-
-  it('gives canon’s people on every map three different figures either way', () => {
-    // The guarantee that must survive the switch: `sheetFor` walks the list by position, so no two
-    // *named* travellers on one map share a sheet while the roster fits. Road company are outside
-    // it on purpose -- they wear the body of their trade, and their dyes tell them apart.
+  it('gives canon’s people on every map distinct figures from the authored roster', () => {
     for (const map of fieldMaps) {
       const art = travellersOn(map.id).filter((t) => t.npcId !== null).map((t) => t.art);
       expect(new Set(art).size, `${map.id}: two named travellers share a sheet`).toBe(art.length);
+      expect(art.some((body) => PLAYABLE.includes(body))).toBe(false);
     }
   });
 
-  it('dresses road company as their trade, from the people canon gives it', () => {
-    const body: Record<string, string> = {
-      company_carrier: 'traveller-carrier',
-      company_drover: 'traveller-nomad',
-      company_pilgrim: 'traveller-pilgrim',
-      company_keeper: 'traveller-asura'
-    };
+  it('dresses generated company in kits from the people canon gives them', () => {
     const culture: Record<string, string> = {
       company_carrier: 'harappan',
       company_drover: 'maru',
@@ -405,8 +369,9 @@ describe('travellers stop wearing the player\'s face', () => {
       company_keeper: 'asura_hybrid'
     };
     for (const map of fieldMaps) {
-      for (const t of travellersOn(map.id).filter((x) => x.npcId === null)) {
-        expect(t.art, `${map.id}/${t.id}`).toBe(body[t.id]);
+      for (const t of travellersOn(map.id).filter(isGeneratedTraveller)) {
+        expect(t.art, `${map.id}/${t.id}`).toBe(t.look.body);
+        expect(t.look.portraitId).toMatch(new RegExp(`^${culture[t.id]}-`));
         expect(t.culture, `${map.id}/${t.id}`).toBe(culture[t.id]);
       }
     }

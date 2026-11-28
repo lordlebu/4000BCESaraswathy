@@ -4,14 +4,14 @@
     "src/content/campLife.ts; the hours are in src/content/tiers.ts (CAMP_DAY), never here.",
     "",
     "Three people a camp: the one who leads, a follower who is also the camp's runner to the road, and",
-    "a follower who keeps the fire at night. Bodies are the strangers' painted sheets, dyed per person",
-    "by looks.ts, so no art is needed. Cultures are canon's own ids; names come from canon's peoples.",
+    "a follower who keeps the fire at night. Bodies and dyes come from matching painted kits",
+    "in npcAppearance.ts. Cultures are canon's own ids; names come from canon's peoples.",
     "",
     "Nobody here is a threat to anybody, on the owner's ruling: no weapon is held up in any line, the",
     "dacoits' toll is an arrangement with the salt carriers, and nobody follows the player.",
     "",
     "`doing` finishes the sentence '{name} ...'. A string, or one per slot.",
-    "`says` is one line each, said when you talk to them. `trades` is what the runner carries to or",
+    "`says` holds role-specific topics for camp dialogue. `trades` is what the runner carries to or",
     "from the road, and `eats` is the meal, for the line when you sit and eat with them.",
     "",
     "`road` is what the talk row says about somebody on the road who is busy with a camp: a visitor sitting at",
@@ -30,13 +30,13 @@
         "runner": {
           "title": "gate-mender",
           "about": "gate-mender, a coil of withies on one shoulder",
-          "body": "traveller-drover",
+          "body": "traveller-nomad",
           "culture": "maru"
         },
         "watch": {
           "title": "milker",
           "about": "milker, with a pail that is never quite empty",
-          "body": "traveller-carrier",
+          "body": "traveller-nomad",
           "culture": "maru"
         }
       },
@@ -70,13 +70,13 @@
         "leader": {
           "title": "elder",
           "about": "elder, who keeps the song",
-          "body": "traveller-pilgrim",
+          "body": "traveller-carrier",
           "culture": "kia"
         },
         "runner": {
           "title": "lamp-keeper",
           "about": "lamp-keeper, with oil on the fingers",
-          "body": "traveller-pilgrim",
+          "body": "traveller-carrier",
           "culture": "kia"
         },
         "watch": {
@@ -128,7 +128,7 @@
         "watch": {
           "title": "cook",
           "about": "cook, who also argues about the map",
-          "body": "traveller-pilgrim",
+          "body": "traveller-carrier",
           "culture": "kia"
         }
       },

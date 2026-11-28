@@ -110,13 +110,13 @@ export function PeoplePanel({ progress, strangers = [], open, onClose, tabs }: P
                 <li key={s.key} className="people-row">
                   <ProfileButton
                     who={{ kind: 'stranger', key: s.key, known: true }}
-                    name={s.traveller.givenName ?? s.traveller.name}
+                    name={s.traveller.givenName}
                   >
                     <StrangerFace
                       stranger={{
                         id: s.key,
                         role: s.traveller.role,
-                        look: s.traveller.look!,
+                        look: s.traveller.look,
                         culture: s.traveller.culture,
                         givenName: s.traveller.givenName
                       }}
@@ -125,7 +125,7 @@ export function PeoplePanel({ progress, strangers = [], open, onClose, tabs }: P
                   </ProfileButton>
                   <div className="people-text">
                     <h4>
-                      {s.traveller.givenName ?? s.traveller.name}{' '}
+                      {s.traveller.givenName}{' '}
                       <span className="muted">· {s.traveller.role.split(',')[0]}</span>
                     </h4>
                     <p className="muted people-where">{s.traveller.campId ? 'Temporary camp' : s.between.join(' · ')}</p>

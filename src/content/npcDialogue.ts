@@ -2,6 +2,7 @@ import { TWIN_MAP } from '../world/twinGeneration';
 import type { BiomeId } from '../world/types';
 import { tileHash } from '../world/rng';
 import type { CampActivity, CampSlot } from './campLife';
+import campLifeData from '../../data/camp-life.json';
 import { ELAMITE_DIALOGUE } from './elamiteDialogue';
 import type { CampKind } from './encampments';
 import type { Standing } from './standing';
@@ -34,7 +35,7 @@ export interface AmbientTopic {
   day: number;
 }
 
-type Context = { map?: string; occupation?: string } & (
+type Context = { map?: string; occupation?: string; familiar?: boolean } & (
   | { road: true; culture: StrangerCulture | null; biome: BiomeId; standing: Standing; warm: boolean }
   | { road: false; kind: CampKind; slot: CampSlot; activity?: CampActivity; elamite?: boolean });
 
@@ -46,6 +47,7 @@ interface Line {
   immediate?: boolean;
 }
 
+const familiar = (c: Context) => c.familiar !== false;
 const warmRoad = (c: Context) => c.road && c.warm;
 const culture = (id: StrangerCulture) => (c: Context) => c.road && c.culture === id;
 const ground = (...biomes: BiomeId[]) => (c: Context) => c.road && biomes.includes(c.biome);
@@ -67,9 +69,10 @@ const REGIONAL: readonly Line[] = [
 ];
 
 const ROAD: readonly Line[] = [
-  { id: 'long-stride', topic: 'greeting', text: '“There you are. I thought I knew that stride.”' },
-  { id: 'cool-morning', topic: 'greeting', text: '“I thought I might catch you before the road forks.”' },
-  { id: 'name-ahead', topic: 'greeting', text: '“Your name got here before you did.”', fits: (c) => c.road && c.warm && c.standing !== 'stranger' },
+  { id: 'first-road-greeting', topic: 'greeting', text: '“Good road to you. Have you come far today?”', fits: (c) => c.familiar === false },
+  { id: 'long-stride', topic: 'greeting', text: '“There you are. I thought I knew that stride.”', fits: familiar },
+  { id: 'cool-morning', topic: 'greeting', text: '“I thought I might catch you before the road forks.”', fits: familiar },
+  { id: 'name-ahead', topic: 'greeting', text: '“Your name got here before you did.”', fits: (c) => familiar(c) && c.road && c.warm && c.standing !== 'stranger' },
   { id: 'yard', topic: 'people', text: '“At home we judge the hour by which side of the yard is in shade. Out here I have to look up.”', fits: warmRoad },
   { id: 'courtyard', topic: 'people', text: '“Someone in our courtyard always keeps a jar by the door for whoever comes through.”', fits: culture('harappan') },
   { id: 'ridge-fires', topic: 'people', text: '“On a clear night at home, you can count the families along the ridge by their hearths.”', fits: culture('maru') },
@@ -88,6 +91,12 @@ const ROAD: readonly Line[] = [
 ];
 
 const CAMP: readonly Line[] = [
+  ...Object.entries(campLifeData.kinds).flatMap(([kind, entry]) =>
+    Object.entries(entry.says).map(([slot, text]): Line => ({
+      id: `welcome-${kind}-${slot}`, topic: 'camp', text: `“${text}”`,
+      fits: (c) => !c.road && c.kind === kind && c.slot === slot
+    }))
+  ),
   { id: 'first-light-fold', topic: 'work', text: '“I leave the bend in the thorn fence until last. No sense closing the gate with half the herd outside it.”', fits: camp('drovers', 'leader') },
   { id: 'fold-trade', topic: 'work', text: '“I take skins to the road. Salt comes back lighter and the goats will walk a long way for it.”', fits: camp('drovers', 'runner') },
   { id: 'fold-watch', topic: 'camp', text: '“The goats will tell me if something moves out there. I keep close enough to hear the first one stand up.”', fits: camp('drovers', 'watch') },
@@ -137,11 +146,13 @@ export function ambientTopics(
     : elamite ? ELAMITE_TOPICS.filter((id) => id !== intro) : ['work', 'greeting', 'people', 'parting'];
   const rank = (id: string, at = 0) => tileHash(speaker, at, 0, id);
   subjects.sort((a, b) => rank(a, day) - rank(b, day));
-  const local = [...(context.road ? ROAD : elamite ? ELAMITE : CAMP), ...REGIONAL].filter((line) => !line.fits || line.fits(context));
+  const local = [...(context.road ? ROAD : elamite ? ELAMITE : CAMP), ...REGIONAL]
+    .filter((line) => !line.fits || line.fits(context));
   const options = news ? [topic('news', news.text, key(news.id))] : [];
   const age = (line: Line) => day - (history[key(line.id)] ?? -Infinity);
   for (const id of [intro, ...subjects]) {
-    const choices = local.filter((line) => line.topic === id && (age(line) === 0 || age(line) >= 3));
+    if (!context.road && !familiar(context) && id === 'greeting') continue;
+    const choices = local.filter((line) => line.topic === id && (id === intro || age(line) === 0 || age(line) >= 3));
     choices.sort((a, b) =>
       Number(Boolean(b.immediate)) - Number(Boolean(a.immediate)) ||
       Number(age(b) === 0) - Number(age(a) === 0) ||

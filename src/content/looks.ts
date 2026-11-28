@@ -1,27 +1,6 @@
-// What a stranger on the road looks like.
-//
-// **Three painted strangers, and a road of them.** `TRAVELLER_SHEETS` holds three bodies -- a
-// carrier, a drover, a pilgrim -- and every map deals them out, so the carrier on Lothal and the
-// carrier on Dwarka were the same person in the same clothes. Painting a fourth body costs a
-// session of prompting and a round of by-eye row checks; re-dyeing the three costs nothing but
-// arithmetic, and at 26x40 it is colour, not silhouette, that tells one person from another.
-//
-// So a **look** is a body plus a skin tone and two dyes, chosen from short lists by a hash of who
-// is wearing it. Nothing new is painted and nothing is saved: the same stranger wears the same
-// clothes on every machine and every reload, because the look is a pure function of their id.
-//
-// **This is presentation, and canon is untouched by it.** Canon records no appearance for anybody
-// -- `PersonPortrait.tsx` says so and refuses to invent one for a named person. The road company
-// here are the engine's own invention (`COMPANY` in `travellers.ts`), so giving them a coat is the
-// game dressing its own extras rather than asserting anything canon has not said. Named people are
-// dyed too, but only their clothes' colour changes, and a painted portrait still wins wherever one
-// exists.
-//
-// Pure: no React, no Phaser. The pixels are `game/`'s; this only says which colour becomes which.
+// The palettes and colour transform shared by painted NPC appearance kits and fixed canon looks.
 
 import looksData from '../../assets/looks.json';
-import { weightedPickFor } from '../world/rng';
-
 /** How a body covers its head, which is what a face is drawn wearing. */
 export type Headwear = 'wrap' | 'turban' | 'hood' | 'bare';
 
@@ -58,19 +37,17 @@ export interface Dye {
   hue: number;
   sat: number;
   light?: number;
-  /** How often it turns up, relative to the others. Plain cloth is commoner than lac. */
-  weight: number;
 }
 
 export const DYES: readonly Dye[] = [
-  { id: 'madder', name: 'madder red', hue: 6, sat: 0.55, weight: 3 },
-  { id: 'indigo', name: 'indigo', hue: 225, sat: 0.42, weight: 3 },
-  { id: 'turmeric', name: 'turmeric', hue: 44, sat: 0.72, weight: 2 },
-  { id: 'lac', name: 'lac crimson', hue: 345, sat: 0.5, weight: 1 },
-  { id: 'leaf', name: 'leaf green', hue: 100, sat: 0.3, weight: 2 },
-  { id: 'ochre', name: 'ochre', hue: 28, sat: 0.5, weight: 2 },
-  { id: 'undyed', name: 'undyed cotton', hue: 38, sat: 0.3, light: 1.45, weight: 3 },
-  { id: 'charcoal', name: 'charcoal', hue: 30, sat: 0.06, light: 0.75, weight: 1 }
+  { id: 'madder', name: 'madder red', hue: 6, sat: 0.55 },
+  { id: 'indigo', name: 'indigo', hue: 225, sat: 0.42 },
+  { id: 'turmeric', name: 'turmeric', hue: 44, sat: 0.72 },
+  { id: 'lac', name: 'lac crimson', hue: 345, sat: 0.5 },
+  { id: 'leaf', name: 'leaf green', hue: 100, sat: 0.3 },
+  { id: 'ochre', name: 'ochre', hue: 28, sat: 0.5 },
+  { id: 'undyed', name: 'undyed cotton', hue: 38, sat: 0.3, light: 1.45 },
+  { id: 'charcoal', name: 'charcoal', hue: 30, sat: 0.06, light: 0.75 }
 ];
 
 /**
@@ -101,43 +78,13 @@ export const BODIES: Readonly<Record<string, BodyPalette>> = looksData.bodies as
 
 /** Somebody's colouring. Ids into `SKIN_TONES` and `DYES`. */
 export interface Look {
-  portraitId?: string;
   body: string;
   skin: string;
   cloth: string;
   second: string;
 }
 
-/**
- * The look somebody wears, or null for a body that cannot be re-dyed.
- *
- * `who` is whatever should keep one person in one set of clothes: a named traveller's canon id, so
- * Terke is dressed alike on every map, or a road-company id salted with the map, so the carrier on
- * Lothal is not the carrier on Dwarka.
- *
- * **Rendezvous hashing, like every other pick over a list that can grow.** Adding a dye takes only
- * the people it outright wins and leaves everybody else dressed as they were -- the same reason
- * `weightedPickFor` replaced `pickFor` for species. A modulo here would re-dress the whole road
- * the day somebody added saffron.
- *
- * The second dye is never the first. Two garments the same colour read as one garment at this size,
- * which is a body with half its drawing thrown away.
- */
-export function lookFor(who: string, body: string): Look | null {
-  if (!Object.hasOwn(BODIES, body)) return null;
-  const at = { x: 0, y: 0 };
-  const skin = weightedPickFor(SKIN_TONES, 'look', at, `${who}:skin`, (t) => t.id, () => 1)!;
-  const cloth = weightedPickFor(DYES, 'look', at, `${who}:cloth`, (d) => d.id, (d) => d.weight)!;
-  const second = weightedPickFor(
-    DYES.filter((d) => d.id !== cloth.id),
-    'look',
-    at,
-    `${who}:second`,
-    (d) => d.id,
-    (d) => d.weight
-  )!;
-  return { body, skin: skin.id, cloth: cloth.id, second: second.id };
-}
+export type NpcLook = Look & { portraitId: string };
 
 /** The texture key a look is drawn from. One per distinct look, so two alike share a texture. */
 export function lookKey(look: Look): string {
@@ -215,34 +162,4 @@ export function recolourTable(look: Look): Map<string, string> {
   if (cloth) for (const hex of body.cloth) out.set(hex, dyed(hex, cloth));
   if (second) for (const hex of body.second) out.set(hex, dyed(hex, second));
   return out;
-}
-
-/**
- * The three colours a face is drawn in: skin, what is on the head, what is on the shoulders.
- *
- * Read off the same table as the sprite, so a face and the figure on the road can never disagree
- * about what somebody is wearing -- and a garment the body never dyes is named by its painted
- * colour in `assets/looks.json`, so the drover's cream turban stays cream on his face too.
- */
-export function swatchesFor(look: Look): { skin: string; headwear: string; shoulders: string } {
-  const body = BODIES[look.body];
-  const table = recolourTable(look);
-  const first = (list: readonly string[] | undefined) =>
-    list && list.length > 0 ? (table.get(list[0]!) ?? list[0]!) : null;
-  const skin = first(body?.skin) ?? '#c98a5a';
-  const cloth = first(body?.cloth) ?? '#8a6a3a';
-  const second = first(body?.second) ?? cloth;
-  const part = (which: FacePart | undefined) =>
-    which === 'second' ? second : which === 'cloth' || !which ? cloth : which;
-  return { skin, headwear: part(body?.face.headwear), shoulders: part(body?.face.shoulders) };
-}
-
-/** How a body covers its head, for the face. */
-export function headwearOf(body: string): Headwear {
-  return BODIES[body]?.headwear ?? 'bare';
-}
-
-/** A dye's name, for prose: "in indigo". */
-export function dyeName(id: string): string {
-  return dyeById.get(id)?.name ?? id;
 }

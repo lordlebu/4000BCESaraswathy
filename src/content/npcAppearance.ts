@@ -1,6 +1,6 @@
 import { tileHash } from '../world/rng';
 import { TWIN_MAP, twinWorldSeed } from '../world/twinGeneration';
-import { BODIES, type Headwear, type Look } from './looks';
+import { BODIES, type Headwear, type NpcLook } from './looks';
 import type { StrangerCulture } from './travellers';
 
 interface PaintedFace {
@@ -40,9 +40,9 @@ export const PAINTED_APPEARANCE: Readonly<Record<string, PaintedFace>> = {
   'maru-m-02': face('hood', 'dark deep', 'ochre', 'charcoal')
 };
 
-interface AppearanceKit { id: string; culture: string; look: Look }
+interface AppearanceKit { id: string; culture: string; look: NpcLook }
 
-/** The legacy sheets have limited shapes, so only kit pairs whose silhouettes agree are dealt. */
+/** Only deal pairs whose sprite silhouettes match the painting. */
 export const APPEARANCE_KITS: readonly AppearanceKit[] = Object.entries(PAINTED_APPEARANCE).flatMap(([id, portrait]) => {
   const culture = id.split('-')[0]!;
   if (culture === 'asura_hybrid') {
@@ -59,38 +59,40 @@ export const APPEARANCE_KITS: readonly AppearanceKit[] = Object.entries(PAINTED_
   });
 });
 
-/** Each key is a saved map and NPC ID. Legacy entries still use their original resolver. */
+/** Keys are map-qualified NPC IDs. Values identify a painted kit. */
 export type NpcAppearanceJournal = Record<string, string>;
-const LEGACY = 'legacy';
+export type GeneratedCulture = Exclude<StrangerCulture, 'elamite'>;
+
+const kitsById = new Map(APPEARANCE_KITS.map((kit) => [kit.id, kit]));
 let active: { seed: string; journal: NpcAppearanceJournal } | null = null;
 
 export function bindNpcAppearances(seed: string, journal: NpcAppearanceJournal): void {
   active = { seed, journal };
 }
 
-export function legacyNpcAppearances(met: readonly string[]): NpcAppearanceJournal {
-  return Object.fromEntries(met.map((key) => [key, LEGACY]));
+export function readNpcAppearances(value: unknown): NpcAppearanceJournal {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+  return Object.fromEntries(Object.entries(value).filter(([, id]) => typeof id === 'string' && kitsById.has(id)));
 }
 
-export function npcKitFor(fieldMapId: string, seed: string, id: string, body: string, culture: StrangerCulture | null): AppearanceKit | null {
-  const own = APPEARANCE_KITS.filter((kit) => kit.culture === culture);
-  const pool = own.length ? own : APPEARANCE_KITS.filter((kit) => kit.culture === 'any');
-  const matching = pool.filter((kit) => kit.look.body === body);
-  const eligible = matching.length ? matching : pool;
-  return eligible[tileHash(seed, 0, 0, `npc-appearance:${fieldMapId}:${id}`) % eligible.length] ?? null;
+export function npcKitFor(fieldMapId: string, seed: string, id: string, body: string, culture: GeneratedCulture): AppearanceKit {
+  const eligible = APPEARANCE_KITS.filter((kit) => kit.culture === culture && kit.look.body === body);
+  const kit = eligible[tileHash(seed, 0, 0, `npc-appearance:${fieldMapId}:${id}`) % eligible.length];
+  if (!kit) throw new Error(`No painted NPC kit for ${culture} on ${body}`);
+  return kit;
 }
 
 export function npcAppearance(
-  fieldMapId: string, seed: string, id: string, body: string, culture: StrangerCulture | null
-): Look | null {
-  if (!active || (fieldMapId === TWIN_MAP ? twinWorldSeed(active.seed) !== seed : active.seed !== seed)) return null;
-  const saved = active.journal[`${fieldMapId}:${id}`];
-  if (saved === LEGACY) return null;
-  const kit = saved ? APPEARANCE_KITS.find((candidate) => candidate.id === saved) : npcKitFor(fieldMapId, seed, id, body, culture);
-  return kit?.look ?? null;
+  fieldMapId: string, seed: string, id: string, body: string, culture: GeneratedCulture
+): NpcLook {
+  const npcSeed = fieldMapId === TWIN_MAP && seed ? twinWorldSeed(seed) : seed;
+  const journeySeed = fieldMapId === TWIN_MAP && active?.seed ? twinWorldSeed(active.seed) : active?.seed;
+  const key = `${fieldMapId}:${id}`;
+  const saved = active && journeySeed === npcSeed ? kitsById.get(active.journal[key] ?? '') : undefined;
+  return (saved ?? npcKitFor(fieldMapId, npcSeed, id, body, culture)).look;
 }
 
-export function rememberNpcAppearance(journal: NpcAppearanceJournal, key: string, look: Look): void {
+export function rememberNpcAppearance(journal: NpcAppearanceJournal, key: string, look: NpcLook): void {
   if (Object.hasOwn(journal, key)) return;
   const kit = APPEARANCE_KITS.find((kit) => kit.look.body === look.body && kit.look.portraitId === look.portraitId);
   if (kit) journal[key] = kit.id;

@@ -95,17 +95,11 @@
       "choices": {
         "walk": {
           "label": "Walk together a while",
-          "line": {
-            "named": "You walk together as far as the next turning. Their name is {name}, and that is most of what they say; the miles go easier for it.",
-            "unnamed": "You walk together as far as the next turning. Neither of you says much, and the miles go easier for it."
-          }
+          "line": "You walk together as far as the next turning. Their name is {name}, and the miles go easier in company."
         },
         "ask": {
           "label": "Ask the way",
-          "line": {
-            "named": "They point you on toward {elsewhere}, and say it is further than it looks. It usually is. They give their name as {name} before they turn off.",
-            "unnamed": "They point you on toward {elsewhere}, and say it is further than it looks. It usually is."
-          }
+          "line": "They point you on toward {elsewhere}, and say it is further than it looks. It usually is. They give their name as {name} before they turn off."
         }
       }
     },
@@ -121,10 +115,7 @@
         "name"
       ],
       "title": "A face you know",
-      "prose": {
-        "named": "{name}, the {trade} from the other day, is on the road ahead, and lifts a hand when they see it is you.",
-        "unnamed": "The {trade} from the other day is on the road ahead, and lifts a hand when they see it is you."
-      },
+      "prose": "{name}, the {trade} from the other day, is on the road ahead, and lifts a hand when they see it is you.",
       "choices": {
         "catch-up": {
           "label": "Catch them up",
@@ -239,17 +230,11 @@
       "choices": {
         "room": {
           "label": "Make room",
-          "line": {
-            "named": "They give their name as {name}, sleep sitting up against their load, and are gone before you wake. The night was warmer for two.",
-            "unnamed": "They sleep sitting up against their load and are gone before you wake. The night was warmer for two."
-          }
+          "line": "They give their name as {name}, sleep sitting up against their load, and are gone before you wake. The night was warmer for two."
         },
         "point": {
           "label": "Point them on",
-          "line": {
-            "named": "You point them on toward {elsewhere}. They thank you, say their name is {name} in case you meet again, and go.",
-            "unnamed": "You point them on toward {elsewhere}. They thank you and go, and the night is quiet again."
-          }
+          "line": "You point them on toward {elsewhere}. They thank you, say their name is {name} in case you meet again, and go."
         }
       },
       "sets": {
@@ -373,10 +358,7 @@
         "trade"
       ],
       "title": "Kindness returned",
-      "prose": {
-        "named": "{name}, the {trade} you gave a corner of your shelter to, is waiting at the side of the road with a little {gift} held out, and will not hear that there was no debt.",
-        "unnamed": "The {trade} you gave a corner of your shelter to is waiting at the side of the road with a little {gift} held out, and will not hear that there was no debt."
-      },
+      "prose": "{name}, the {trade} you gave a corner of your shelter to, is waiting at the side of the road with a little {gift} held out, and will not hear that there was no debt.",
       "choices": {
         "accept": {
           "label": "Take it, and thank them",
@@ -428,7 +410,7 @@
       },
       "title": "On the road with {name}",
       "prose": {
-        "cold": "{name} gives you a nod and a word about {ground}, and not much more. Nobody of their people has reason yet to think of you one way or the other.",
+        "cold": "{name} gives you a nod and a word about {ground}, as they come alongside. Nobody of their people has reason yet to think of you one way or the other.",
         "stranger": "{name} falls in beside you. Nobody on these roads knows you yet, they say, but their own people speak well of you.",
         "heard-of": "{name} falls in beside you. They have heard of you on these roads, and of what you did for their people.",
         "known": "{name} falls in beside you and talks easily about {ground}. People here know who you are now.",
@@ -445,7 +427,7 @@
         },
         "walk": {
           "label": "Walk together a while",
-          "line": "You walk together as far as the next turning, talking about nothing much, and the miles go easier for it."
+          "line": "You walk together as far as the next turning, and the miles go easier in company."
         },
         "part": {
           "label": "Wish them a good road",
@@ -612,13 +594,12 @@
         "name",
         "title",
         "doing",
-        "says",
         "eats"
       ],
       "title": "{name}, the {title}",
       "prose": {
-        "first": "{name} {doing}, and looks up as you come near. They tell you their name before you ask, as if it saves time, and then: “{says}”",
-        "again": "{name} {doing}, and nods as if you had only stepped away. “{says}”"
+        "first": "{name} {doing}, and looks up as you come near. They tell you their name before you ask, as if it saves time.",
+        "again": "{name} {doing}, and nods as if you had only stepped away."
       },
       "choices": {
         "sit": {

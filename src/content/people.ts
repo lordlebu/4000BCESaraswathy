@@ -17,7 +17,7 @@ import { allNpcs, fieldMap, poi, type Npc } from './places';
 import { ENKIDU_ID, ENKIDU_STRANGER } from './enkidu';
 import { campPersonFor } from './campLife';
 import { TWIN_MAP, twinWorldSeed } from '../world/twinGeneration';
-import { travellersOn, type StrangerCulture, type Traveller } from './travellers';
+import { isGeneratedTraveller, travellersOn, type GeneratedTraveller, type StrangerCulture } from './travellers';
 
 /** One person, as a record rather than as somebody standing in front of you. */
 export interface Acquaintance {
@@ -101,7 +101,7 @@ export function threadWith(progress: Progress, person: Npc): string | null {
 export interface StrangerMet {
   /** As the save keeps it: `<fieldMapId>:<traveller id>`. */
   key: string;
-  traveller: Traveller;
+  traveller: GeneratedTraveller;
   /** The map they walk. A carrier on Lothal and a carrier on Dwarka are two people. */
   fieldMapId: string;
   /** The two places their circuit runs between, by name. */
@@ -128,7 +128,7 @@ export function strangersMet(keys: readonly string[], seed = ''): StrangerMet[] 
       continue;
     }
     const traveller = campPersonFor(fieldMapId, travellerId, identitySeed) ??
-      travellersOn(fieldMapId, identitySeed).find((t) => t.id === travellerId && t.npcId === null);
+      travellersOn(fieldMapId, identitySeed).filter(isGeneratedTraveller).find((t) => t.id === travellerId);
     if (!traveller) continue;
     out.push({
       key,

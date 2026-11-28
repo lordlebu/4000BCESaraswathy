@@ -6,17 +6,17 @@ import { happeningNow, surroundingsAt } from '../src/content/happenings';
 import { strangersMet } from '../src/content/people';
 import { fieldMap } from '../src/content/places';
 import type { Rumour } from '../src/content/rumours';
-import { ambientTopics } from '../src/content/twinAmbientTalk';
+import { ambientTopics } from '../src/content/npcDialogue';
 import { twinCampDressingSpots, twinCampRouteTiles } from '../src/content/twinCampDressing';
 import { travellersOn, walkedRoad } from '../src/content/travellers';
-import { compatibleFaces, paintedFaceFor } from '../src/ui/StrangerFace';
+import { paintedFaceFor } from '../src/ui/StrangerFace';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { TWIN_MAP } from '../src/world/twinGeneration';
 
 const speaker = `${TWIN_MAP}:company_carrier`;
 const stranger: EventStranger = {
   id: speaker, culture: 'harappan', givenName: 'Saalik', role: 'carrier, with a loaded back',
-  look: { body: 'traveller-carrier', skin: 'as-painted', cloth: 'undyed', second: 'indigo' }
+  look: { body: 'traveller-carrier', skin: 'as-painted', cloth: 'undyed', second: 'indigo', portraitId: 'harappan-f-04' }
 };
 const roll = () => 0;
 const now: Circumstance = {
@@ -77,7 +77,7 @@ describe('Twin Cities ambient conversations', () => {
       const around = { ...surroundingsAt(world, camp.at, TWIN_MAP, null, roll)!, campPerson };
       const first = happeningNow(now, roll, around, [], campTalk)!;
       const known = happeningNow({ ...now, met: [`${TWIN_MAP}:${person.id}`] }, roll, around, [], campTalk)!;
-      expect(first.topics).toBeUndefined();
+      expect(first.topics?.[0]?.line).toContain('your bowl');
       expect(known.choices).toEqual(first.choices);
       expect(known.artMoment).toBe(`woven-camp-meal-${camp.kind}`);
       expect(known.topics?.[0]?.line).toContain('your bowl');
@@ -98,13 +98,10 @@ describe('Twin Cities ambient conversations', () => {
     expect([...kinds].sort()).toEqual(['adventurers', 'drovers', 'pilgrims']);
   });
 
-  it('chooses only compatible paintings across maps and falls back for an incompatible look', () => {
-    expect(compatibleFaces(stranger.look, stranger.culture)).toEqual(['harappan-f-04']);
-    const painting = paintedFaceFor(stranger);
-    expect(painting).toContain('harappan-f-04');
-    expect(paintedFaceFor({ ...stranger, id: 'field_map_lothal:company_carrier' })).toBe(painting);
-    expect(paintedFaceFor({ ...stranger, look: { ...stranger.look, skin: 'deep' } })).toBeNull();
-    expect(paintedFaceFor({ ...stranger, look: { ...stranger.look, cloth: 'leaf' } })).toBeNull();
-    expect(paintedFaceFor({ ...stranger, culture: 'maru' })).toBeNull();
+  it('uses the pinned portrait ID across contexts and rejects an absent painting', () => {
+    expect(paintedFaceFor(stranger)).toContain('harappan-f-04');
+    expect(paintedFaceFor({ ...stranger, id: 'field_map_lothal:company_carrier' })).toBe(paintedFaceFor(stranger));
+    const missing = { ...stranger, look: { ...stranger.look, portraitId: 'missing' } };
+    expect(() => paintedFaceFor(missing)).toThrow('Missing assigned NPC portrait');
   });
 });

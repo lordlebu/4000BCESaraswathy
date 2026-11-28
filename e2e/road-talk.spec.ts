@@ -221,6 +221,8 @@ test('beside a stranger, walking with them opens a card about them', async ({ pa
   const row = talkRow(there);
   await expect(row).toBeEnabled({ timeout: 20_000 });
   await expect(row).toContainText('Walk with');
+  const portrait = await row.locator('img.tile-action-portrait').getAttribute('src');
+  expect(portrait).toMatch(/(?:harappan|kia|maru|asura_hybrid)-/);
   await row.click();
   const card = there.locator('.activity-card');
   await expect(card).toBeVisible({ timeout: 10_000 });
@@ -229,6 +231,9 @@ test('beside a stranger, walking with them opens a card about them', async ({ pa
 
   // The first time is the company card, and walking together is how you learn their name.
   await expect(card.locator('h2')).toHaveText('Company on the road');
+  await expect(card.locator('img.stranger-face')).toHaveAttribute('src', portrait!);
+  await expect(card.getByRole('button', { name: 'Say hello' })).toBeVisible();
+  await expect(card.locator('.event-topic-reply')).toContainText('Have you come far today?');
   await card.getByRole('button', { name: 'Walk together a while' }).click();
   const line = (await card.locator('.activity-prose').textContent()) ?? '';
   const name = line.match(/Their name is (\w+)/)?.[1];
@@ -240,6 +245,8 @@ test('beside a stranger, walking with them opens a card about them', async ({ pa
   await row.click();
   await expect(card).toBeVisible({ timeout: 10_000 });
   await expect(card.locator('h2')).toHaveText(`On the road with ${name}`);
+  await expect(card.locator('img.stranger-face')).toHaveAttribute('src', portrait!);
+  await expect(card.locator('.event-topic-reply')).toBeVisible();
   // Its own painting, not a borrowed scene or the blank band.
   await expect(card.locator('img.activity-scene')).toHaveAttribute('src', /woven-small-talk/);
 });

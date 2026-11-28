@@ -28,8 +28,8 @@ import { allNpcs, fieldMap, fieldMaps, givenNames, npc, poi, type Npc } from './
 import { weightedPickFor } from '../world/rng';
 import { vehicles } from './making';
 import { stepCostOn } from './species';
-import { npcAppearance } from './npcAppearance';
-import { type Look, lookFor } from './looks';
+import { npcAppearance, type GeneratedCulture } from './npcAppearance';
+import { type Look, type NpcLook } from './looks';
 import { TWIN_PEOPLE } from './twinPeople';
 
 /**
@@ -166,68 +166,36 @@ export interface Traveller {
   campId?: string;
 }
 
-/**
- * Sheets that draw a traveller and nobody else.
- *
- * **Empty on purpose, and filling it is the whole of the fix.** The complaint is that everybody met
- * on the road is a playable character: `PLAYABLE_SHEETS` below is the five the player chooses from,
- * so a traveller always wears a face the player can also be wearing -- and on the map you are on,
- * one of the three may be wearing yours.
- *
- * Three entries is not a target, it is the exact number. `sheetFor` guarantees no two travellers on
- * a map share a sheet only while the roster is no longer than the list it walks, and
- * `TRAVELLERS_PER_MAP` is 3 -- so three traveller-only sheets give every map three distinct
- * strangers and make a collision with the player impossible rather than unlikely. A fourth would
- * add variety and fix nothing.
- *
- * See `docs/art-brief.md`, Asset 7. When the art lands this list gets the three names, and nothing
- * else in this file changes.
- */
-const TRAVELLER_SHEETS: readonly string[] = [
-  'traveller-carrier',
-  'traveller-drover',
-  'traveller-pilgrim'
-];
+export type GeneratedTraveller = Traveller & { npcId: null; look: NpcLook; givenName: string };
 
-/**
- * The playable five, used only until there are enough traveller sheets to go round.
- *
- * **Assigned by position in the roster rather than by a hash of the id, and the first attempt got
- * that wrong.** Hashing the id is stable and reads as the tidier rule, but two ids can hash to the
- * same sheet -- measured, Thrali and the carrier both came out `malacite` on Lothal, so two of the
- * three people on that map were the same figure. Walking down the list guarantees no repeat while
- * the roster is no longer than this array, which `TRAVELLERS_PER_MAP` makes certain.
- *
- * The offset is a hash of the *map*, so the four maps do not all lead with the same face, and
- * adding a place to canon does not restyle anybody.
- */
-const PLAYABLE_SHEETS: readonly string[] = ['mithra', 'mehtar', 'malacite', 'guyuk', 'varuna'];
-
-/**
- * Which list to draw travellers from.
- *
- * **All or nothing, deliberately.** Mixing a part-filled traveller list with the playable five
- * would put one stranger and two player faces on a map, which reads as a bug rather than as
- * progress -- and it would break the no-repeat guarantee, because a name appearing in both lists
- * can be dealt twice. So the switch happens only once the traveller list can cover a whole map on
- * its own.
- *
- * Pure and parameterised so the *rule* is testable rather than only its current answer: the day the
- * art lands there must be a test that already proved the switchover, not one written afterwards to
- * describe it.
- */
-export function sheetsToUse(
-  travellerOnly: readonly string[],
-  playable: readonly string[],
-  perMap: number = TRAVELLERS_PER_MAP
-): readonly string[] {
-  return travellerOnly.length >= perMap ? travellerOnly : playable;
+export function isGeneratedTraveller(traveller: Traveller): traveller is GeneratedTraveller {
+  return traveller.npcId === null;
 }
 
-/** The sheet for the nth traveller on a map, with no two alike. */
-function sheetFor(fieldMapId: string, index: number): string {
-  const sheets = sheetsToUse(TRAVELLER_SHEETS, PLAYABLE_SHEETS);
-  return sheets[(hashOf(fieldMapId) + index) % sheets.length]!;
+// Canon identities keep their established figures independently of roster order.
+const CANON_TRAVELLER_LOOKS: Readonly<Record<string, Look>> = {
+  npc_anu: { body: 'traveller-carrier', skin: 'as-painted', cloth: 'turmeric', second: 'indigo' },
+  npc_hesh: { body: 'traveller-drover', skin: 'light', cloth: 'indigo', second: 'turmeric' },
+  npc_ila: { body: 'traveller-pilgrim', skin: 'as-painted', cloth: 'indigo', second: 'turmeric' },
+  npc_pell: { body: 'traveller-drover', skin: 'deep', cloth: 'indigo', second: 'madder' },
+  npc_sesh: { body: 'traveller-pilgrim', skin: 'as-painted', cloth: 'leaf', second: 'madder' },
+  npc_sura: { body: 'traveller-carrier', skin: 'deep', cloth: 'undyed', second: 'indigo' },
+  npc_bekh: { body: 'traveller-pilgrim', skin: 'as-painted', cloth: 'leaf', second: 'madder' },
+  npc_kunch: { body: 'traveller-carrier', skin: 'dark', cloth: 'indigo', second: 'turmeric' },
+  npc_thrali: { body: 'traveller-drover', skin: 'deep', cloth: 'indigo', second: 'ochre' },
+  npc_marn: { body: 'traveller-carrier', skin: 'dark', cloth: 'turmeric', second: 'madder' },
+  npc_moonj: { body: 'traveller-drover', skin: 'as-painted', cloth: 'indigo', second: 'lac' },
+};
+
+function canonTravellerLook(fieldMapId: string, id: string): { art: string; look: Look | null } {
+  if (fieldMapId === 'field_map_twins') {
+    const art = TWIN_PEOPLE[id];
+    if (!art) throw new Error(`Missing Twin Cities traveller art for ${id}`);
+    return { art, look: null };
+  }
+  const look = CANON_TRAVELLER_LOOKS[id];
+  if (!look) throw new Error(`Missing canon traveller appearance for ${id}`);
+  return { art: look.body, look };
 }
 
 /** A cheap stable hash over a string, so an id picks the same sheet on every machine. */
@@ -268,30 +236,26 @@ export type StrangerCulture = (typeof STRANGER_CULTURES)[number] | 'elamite';
 /**
  * The road company: the people a road has that nobody wrote down.
  *
- * **They carry no words.** Everything a named person says is authored in canon and reached through
- * `lines`; these have none and must never grow any. What they have instead is a trade and a load,
- * which is what a road actually shows you about somebody before they speak.
+ * Road company use the shared NPC dialogue catalogue. Canon still owns named conversations
+ * and the words they can teach.
  *
- * **Each wears the body of their trade**, now that dyeing tells two carriers apart -- so the carrier
- * a woven event introduces is drawn as a carrier, where position-dealing once put him in the
- * pilgrim's hood. And each belongs to the people canon gives that work: the drover is Maru, as
- * Terke is; the carrier is of the Harappan settlers whose loads go down every road; the pilgrim
- * tends the wayside toward the Kia's marsh shrines.
+ * Each route role declares the body and culture of its painted kit. The drover is Maru, the
+ * carrier Harappan, and the wayside pilgrim Kia.
  */
 const COMPANY: readonly {
   id: string;
   name: string;
   role: string;
   body: string;
-  culture: StrangerCulture;
+  culture: GeneratedCulture;
   /** Walks wherever this people's stranger does, on top of the two. Absent for the two themselves. */
   beside?: StrangerCulture;
 }[] = [
   { id: 'company_carrier', name: 'A carrier', role: 'carrier, with a loaded back', body: 'traveller-carrier', culture: 'harappan' },
   // The upland nomad's body, fur and skin as canon dresses the Maru -- Asset 9. The drover sheet
-  // (olive tunic, white headwrap) stays for the named travellers `sheetFor` deals it to.
+  // (olive tunic, white headwrap) stays with canon’s assigned travellers.
   { id: 'company_drover', name: 'A drover', role: 'drover, behind six animals', body: 'traveller-nomad', culture: 'maru' },
-  { id: 'company_pilgrim', name: 'A pilgrim', role: 'pilgrim, tending the wayside', body: 'traveller-pilgrim', culture: 'kia' },
+  { id: 'company_pilgrim', name: 'A pilgrim', role: 'pilgrim, tending the wayside', body: 'traveller-carrier', culture: 'kia' },
   // The Violet-Horned Clan, who keep the fallen dolmens with bone flutes and bells, and trade with the
   // Maru on the basalt plateau (canon's `asura_hybrid` note). Kin who walk beside the drover.
   {
@@ -311,8 +275,7 @@ const COMPANY: readonly {
  * the Aravali and the carrier on Lothal both came out Rethik -- two people, one name, and a player
  * would reasonably read it as somebody following them. So the whole road is dealt at once: every
  * stranger in a stable order takes their best-ranked name that nobody of their people has taken.
- * A name added to canon still only takes the strangers it wins; a people with more strangers than
- * names starts again from the full list rather than leaving anybody nameless.
+ * Names are drawn without redistributing one name to two road NPCs.
  */
 export function givenNameFor(who: string, seed = ''): string | null {
   return dealtNames(seed).get(who) ?? null;
@@ -339,12 +302,13 @@ function dealtNames(seed: string): Map<string, string> {
   }
   const out = new Map<string, string>();
   for (const [culture, strangers] of byCulture) {
-    const names = givenNames[culture] ?? [];
+    const names = givenNames[culture];
+    if (!names || names.length < strangers.length) throw new Error(`Not enough names for ${culture} road company`);
     const taken = new Set<string>();
     for (const key of [...strangers].sort()) {
       const free = names.filter((n) => !taken.has(n));
-      const name = weightedPickFor(free.length > 0 ? free : names, 'given-name', { x: 0, y: 0 }, seed ? `${seed}|${key}` : key, (n) => n, () => 1);
-      if (!name) continue;
+      const name = weightedPickFor(free, 'given-name', { x: 0, y: 0 }, seed ? `${seed}|${key}` : key, (n) => n, () => 1);
+      if (!name) throw new Error(`No name dealt to ${key}`);
       taken.add(name);
       out.set(key, name);
     }
@@ -440,9 +404,6 @@ export function travellersOn(fieldMapId: string, seed = ''): Traveller[] {
     if (out.length >= TRAVELLERS_PER_MAP) break;
     const circuit = person.foundAt.filter((id) => here.has(id));
     const grounds = new Set(circuit.flatMap((id) => poi(id)?.terrain ?? []));
-    // Stable authored identities for the existing twin-city walkers. No roster, route or
-    // timetable changes; never re-dye their working clothes as a generic road-company body.
-    const namedArt = fieldMapId === 'field_map_twins' ? TWIN_PEOPLE[person.id] : undefined;
     out.push({
       id: person.id,
       name: person.name,
@@ -450,8 +411,7 @@ export function travellersOn(fieldMapId: string, seed = ''): Traveller[] {
       npcId: person.id,
       circuit,
       conveyance: conveyanceFor(grounds),
-      art: namedArt ?? sheetFor(fieldMapId, out.length),
-      look: namedArt ? null : lookFor(person.id, sheetFor(fieldMapId, out.length)),
+      ...canonTravellerLook(fieldMapId, person.id),
       culture: null,
       givenName: null
     });
@@ -475,6 +435,8 @@ export function travellersOn(fieldMapId: string, seed = ''): Traveller[] {
       const circuit = [first, second];
       const grounds = new Set(circuit.flatMap((id) => poi(id)?.terrain ?? []));
       const kit = npcAppearance(fieldMapId, seed, who.id, who.body, who.culture);
+      const givenName = givenNameFor(`${fieldMapId}:${who.id}`, seed);
+      if (!givenName) throw new Error(`No name dealt to ${fieldMapId}:${who.id}`);
       out.push({
         id: who.id,
         name: who.name,
@@ -482,11 +444,11 @@ export function travellersOn(fieldMapId: string, seed = ''): Traveller[] {
         npcId: null,
         circuit,
         conveyance: conveyanceFor(grounds),
-        art: kit?.body ?? who.body,
+        art: kit.body,
         // Dyed and named per journey, like the name (`dealtNames`); the circuit stays the map's.
-        look: kit ?? lookFor(seed ? `${seed}|${fieldMapId}:${who.id}` : `${fieldMapId}:${who.id}`, who.body),
+        look: kit,
         culture: who.culture,
-        givenName: givenNameFor(`${fieldMapId}:${who.id}`, seed)
+        givenName
       });
     }
   }

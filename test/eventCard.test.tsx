@@ -14,24 +14,13 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { EventCard } from '../src/ui/EventCard';
 import { anyConditions, type GameEvent } from '../src/content/events';
-import { swatchesFor, type Look } from '../src/content/looks';
+import type { NpcLook } from '../src/content/looks';
 
 afterEach(cleanup);
 
-// Hide the real artwork to exercise the empty-pool fallback.
-let emptyPool = false;
-vi.mock('../src/ui/art', async (original) => {
-  const actual = await original<typeof import('../src/ui/art')>();
-  return {
-    ...actual,
-    artNames: (folder: string) => (folder === 'faces' && emptyPool ? [] : actual.artNames(folder))
-  };
-});
-afterEach(() => {
-  emptyPool = false;
-});
-
-const look: Look = { body: 'traveller-carrier', skin: 'as-painted', cloth: 'undyed', second: 'indigo' };
+const look: NpcLook = {
+  body: 'traveller-carrier', skin: 'as-painted', cloth: 'undyed', second: 'indigo', portraitId: 'harappan-f-04'
+};
 
 const event = (over: Partial<GameEvent> = {}): GameEvent => ({
   id: 'woven:company:company_carrier',
@@ -57,26 +46,11 @@ const event = (over: Partial<GameEvent> = {}): GameEvent => ({
 });
 
 describe('the card with a stranger on it', () => {
-  it('shows a painted face from their own people when the pool has a compatible painting', () => {
+  it('shows the painting assigned to their appearance kit', () => {
     const { baseElement } = render(<EventCard event={event()} holds={[]} onChoose={() => {}} onClose={() => {}} />);
     const face = baseElement.querySelector('img.stranger-face');
     expect(face, 'no painted face on the card').not.toBeNull();
     expect(face!.getAttribute('src')).toContain('harappan-f-04');
-    expect(face!.closest('.event-heading')?.querySelector('h2')?.textContent).toBe('Company on the road');
-  });
-
-  it.each([true, false])('draws the figure’s dyes without a matching painting (empty pool: %s)', (empty) => {
-    emptyPool = empty;
-    const fixture = event();
-    const fallbackLook = empty ? look : { ...look, cloth: 'leaf' };
-    const stranger = { ...fixture.stranger!, look: fallbackLook };
-    const { baseElement } = render(<EventCard event={{ ...fixture, stranger }} holds={[]} onChoose={() => {}} onClose={() => {}} />);
-    const face = baseElement.querySelector('svg.stranger-face');
-    expect(face, 'no face on the card').not.toBeNull();
-    const fills = [...face!.querySelectorAll('path')].map((p) => p.getAttribute('fill'));
-    const { skin, headwear, shoulders } = swatchesFor(fallbackLook);
-    expect(fills).toEqual([shoulders, skin, headwear]);
-    // The face sits beside the title, not somewhere else on the card.
     expect(face!.closest('.event-heading')?.querySelector('h2')?.textContent).toBe('Company on the road');
   });
 
