@@ -85,9 +85,7 @@ where models reach for a threat pose unprompted.
 
 ## B. Overworld sprites — three animals ✅ done
 
-**This is the set that replaced live placeholder code.** The game drew a generated stand-in built
-from canvas primitives in `wandererMarkerKey`; art in `assets/wanderers/` now supersedes it, and
-the stand-in remains as the fallback for any animal added later.
+Every active animal uses all four authored views in `assets/wanderers/`.
 
 Twelve frames in: **four facings each** — right, left, down, up — for the whale, the sivatherium
 and Vasuki. Full spec in [`assets/wanderers/README.md`](../assets/wanderers/README.md).
@@ -143,7 +141,7 @@ Arrived as a walk sheet, four rows of four, and walks: see `assets/wanderers/REA
 
 Not an animal, and it walks the same way: `PATROLS` in `src/content/wanderers.ts` puts it on North
 Dwarka, near the Caravan Ground, on desert, grass and hill, standing still most of the day. Until
-it is painted the game draws a stand-in (`chariot` in `wandererMarkerKey`): a solid-wheeled car, a
+the patrol sprite shipped, a prototype drew a solid-wheeled car, a
 driver with a spear, and a humped ox at the pole. The driver is Sudama, Jarro's charioteer (canon's
 `npc_sudama`), and the ox is a zebu bull: the zebu plate is a cow, whose hump is barely a rise.
 

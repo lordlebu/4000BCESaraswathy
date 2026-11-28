@@ -10,9 +10,9 @@ describe('individual painted twin-valley place views',()=>{
   it('gives every authored stop its own preferred view instead of a category filler',()=>{
     const places=poisOn('field_map_twins');
     expect(places).toHaveLength(16);
-    const urls=places.map(p=>placeArt(p.id,p.kind));
+    const urls=places.map(p=>placeArt(p.id));
     expect(new Set(urls).size).toBe(16);
-    for(const p of places)expect(placeArt(p.id,p.kind),p.id).toContain(`${p.id}-painted`);
+    for(const p of places)expect(placeArt(p.id),p.id).toContain(`${p.id}-painted`);
     expect(manifest.paintings.map(p=>p.id).sort()).toEqual(places.map(p=>p.id)
       .filter(id=>id!=='poi_harappa_court').sort());
   });

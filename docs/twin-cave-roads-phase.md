@@ -1,5 +1,7 @@
 # Cave household, highland trees and masonry roads - 18 November 2026
 
+This document records the art delivery at the time. The [current Twin Cities profile and save rules](twin-cities-uplift.md) and the [generated cook schedule](strangers-and-happenings.md#what-was-built-for-them) apply to the running game.
+
 ## Implemented owner requests
 
 - Yamantaka is twice his previous overworld display scale, walking and seated alike. His foot

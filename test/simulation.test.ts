@@ -31,7 +31,6 @@ import { fieldMap, fieldMaps, npcsAt } from '../src/content/places';
 import { encampmentOn, type Encampment } from '../src/content/encampments';
 import { campPeople, doingLine } from '../src/content/campLife';
 import { rumourAt, rumoursOn } from '../src/content/rumours';
-import { PASSING_AFTER_STEPS } from '../src/content/tiers';
 
 const JOURNEYS_PER_MAP = Number(process.env.SIM_JOURNEYS ?? 6);
 const DAYS = Number(process.env.SIM_DAYS ?? 40);
@@ -238,8 +237,8 @@ function simulate(): Tally {
           }
           campNight = standing;
         }
-        // The Sinauli wagon on North Dwarka, met once, after the first day's walking (`PASSING_AFTER_STEPS`).
-        if (map.id === 'field_map_dwarka' && day === Math.max(1, Math.ceil(PASSING_AFTER_STEPS / 80))) {
+        // The Sinauli wagon on North Dwarka, met once, on the first road day.
+        if (map.id === 'field_map_dwarka' && day === 1) {
           const at = stepFor(`passing:${day}`);
           if (ask('road', day, at, `passing:${day}`, { timeOfDay: morning, passing: { id: 'sinauli-wagon', vehicle: 'vehicle_sinauli_wagon' }, force: { kind: 'passing', asked: true } })) any = true;
         }

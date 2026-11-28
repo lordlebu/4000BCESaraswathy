@@ -12,7 +12,7 @@ import { ENKIDU_ID, ENKIDU_TRAVELLER } from '../content/enkidu';
 
 import { useEffect, useMemo, useRef, useState, type Dispatch, type MutableRefObject } from 'react';
 import { EventBus, type GameToUi } from '../game/EventBus';
-import { campCallers, campPeople, doingLine, type CampActivity, type CampPerson } from '../content/campLife';
+import { campCallers, campPeople, caveCookCamp, doingLine, type CampActivity, type CampPerson } from '../content/campLife';
 import { encampmentOn, type Encampment } from '../content/encampments';
 import { roadTalk } from '../content/presence';
 import { travellersOn } from '../content/travellers';
@@ -37,7 +37,6 @@ export type Happens = (
       campPerson?: CampTalk | null;
       cameFrom?: string | null;
       /** The painting of the road just travelled, for a road's happening that has none of its own. */
-      roadArt?: string | null;
       force?: { kind?: string; asked?: boolean };
     }
   ) => boolean;
@@ -92,7 +91,10 @@ export function useRoadTalk({
     [world, fieldMapId, arrival?.day]
   );
   const seed = world?.seed ?? '';
-  const campFolk = useMemo<CampPerson[]>(() => (campToday ? campPeople(campToday, fieldMapId, seed) : []), [campToday, fieldMapId, seed]);
+  const campFolk = useMemo<CampPerson[]>(() => {
+    const cook = arrival && caveCookCamp(fieldMapId, fieldPlaced.current, arrival.day);
+    return [campToday, cook].flatMap(camp => camp ? campPeople(camp, fieldMapId, seed) : []);
+  }, [campToday, fieldMapId, seed, arrival?.day]);
   const talk = useMemo(
     () =>
       roadTalk(nearbyTravellers, fieldMapId, metStrangers.current, chosenTraveller, previousTarget.current, [
@@ -131,8 +133,8 @@ export function useRoadTalk({
     // Somebody who keeps a camp. The one who leads speaks the camp's own card first, if it has not
     // been seen -- that is the welcome -- and after that each of them has a word of their own.
     const person = campFolk.find((p) => p.id === travellerId);
-    if (person && campToday) {
-      if (person.slot === 'leader' && !seenEvents.current.includes(`woven:camp:${campToday.id}`)) {
+    if (person) {
+      if (campToday && person.campId === campToday.id && person.slot === 'leader' && !seenEvents.current.includes(`woven:camp:${campToday.id}`)) {
         happens.current?.('arriving', arrival.at, null, `camp:${campToday.id}`, {
           camp: campToday,
           force: { kind: 'camp', asked: true }
@@ -142,7 +144,7 @@ export function useRoadTalk({
       const activity = nearbyTravellers.find((t) => t.id === travellerId)?.doing as CampActivity | null | undefined;
       if (!activity) return;
       happens.current?.('road', arrival.at, null, `camp-talk:${arrival.day}:${travellerId}`, {
-        campPerson: { person, activity, doing: doingLine(person.kind, person.slot, activity, person.elamiteRole), meal: activity === 'meal' },
+        campPerson: { person, activity, doing: doingLine(person.kind, person.slot, activity, person.elamiteRole, person.cook), meal: activity === 'meal' },
         force: { kind: 'camp-talk', asked: true }
       });
       return;

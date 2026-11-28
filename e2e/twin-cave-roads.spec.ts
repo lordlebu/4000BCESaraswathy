@@ -1,3 +1,4 @@
+import { seedJourney } from './journey-fixture';
 import {test,expect} from '@playwright/test';
 const base='?map=field_map_twins&seed=twin-art-review&door=open&title=skip&firsts=off&events=off&chatter=off';
 
@@ -9,11 +10,9 @@ test('the enlarged cave household and smaller cooker use their real display size
   await expect.poll(()=>page.evaluate(()=>(window as any).__walker?.()?.residents?.length),{timeout:45000}).toBeGreaterThan(2);
   const state=await page.evaluate(()=>(window as any).__walker());
   await assets;
-  await expect(page.locator('button.who',{hasText:'The visiting cook'}).locator('img.person-portrait')).toHaveAttribute('src',/maru-m-01/);
   const mir=state.residents.find((p:any)=>p.npcId==='npc_mirlepa');
   const yam=state.residents.find((p:any)=>p.npcId==='npc_yamantaka');
   expect(yam.height).toBeCloseTo(mir.height*2);
-  expect(state.residents.find((p:any)=>p.npcId==='npc_cave_cook').sheet).toBe('traveller-nomad');
   expect(state.caveScenery.find((p:any)=>p.name==='poi:poi_northwest_cave_camp').width).toBe(192);
   expect(state.caveScenery.find((p:any)=>p.name==='cave:cooker').width).toBe(96);
   await page.keyboard.press('Escape');
@@ -50,4 +49,34 @@ test('sleeping at the cave always opens the shared meal and then the three-perso
   await page.screenshot({path:info.outputPath('cave-three-sleepers.png')});
   await card.locator('.activity-choice',{hasText:'Start the day'}).click();
   await expect(card).toBeHidden();
+});
+
+
+test('the visiting cook shares the generated camp conversation and meal', async ({ page }) => {
+  const read = () => page.evaluate(() => (window as unknown as {
+    __travellers?: () => { id: string; camp?: string; sheet: string; visible: boolean; tile: {x: number; y: number} | null }[];
+  }).__travellers?.().find(person => person.id.startsWith('cave-cook-')));
+  const visit = base + '&hour=18&at=poi_northwest_cave_camp';
+  await seedJourney(page, 'twin-art-review', { seenEvents: ['happening_twin_cave_arrival'] });
+  await page.goto(visit);
+  await expect.poll(read, { timeout: 45000 }).toMatchObject({
+    id: 'cave-cook-0', camp: 'cave-cook-visit:0', sheet: /^traveller-carrier/, visible: true
+  });
+  const look = (await read())!.sheet;
+  await page.reload();
+  await expect.poll(read, { timeout: 45000 }).toMatchObject({ id: 'cave-cook-0', sheet: look, visible: true });
+  await page.getByRole('button', { name: 'Leave', exact: true }).click();
+  const talk = page.getByRole('button', { name: /talk.*visiting cook/i });
+  await expect(talk).toBeVisible({ timeout: 15000 });
+  await talk.click({ timeout: 10000 });
+  const card = page.getByRole('dialog');
+  await expect(card.locator('img.activity-scene')).toHaveAttribute('src', /discovery_twin_cave/);
+  await expect(card.locator('img.person-portrait, img.stranger-face')).toHaveCount(1);
+  await card.getByRole('button', { name: /eat/i }).click();
+  await expect(card).toContainText('sheltered hearth');
+
+  await seedJourney(page, 'cave-no-visit', { travelled: 2 * 60 * 60 * 1000 });
+  await page.goto(visit.replace('twin-art-review', 'cave-no-visit'));
+  await expect(page.getByRole('button', { name: 'Leave', exact: true })).toBeVisible({ timeout: 45000 });
+  expect(await read()).toBeUndefined();
 });

@@ -1,12 +1,19 @@
 # How this project tests, and what it cost to learn
 
 
+## Journey reset and encounter regression
+
+Use a real browser movement fixture for an automatic encounter. Open the map, walk, verify that
+the visible encounter waits for a clear screen, then select a choice and check the diary.
+Keep deprecated storage fixtures in tests for the reset. Gameplay fixtures should use
+`e2e/journey-fixture.ts` so they start with a complete current journey.
+
 ## Twin-valley terrain review - 18 November 2026
 
 Complete a whole implementation phase before running its combined checks. The approved palette
-is **muted sage**; `turf=lichen`, `turf=olive` and `turf=legacy` are development-only comparisons,
+is **muted sage**; `turf=lichen` and `turf=olive` are development-only palette comparisons,
 with no player preference/save field. `e2e/twin-terrain.spec.ts` checks the actual ground texture,
-display size, atlas budget, all three palette samples and console errors. Combine it with the
+display size, atlas budget, the enabled palette samples and console errors. Combine it with the
 landscape and existing cave contracts for the complete eight-case review. The phase ledger
 records the commands/results and the Windows dev-server teardown workaround; it does not weaken
 CI or replace broader gameplay/save/hardware review. Screenshots and performance JSON belong in

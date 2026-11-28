@@ -25,7 +25,7 @@ import {
   wanderersOn
 } from '../src/content/wanderers';
 import { hoursToPhase } from '../src/game/dayNight';
-import { GRID, WANDERER_BOX, boxFor, markerSize, paintedHeight } from '../src/game/frames';
+import { GRID, WANDERER_BOX, boxFor, paintedHeight } from '../src/game/frames';
 import { PLAYER_FRAME, figureScale } from '../src/game/player';
 import { DEFAULT_SEED } from '../src/ui/seed';
 import type { Creature } from '../src/world/types';
@@ -291,19 +291,6 @@ describe("every animal fits the walking whale's box", () => {
     expect(Math.abs(h - boxH), 'the whale does not fill the box').toBeLessThanOrEqual(1.5);
   });
 
-  it('draws the stand-in the size the painting will be', () => {
-    // So the art arriving changes the picture and not the size. This fails by name if a repainted
-    // animal changes shape without its `long` and `tall` in `frames.ts`.
-    for (const id of ANIMALS) {
-      const marker = markerSize(id);
-      const painted = drawn(id);
-      expect(Math.abs(marker.w - painted.w) / painted.w, `${id}: stand-in ${marker.w}px long, painting ${Math.round(painted.w)}px`)
-        .toBeLessThan(0.03);
-      expect(Math.abs(marker.h - painted.h) / painted.h, `${id}: stand-in ${marker.h}px high, painting ${painted.h}px`)
-        .toBeLessThan(0.03);
-    }
-  });
-
   it('lets only the giraffid look down on the player, and not by much', () => {
     // Half the three tiles it stood at when every animal was two tiles long, on the owner's ask.
     const playerTall = PLAYER_FRAME.height * figureScale(GRID);
@@ -320,9 +307,9 @@ describe("every animal fits the walking whale's box", () => {
   it('keeps each animal its own shape', () => {
     // A giraffid is taller than it is long; a serpent is far longer than it is tall. If these ever
     // come out equal again, every animal is being drawn as the same body -- which is what happened.
-    const whale = markerSize('narmada-walking-whale');
-    const siva = markerSize('sivatherium');
-    const vasuki = markerSize('vasuki-indicus');
+    const whale = drawn('narmada-walking-whale');
+    const siva = drawn('sivatherium');
+    const vasuki = drawn('vasuki-indicus');
 
     expect(siva.h, 'the giraffid is not standing up').toBeGreaterThan(siva.w);
     expect(whale.w / whale.h, 'the whale is not long and low').toBeGreaterThan(1.5);

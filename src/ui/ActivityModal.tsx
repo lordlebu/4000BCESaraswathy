@@ -37,7 +37,6 @@ import { GESTURE_VERB, gestureLine, type Gesture } from '../content/gestures';
 import type { Taking } from '../content/nodes';
 import { nameOf } from '../content/making';
 import { sceneFor } from './scenes';
-import { firstArt } from './art';
 import { plateFor } from './plates';
 import { Modal } from './Modal';
 import type { DayPage } from '../content/daybook';
@@ -117,20 +116,9 @@ export interface ActivityModalProps {
   /** The animal being followed, when there is one — its plate is the picture for a stalk. */
   creatureId: string | null;
   creatureName: string | null;
-  /**
-   * Which kind of this gesture it is, when that changes the picture.
-   *
-   * The shelter kind for a night, the process word for a making -- so a night at a camp is not
-   * painted as a night on bare ground, and a pot at a kiln is not painted as a man splitting
-   * reeds. `sceneFor` falls back to the plain gesture, so this is always optional and **no art is
-   * ever a blocker**: a variant with no painting simply draws the gesture's own scene, and a
-   * gesture with no painting draws nothing and still works.
-   */
+  /** The shelter, process or ground used to select this activity’s artwork. */
   variant?: string | null;
-  /**
-   * The ground underfoot, for a night: a bedroll on a ridge is not a bedroll on a marsh, and
-   * `sceneFor` tries the shelter on this ground before the shelter alone.
-   */
+  /** Ground underfoot for the assigned rest painting. */
   ground?: string | null;
   /** Named-place rest painting, without changing shelter mechanics. */
   placeId?:string|null;
@@ -247,22 +235,11 @@ export function ActivityModal({
 
   if (!open) return null;
 
-  // **Following an animal: the act fills the card, and the animal sits in its corner** (the owner's
-  // ruling, 2 October 2026). The plate used to fill it, which read as opening the bestiary rather
-  // than following anything -- but the plain `stalk.png` could not take its place, because it
-  // shows a buffalo. So the act is a painting with no animal in it, `stalk-follow.png` (and
-  // `fish.png`, whose water shows no fish), and the plate is what says which animal. A place's own
-  // painting of the act still comes first. With no such painting the plate fills the card as before.
+  // The activity painting shows the act. An identified animal gets its own labelled inset.
   const followed = (gesture === 'stalk' || gesture === 'fish') && creatureId ? creatureId : null;
-  const plate = followed ? plateFor(followed) : null;
-  const act = followed
-    ? firstArt('scenes', [variant ? `${gesture}-${variant}` : null, gesture === 'stalk' ? 'stalk-follow' : 'fish'], pick)
-    : null;
-  const inset = act ? plate : null;
-  const picture = followed
-    ? (act ?? plate ?? sceneFor(gesture, variant, pick))
-    : // A night is painted at midnight while it is being chosen and at dawn once it is over.
-      sceneFor(gesture, variant, pick, gesture === 'rest' ? (done ? 'dawn' : 'midnight') : null, gesture === 'rest' ? ground : null,placeId);
+  const inset = followed ? plateFor(followed) : null;
+  const picture = sceneFor(gesture, followed ? (gesture === 'stalk' ? 'follow' : null) : variant, pick,
+    gesture === 'rest' ? (done ? 'dawn' : 'midnight') : null, gesture === 'rest' ? ground : null, placeId);
   const what = subject ?? promised[0]?.material.name ?? 'it';
 
   return (

@@ -23,7 +23,7 @@ import { FieldKit } from '../src/ui/FieldKit';
 import { Here } from '../src/ui/Here';
 import { CollectionPanel } from '../src/ui/CollectionPanel';
 import { creatures as allCreatures, flora as allFlora } from '../src/content/canon';
-import { LANGUAGE_INK, PersonPortrait, toolFor } from '../src/ui/PersonPortrait';
+import { PersonPortrait } from '../src/ui/PersonPortrait';
 import { portraitFor } from '../src/ui/portraits';
 import { add, emptySatchel } from '../src/content/satchel';
 import { Conversation, handOver } from '../src/ui/Conversation';
@@ -108,7 +108,7 @@ afterEach(cleanup);
  */
 describe('the diary decides whether it is empty', () => {
   it('says so when nothing at all has happened', () => {
-    render(<Diary progress={emptyProgress()} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />);
+    render(<Diary progress={emptyProgress()} open onClose={noop} onAnswer={noop} onOpenKit={noop} />);
     expect(screen.getByText(/Travel, speak, or examine a place to begin/i)).toBeDefined();
   });
 
@@ -118,20 +118,20 @@ describe('the diary decides whether it is empty', () => {
     const p = talkedToBekh();
     expect(p.questions.length).toBeGreaterThan(0);
 
-    render(<Diary progress={p} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />);
+    render(<Diary progress={p} open onClose={noop} onAnswer={noop} onOpenKit={noop} />);
     expect(screen.queryByText(/Travel, speak, or examine a place to begin/i)).toBeNull();
     expect(screen.getByRole('heading', { name: /open questions/i })).toBeDefined();
   });
 
   it('does not call itself empty when only a word has been learned', () => {
     const p = learn(emptyProgress(), 'word_kia_thal');
-    render(<Diary progress={p} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />);
+    render(<Diary progress={p} open onClose={noop} onAnswer={noop} onOpenKit={noop} />);
     expect(screen.queryByText(/Travel, speak, or examine a place to begin/i)).toBeNull();
   });
 
   it('renders nothing at all when closed', () => {
     const { container } = render(
-      <Diary progress={emptyProgress()} open={false} onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
+      <Diary progress={emptyProgress()} open={false} onClose={noop} onAnswer={noop} onOpenKit={noop} />
     );
     expect(container.firstChild).toBeNull();
   });
@@ -182,7 +182,7 @@ describe('the diary keeps the crossings-out', () => {
     p = advance(p, 'discovery_saltreed_thatch');
 
     const { baseElement } = render(
-      <Diary progress={p} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
+      <Diary progress={p} open onClose={noop} onAnswer={noop} onOpenKit={noop} />
     );
     const readings = baseElement.querySelectorAll('.revisions .reading');
     expect(readings.length).toBe(2);
@@ -193,7 +193,7 @@ describe('the diary keeps the crossings-out', () => {
 
   it('shows no row at all for a discovery never noticed', () => {
     const { baseElement } = render(
-      <Diary progress={emptyProgress()} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
+      <Diary progress={emptyProgress()} open onClose={noop} onAnswer={noop} onOpenKit={noop} />
     );
     expect(baseElement.querySelectorAll('.entry').length).toBe(0);
   });
@@ -208,7 +208,6 @@ describe('the diary keeps the crossings-out', () => {
         open
         onClose={noop}
         onAnswer={noop}
-        onOpenEnding={noop}
         onOpenKit={noop}
       />
     );
@@ -272,7 +271,7 @@ describe('the knowledge tree', () => {
   it('never claims a discipline the player has not touched', () => {
     const p = climb(emptyProgress(), 'discovery_saltreed_thatch');
     const { baseElement } = render(
-      <Diary progress={p} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
+      <Diary progress={p} open onClose={noop} onAnswer={noop} onOpenKit={noop} />
     );
     const shown = [...baseElement.querySelectorAll('.disc-name')].map((e) => e.textContent);
     expect(shown.length).toBeGreaterThan(0);
@@ -282,7 +281,7 @@ describe('the knowledge tree', () => {
   it('counts rungs rather than discoveries, so half-understanding shows', () => {
     const one = advance(emptyProgress(), 'discovery_saltreed_thatch');
     const { baseElement } = render(
-      <Diary progress={one} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
+      <Diary progress={one} open onClose={noop} onAnswer={noop} onOpenKit={noop} />
     );
     const bar = baseElement.querySelector('.disc-bar i') as HTMLElement | null;
     expect(bar).not.toBeNull();
@@ -298,7 +297,7 @@ describe('the panels stay in step with canon', () => {
     let p = emptyProgress();
     for (const d of discoveries) p = advance(p, d.id);
     const { baseElement } = render(
-      <Diary progress={p} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
+      <Diary progress={p} open onClose={noop} onAnswer={noop} onOpenKit={noop} />
     );
     const shown = new Set([...baseElement.querySelectorAll('.diary-section > h3')].map((e) => e.textContent));
     const used = new Set(discoveries.map((d) => d.discipline));
@@ -888,32 +887,9 @@ describe('the people in a place', () => {
     // One portrait each, and hidden from the reading order: the name beside it already says who
     // this is, so announcing "portrait, Thrali" would be worse than announcing "Thrali".
     const portraits = document.querySelectorAll('svg.person-portrait');
-    expect(portraits).toHaveLength(3);
-    for (const svg of portraits) expect(svg.getAttribute('aria-hidden')).toBe('true');
+    expect(portraits).toHaveLength(0);
 
-    // Kia and Maru must not be drawn in the same ink. Somebody canon gives no language takes the
-    // neutral one rather than being assigned a tongue.
-    const inkOf = (i: number) => portraits[i]!.querySelector('path')!.getAttribute('fill');
-    expect(inkOf(0)).toBe(LANGUAGE_INK.kia);
-    expect(inkOf(1)).toBe(LANGUAGE_INK.maru);
-    expect(Object.values(LANGUAGE_INK)).not.toContain(inkOf(2));
-  });
-
-  it('gives a fisher and a herder different things to hold', () => {
-    // The portrait says what someone does, which is the only thing canon records about how they
-    // look. Two trades sharing a drawing would make it say nothing.
-    expect(toolFor('fisher')).not.toBe(toolFor('herder'));
-
-    render(
-      <div>
-        <PersonPortrait person={nobody('kia', 'fisher')} />
-        <PersonPortrait person={nobody('maru', 'herder')} />
-      </div>
-    );
-    const [first, second] = [...document.querySelectorAll('svg.person-portrait')];
-    const toolOf = (svg: Element) => [...svg.querySelectorAll('path')].at(-1)!.getAttribute('d');
-    expect(toolOf(first!)).not.toBe(toolOf(second!));
-  });
+ });
 
   it('shows a painting instead, for anybody who has one', () => {
     const painted = npcs.find((n) => portraitFor(n.id) !== null);
@@ -924,7 +900,7 @@ describe('the people in a place', () => {
   });
 });
 
-describe('the field notes draw a mark for every species', () => {
+describe('field notes display named species', () => {
   // The reason the 297-species tail is survivable. Canon holds 219 encounter fauna and 78 flora,
   // one painted plate is a session's work, and 297 of them is a year -- so the panel derives a
   // silhouette from the name and colours it by the ground the species lives on. Every species has
@@ -970,21 +946,6 @@ describe('the field notes draw a mark for every species', () => {
     discovered: 5,
     atLandmark: false,
     memory: ''
-  });
-
-  it('draws one beside the creature and one beside the plant', () => {
-    const { baseElement } = render(
-      <Here standing={bare} sky={null} conversation={null} height="read" onHeight={() => {}} open notes={note()} place={{ poiId: null } as never} actions={[]} />
-    );
-    // Two marks, one per named species -- and they are inside the term, beside the name, rather
-    // than floating in the section heading.
-    //
-    // Both halves are an emoji now: the mark is punctuation beside a name, and the painted plate
-    // is what gets a block of its own. The two use different classifiers -- body plan for an
-    // animal, growth form for a plant -- so this also checks they are not the same glyph.
-    const marks = [...baseElement.querySelectorAll('.note dt .species-emoji')];
-    expect(marks).toHaveLength(2);
-    expect(marks[0].textContent).not.toBe(marks[1].textContent);
   });
 
   it('never opens a plate block for a plant, even if one is dropped in', () => {
@@ -1034,7 +995,7 @@ describe('the field notes draw a mark for every species', () => {
   });
 });
 
-describe('a painted plate replaces the derived mark, one species at a time', () => {
+describe('a painted plate matches the named species', () => {
   // The whole tail strategy in one behaviour. 297 species, one plate a session, so the silhouette
   // is the normal case forever and a plate is the exception -- and adding one must take no code.
   //
@@ -1087,7 +1048,7 @@ describe('a painted plate replaces the derived mark, one species at a time', () 
     expect(baseElement.querySelectorAll('.note dt .species-icon')).toHaveLength(0);
   });
 
-  it('falls back to the mark for a species with no plate', () => {
+  it('shows the name without a mark when no plate exists', () => {
     const { baseElement } = render(
       <Here standing={bare} sky={null} conversation={null} height="read" onHeight={() => {}}
         open
@@ -1096,7 +1057,8 @@ describe('a painted plate replaces the derived mark, one species at a time', () 
       actions={[]} />
     );
     expect(baseElement.querySelectorAll('.plate-open-note')).toHaveLength(0);
-    expect(baseElement.querySelectorAll('.note dt .species-emoji')).toHaveLength(1);
+    expect(baseElement.querySelectorAll('.note dt .species-emoji')).toHaveLength(0);
+    expect(screen.getByText('Unpainted Thing')).toBeTruthy();
   });
 
   it('marks the plate decorative, since the name already says what it is', () => {

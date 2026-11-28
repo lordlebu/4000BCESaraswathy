@@ -1,3 +1,5 @@
+import { journeyStorageKey, seedJourney } from './journey-fixture';
+import { examineFirst } from './context-event';
 import { expect, test } from '@playwright/test';
 
 const base='?map=field_map_twins&seed=twin-expansion&hour=12&door=open&chatter=off&firsts=off';
@@ -24,16 +26,39 @@ for(const [at,title,name] of [
   });
 }
 
-test('returning to the reed bank opens its knowledge-gated follow-up',async({page})=>{
-  await page.addInitScript(()=>localStorage.setItem('south-of-tethys:twin-expansion',JSON.stringify({
-    knowledgeVersion:1,progress:{rungs:{discovery_twin_banks:0},words:[],recipes:[],made:[],answered:{},questions:[]},
-    seenEvents:['happening_valley_seam']
-  })));
-  await page.goto(base+'&at=poi_reedwright_bank');
-  await expect(page.getByRole('button',{name:'Leave',exact:true})).toBeVisible({timeout:30000});
-  await page.getByRole('button',{name:'Leave',exact:true}).click();
+test('returning to the reed bank opens its knowledge-gated follow-up', async ({ page }) => {
+  const seed = 'twin-expansion';
+  await seedJourney(page, seed, { seenEvents: ['happening_valley_seam'] });
+
+  await page.goto(base + '&at=poi_reedwright_bank');
+  const leave = page.getByRole('button', { name: 'Leave', exact: true });
+  const pending = () => page.evaluate(key => JSON.parse(localStorage.getItem(key) ?? '{}').encounters?.pending,
+    journeyStorageKey(seed));
+  const initialArrival = expect.objectContaining({ kind: 'place', id: 'poi_reedwright_bank', returning: false });
+  await expect(leave).toBeVisible({ timeout: 30000 });
+  await expect.poll(pending, { timeout: 12000 }).toContainEqual(initialArrival);
+  await leave.click();
+  await expect.poll(pending, { timeout: 12000 }).not.toContainEqual(initialArrival);
+
+  await page.getByRole('button', { name: "The Reedwright's Bank, hidden" }).click();
+  await examineFirst(page);
+  await leave.click();
+  const walker = () => page.evaluate(() => (window as unknown as {
+    __walker?: () => { x: number; moving: boolean };
+  }).__walker?.());
   await page.keyboard.press('KeyD');
-  await expect.poll(()=>page.evaluate(()=>(window as any).__walker().x)).toBe(39);
+  await expect.poll(walker, { timeout: 12000 }).toMatchObject({ x: 39, moving: false });
+  const road = page.getByRole('dialog', { name: 'The Longer Road' });
+  await expect(road).toBeVisible({ timeout: 12000 });
+  await road.getByRole('button', { name: 'Keep the page' }).click();
+  await road.getByRole('button', { name: 'Go on' }).click();
+  await expect(road).toHaveCount(0);
   await page.keyboard.press('KeyA');
-  await expect(page.locator('.activity-card h2')).toHaveText('The Next Repair',{timeout:10000});
+  await expect.poll(walker, { timeout: 12000 }).toMatchObject({ x: 38, moving: false });
+
+  const card = page.getByRole('dialog', { name: 'The Next Repair' });
+  await expect(leave).toBeVisible();
+  await expect(card).toHaveCount(0);
+  await leave.click();
+  await expect(card).toBeVisible({ timeout: 10000 });
 });

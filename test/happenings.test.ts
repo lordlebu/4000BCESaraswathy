@@ -501,11 +501,10 @@ describe('the meal at a camp has a painting of its own to ask for', () => {
     expect(meals.length, 'no camp meal was sampled').toBeGreaterThan(0);
     expect(talks.length - meals.length, 'no camp card away from the meal was sampled').toBeGreaterThan(0);
     for (const { event } of talks) {
-      const kind = event.artVariant?.replace('woven-camp-', '');
+      const kind = event.art.replace(/^woven-camp-(meal-)?/, '');
       const eating = event.choices.some((c) => c.id === 'eat');
       // The meal painting first, then the kind's camp, then any camp: each falls through until painted.
-      expect(event.artMoment, event.id).toBe(eating ? `woven-camp-meal-${kind}` : undefined);
-      expect(event.art).toBe('woven-camp');
+      expect(event.art, event.id).toBe(`woven-camp-${eating ? 'meal-' : ''}${kind}`);
     }
   });
 });

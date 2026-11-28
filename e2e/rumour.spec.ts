@@ -1,3 +1,4 @@
+import { seedJourney } from './journey-fixture';
 // Arriving where a stranger's rumour sent you.
 //
 // `test/rumours.test.ts` proves the rumour, the small talk and the card under Node. What only a page
@@ -14,18 +15,7 @@ const TOLD =
   'told:rumour:place:poi_drowned_dockyard@poi_drowned_dockyard@field_map_lothal:company_carrier';
 
 test('a place a stranger sent you to keeps the promise on arriving', async ({ page }) => {
-  await page.addInitScript((flag) => {
-    // Only the what-you-know half, which loads on its own version: every other field defaults.
-    // Written once, so the page's own saves afterwards are not undone by a reload.
-    const key = 'south-of-tethys:dock-8';
-    try {
-      if (!localStorage.getItem(key)) {
-        localStorage.setItem(key, JSON.stringify({ knowledgeVersion: 1, flags: [flag], met: [] }));
-      }
-    } catch {
-      // Storage refused: the spec will fail on the card, which is the honest outcome.
-    }
-  }, TOLD);
+  await seedJourney(page, 'dock-8', { flags: [TOLD] });
 
   await page.goto('/?seed=dock-8&hour=12&at=9,40');
   await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });

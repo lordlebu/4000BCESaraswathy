@@ -522,15 +522,12 @@ plan was finished: nothing waits for them.
 
 #### `woven-camp-talk` -- talking to somebody who keeps a camp
 
-Draws the painting of the camp it is at -- `woven-camp-drovers`, `woven-camp-pilgrims`,
-`woven-camp-adventurers` or `woven-camp-dacoits`, the owner's camp art of 1 October 2026 -- and
-falls back to `woven-camp`. The people at a camp live there, so their card is the camp's picture.
+Assign the resident’s camp painting. Use the corresponding meal painting during the meal.
 
 #### `woven-camp-meal-drovers` -- The meal at a drovers' fold
 
 Save as `assets/source/events/woven-camp-meal-drovers.png`. Drawn on the card when you sit with
-somebody at a drovers camp at the meal (17:00 to 19:00), tried before `woven-camp-drovers` and falling
-back to it until it exists (`artMoment` in `content/events.ts`).
+somebody at a drovers camp at the meal (17:00 to 19:00).
 
 ```text
 Watercolour illustration from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black. Unhurried and calm; there is no threat in this world and nothing is in danger. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature.
@@ -543,8 +540,7 @@ Subject: Dusk at a drovers' camp in open grassland: a felt tent, a fold of woven
 #### `woven-camp-meal-pilgrims` -- The meal with pilgrims
 
 Save as `assets/source/events/woven-camp-meal-pilgrims.png`. Drawn on the card when you sit with
-somebody at a pilgrims camp at the meal (17:00 to 19:00), tried before `woven-camp-pilgrims` and falling
-back to it until it exists (`artMoment` in `content/events.ts`).
+somebody at a pilgrims camp at the meal (17:00 to 19:00).
 
 ```text
 Watercolour illustration from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black. Unhurried and calm; there is no threat in this world and nothing is in danger. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature.
@@ -557,8 +553,7 @@ Subject: Dusk at a pilgrims' camp: a cloth shelter, a pole hung with coloured cl
 #### `woven-camp-meal-adventurers` -- The meal at the adventurers' fire
 
 Save as `assets/source/events/woven-camp-meal-adventurers.png`. Drawn on the card when you sit with
-somebody at a adventurers camp at the meal (17:00 to 19:00), tried before `woven-camp-adventurers` and falling
-back to it until it exists (`artMoment` in `content/events.ts`).
+somebody at a adventurers camp at the meal (17:00 to 19:00).
 
 ```text
 Watercolour illustration from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black. Unhurried and calm; there is no threat in this world and nothing is in danger. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature.
@@ -571,8 +566,7 @@ Subject: Dusk at an adventurers' camp: a lean-to of poles and hide, coils of rop
 #### `woven-camp-meal-dacoits` -- The meal with a dacoit band
 
 Save as `assets/source/events/woven-camp-meal-dacoits.png`. Drawn on the card when you sit with
-somebody at a dacoits camp at the meal (17:00 to 19:00), tried before `woven-camp-dacoits` and falling
-back to it until it exists (`artMoment` in `content/events.ts`).
+somebody at a dacoits camp at the meal (17:00 to 19:00).
 
 ```text
 Watercolour illustration from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black. Unhurried and calm; there is no threat in this world and nothing is in danger. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature.

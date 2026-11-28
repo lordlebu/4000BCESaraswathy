@@ -22,7 +22,7 @@ it('resolves the carving and unveiling cards to their distinct delivered paintin
   const arc=storylines.find(s=>s.id==='storyline_twin_kang_bust')!;
   for(const id of ['carving','unveiling']){
     const beat=arc.beats.find(b=>b.id===id)!, event=beatEvent(arc,beat);
-    const picture=preferredArt('events',[event.artVariant,event.art,event.artFallback]);
+    const picture=preferredArt('events',event.art);
     expect(picture).toContain(`story-storyline_twin_kang_bust-${id}-painted`);
     const file=join(__dirname,`../src/ui/events/story-storyline_twin_kang_bust-${id}-painted.png`);
     expect(dimensions(file)).toEqual([512,384]);

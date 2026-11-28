@@ -10,30 +10,15 @@
 // `src/ui/plates/` keeps and for the same reason: a name that has to be registered somewhere is a
 // name that will be registered wrong.
 //
-// **Four facings, and a species may ship fewer.** `tools/build-wanderers.js` cuts right, left,
-// down and up out of one sheet, but `facingArt` falls back along a chain -- an animal with only a
-// right view is drawn facing right whichever way it is walking, which is better than not drawn.
-// A bare `<id>.png` with no facing suffix still works and answers for every direction, because
-// that was the convention before the sheets arrived and breaking it would strand anything painted
-// to it.
-//
-// Until a file exists, `wandererMarkerKey` draws a stand-in. That is what let the whale ship before
-// it was painted: the quest, the circuit and the browser check were all real while the picture was
-// provisional, and the day the painting arrived nothing but the picture changed.
-
-// Which way an animal is drawn is the same question as which way a person is drawn, so it is the
-// same type -- `player.ts` already owns `Facing` and a second identical union here would be a
-// second thing to keep in step.
+// All four facings are required for a species to appear on the map.
 import type { Facing } from './player';
 
 export type { Facing };
 
 /**
- * Every painted wanderer, keyed `<id>` or `<id>-<facing>`.
+ * Every painted wanderer, keyed `<id>-<facing>`.
  *
- * `eager` for the reason `src/ui/art.ts` gives: the scene decides during `create` whether to draw a
- * painting or the stand-in, and a promise cannot be answered then. Vite resolves the URL at build
- * time and fetches the bytes only if the texture is actually loaded.
+ * Vite resolves the URLs at build time. The scene preloads the species that live on its map.
  */
 const files = import.meta.glob<string>('../../assets/wanderers/*.{png,webp}', {
   eager: true,
@@ -47,35 +32,11 @@ for (const [path, url] of Object.entries(files)) {
   byName.set(file.replace(/\.[^.]+$/, ''), url);
 }
 
-/**
- * What to draw this animal with, facing this way, or null while it is still a stand-in.
- *
- * **Falls back rather than failing.** Down and up borrow the side view before they borrow nothing,
- * and left borrows right -- a four-legged animal seen from behind at 80 pixels is not so different
- * from one seen from the side, and an animal drawn the wrong way round is still an animal met. The
- * order is deliberate: the nearest view first, then the side, then the species' single unfacinged
- * file if it has one.
- */
 export function facingArt(speciesId: string, facing: Facing): string | null {
-  const chain: string[] =
-    facing === 'left'
-      ? [`${speciesId}-left`, `${speciesId}-right`]
-      : facing === 'right'
-        ? [`${speciesId}-right`, `${speciesId}-left`]
-        : [`${speciesId}-${facing}`, `${speciesId}-right`, `${speciesId}-left`];
-  for (const name of [...chain, speciesId]) {
-    const url = byName.get(name);
-    if (url) return url;
-  }
-  return null;
+  return byName.get(`${speciesId}-${facing}`) ?? null;
 }
 
-/** Whether this species has any painting at all. What the scene asks before reaching for a mark. */
-export function hasPaintedArt(speciesId: string): boolean {
-  return facingArt(speciesId, 'right') !== null;
-}
-
-/** The texture key one facing is loaded under. Distinct from the stand-in's key. */
+/** The texture key one facing is loaded under. */
 export function paintedKey(speciesId: string, facing: Facing): string {
   return `wanderer-art:${speciesId}:${facing}`;
 }
@@ -109,7 +70,7 @@ export function loadWandererArt(scene: Phaser.Scene, speciesIds: readonly string
   for (const id of speciesIds) {
     for (const facing of ['right', 'left', 'down', 'up'] as const) {
       const url = facingArt(id, facing);
-      if (!url) continue;
+      if (!url) throw new Error(`Missing artwork for ${id} facing ${facing}`);
       const key = paintedKey(id, facing);
       if (!scene.textures.exists(key)) scene.load.image(key, url);
       // And the steps of its walk, when it was painted walking.

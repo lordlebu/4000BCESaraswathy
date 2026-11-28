@@ -19,7 +19,7 @@ import { createRequire } from 'node:module';
 import { readdirSync, statSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import biomes from '../data/biomes.json';
-import { GROUND_GROUP, NIGHT_MOMENTS, sceneNames } from '../src/ui/scenes';
+import { GROUND_GROUP, NIGHT_MOMENTS, sceneKey } from '../src/ui/scenes';
 import { SHELTER_ORDER } from '../src/game/night';
 
 const SCENES = join(__dirname, '..', 'src', 'ui', 'scenes');
@@ -65,17 +65,16 @@ const GROUPS = [...new Set(Object.values(GROUND_GROUP))];
 const ACTS = ['follow'];
 /** A night at a moment: `none-midnight`, `camp-dawn`. Only `rest` asks for these. */
 const NIGHTS = SHELTERS.flatMap((s) => NIGHT_MOMENTS.map((m) => `${s}-${m}`));
-const PLACE_NIGHTS=sceneNames('rest','roof','midnight',null,'poi_northwest_cave_camp')
-  .concat(sceneNames('rest','roof','dawn',null,'poi_northwest_cave_camp')).map(n=>n.replace(/^rest-/,''));
+const PLACE_NIGHTS = NIGHT_MOMENTS.map(moment => sceneKey('rest', 'roof', moment, null, 'poi_northwest_cave_camp')!.replace(/^rest-/, ''));
 /**
- * A night painted for its ground: `bedroll-snow-midnight`, `bedroll-high-dawn`. Asked of `sceneNames`
+ * A night painted for its ground: `bedroll-snow-midnight`, `bedroll-high-dawn`. Asked of `sceneKey`
  * itself, over every shelter, moment and biome, so the guard knows exactly the names a night looks
  * up and no more.
  */
 const GROUND_NIGHTS = new Set(
   SHELTERS.flatMap((shelter) =>
     [undefined, ...NIGHT_MOMENTS].flatMap((moment) =>
-      BIOMES.flatMap((ground) => sceneNames('rest', shelter, moment, ground).map((n) => n.replace(/^rest-/, '')))
+      BIOMES.map((ground) => sceneKey('rest', shelter, moment, ground)?.replace(/^rest-/, '')).filter(Boolean)
     )
   )
 );

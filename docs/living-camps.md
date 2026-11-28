@@ -272,10 +272,9 @@ the light shining on bare ground. A new piece painted with a flame takes one lin
 The plan's one open question about art was whether the meal wanted a painting of its own, to be
 decided after Phase 2. It was asked for once the plan was finished: four prompts, one per kind of
 camp, are in `docs/event-prompts.md` as `woven-camp-meal-drovers`, `-pilgrims`, `-adventurers` and
-`-dacoits`. **Nothing waits for them.** The card at the meal tries the meal painting first
-(`artMoment` on the event, read by `EventCard`), then the kind's camp painting, then any camp, so a
-painting shows the day its file lands in `src/ui/events/` and the card looks exactly as it does now
-until then. `test/happenings.test.ts` holds the order.
+`-dacoits`. A meal card uses its assigned camp painting when present. The dialogue and meal
+effects remain playable without the optional illustration. `test/happenings.test.ts` checks the
+assigned key.
 
 **All four landed the same day**, painted by the owner and sent from a phone; their crops are in
 `docs/event-prompts.md`. The adventurers' has a spear leaning on its tent, and **the owner kept it**:

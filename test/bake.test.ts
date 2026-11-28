@@ -177,12 +177,10 @@ describe('a bake that cannot be trusted is refused rather than half-read', () =>
     expect(restoreWorld(baked, maps[0]!)).toBeNull();
   });
 
-  it('drops a place canon no longer lists rather than inventing one', () => {
+  it('rejects a bake that records a removed place', () => {
     const baked = bakedOf();
     baked.placed.push(['poi_that_canon_removed', 1, 1]);
-    const back = restoreWorld(baked, maps[0]!)!;
-    expect(back).not.toBeNull();
-    expect(back.placed.some((p) => p.poi.id === 'poi_that_canon_removed')).toBe(false);
+    expect(restoreWorld(baked, maps[0]!)).toBeNull();
   });
 });
 

@@ -3,7 +3,6 @@ import { bakeWorld, restoreWorld, worldFor } from '../src/world/bake';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { fieldMap, npcsAt } from '../src/content/places';
 import { canHappen, events } from '../src/content/events';
-import { reachableFrom } from '../src/world/generate';
 
 const map = fieldMap('field_map_twins')!;
 const additions = ['poi_dune_windbreak','poi_reedwright_bank','poi_nesting_cove'];
@@ -20,23 +19,17 @@ function olderValley() {
   return baked;
 }
 
-describe('the additive valley expansion', () => {
-  it('adds all three new stops to a saved valley without rerolling its ground or old places', () => {
-    const old = olderValley(), restored = restoreWorld(old, map)!;
-    expect(restored.world.tiles[1]![1]!.biome).toBe('coast');
-    expect(restored.placed).toHaveLength(map.pointsOfInterest.length);
-    for(const [id,x,y] of old.placed)expect(restored.placed.find(p=>p.poi.id===id)?.at).toEqual({x,y});
-    const reached=reachableFrom(restored.world.tiles,64,64,restored.world.start);
-    for(const id of additions){const p=restored.placed.find(p=>p.poi.id===id)!;expect(reached.has(`${p.at.x},${p.at.y}`)).toBe(true);}
-    const once=bakeWorld(restored);
-    expect(bakeWorld(restoreWorld(once,map)!)).toEqual(once);
+describe('the valley expansion', () => {
+  it('rejects an incomplete bake and generates all current stops when storage is full', () => {
+    const old = olderValley();
+    expect(restoreWorld(old, map)).toBeNull();
+    vi.stubGlobal('localStorage', {
+      getItem: () => JSON.stringify(old), removeItem: () => {}, setItem: () => { throw new Error('quota'); }
+    });
+    const current = worldFor(map, 'expansion-save');
+    expect(current.world).toEqual(buildFieldMap(map, { seed: 'expansion-save' }).world);
+    expect(current.placed.map(({ poi }) => poi.id)).toEqual(expect.arrayContaining(additions));
   });
-
-  it('keeps restored ground when persisting the added places hits a full storage quota', () => {
-    vi.stubGlobal('localStorage',{getItem:()=>JSON.stringify(olderValley()),setItem:()=>{throw new Error('quota');}});
-    expect(worldFor(map,'expansion-save').world.tiles[1]![1]!.biome).toBe('coast');
-  });
-
   it('keeps the new residents in their places and makes every new happening reachable', () => {
     expect(npcsAt('poi_reedwright_bank').map(n=>n.id)).toContain('npc_reedwright_irekha');
     expect(npcsAt('poi_nesting_cove').map(n=>n.id)).toContain('npc_cove_watcher_ulenna');

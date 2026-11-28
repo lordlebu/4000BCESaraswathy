@@ -1,9 +1,9 @@
 import {describe,it,expect} from 'vitest';
-import {fieldMap,poi} from '../src/content/places';
+import {fieldMap} from '../src/content/places';
 import {buildFieldMap} from '../src/world/fieldMap';
-import {addTwinPlaces} from '../src/world/twinCities';
+import { caveCookCamp } from '../src/content/campLife';
 import {beeduAt,beeduRoute,BEEDU_CYCLE_MS} from '../src/content/beedu';
-import {bustStage,caveHelperPresent,KANG_ARC} from '../src/content/twinStories';
+import {bustStage,caveHerderIsVisiting,KANG_ARC} from '../src/content/twinStories';
 import {beatNow,storylines} from '../src/content/storylines';
 import {linesFor,emptyProgress} from '../src/journey';
 
@@ -30,16 +30,14 @@ describe('the optional bust and permanent cave',()=>{
   const finished=linesFor(progress,'npc_priest_kang',{},[`story:${KANG_ARC}:unveiling`]);
   expect(finished.some(l=>l.text.startsWith('There I am in stone.'))).toBe(true);
  });
- it('alternates helpers without moving the household or cutting new roads on saved ground',()=>{
-  for(let day=0;day<12;day++){
-   expect(Number(caveHelperPresent('npc_cave_cook',day))+Number(caveHelperPresent('npc_cave_herder',day))).toBeLessThanOrEqual(1);
-   expect(caveHelperPresent('npc_mirlepa',day)).toBe(true);
+ it('visits the cave for two days every six without displacing the herder', () => {
+  const built = buildFieldMap(fieldMap('field_map_twins')!, { seed: 'cave-roster' });
+  const places = built.placed.map(({ poi, at }) => ({ poiId: poi.id, at }));
+  for (let day = 0; day < 12; day++) {
+   const cook = caveCookCamp(built.fieldMap.id, places, day);
+   expect(Boolean(cook)).toBe(day % 6 < 2);
+   if (cook) expect(caveHerderIsVisiting(day)).toBe(false);
   }
-  const built=buildFieldMap(fieldMap('field_map_twins')!,{seed:'cave-migration'});
-  const roads=built.world.tiles.map(r=>r.map(t=>Boolean(t.road)));
-  const placed=addTwinPlaces(built.world,[poi('poi_northwest_cave_camp')!]);
-  expect(placed[0]!.at).toEqual({x:51,y:12});
-  expect(built.world.tiles.map(r=>r.map(t=>Boolean(t.road)))).toEqual(roads);
  });
 });
 

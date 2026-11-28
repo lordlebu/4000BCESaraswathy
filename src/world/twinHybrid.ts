@@ -4,7 +4,7 @@ import type { FieldMapWorld } from './fieldMap';
 import { findPath, pointKey, routeDistances } from './pathfind';
 import { tileHash } from './rng';
 import { crossingCost } from './routes';
-import { buildTwinCities, riverX, TWIN_ANCHORS, TWIN_MAP } from './twinCities';
+import { buildTwinValleyBase, riverX, TWIN_ANCHORS, TWIN_MAP } from './twinCities';
 import { CAVE_AT, inTwinHighlands } from './twinHighlands';
 import type { Point, Tile } from './types';
 import { generateFromProfile, type MapProfile } from './mapProfile';
@@ -16,7 +16,6 @@ export const TWIN_PROFILE: MapProfile = {
 const HARAPPA_ROAD = { x: 22, y: 27 };
 const EAST_ROAD = { x: 46, y: 27 };
 const LANDING_ROAD = { x: 46, y: 39 };
-const FALLBACK_LAYOUT = 'twins:valley-reference';
 
 function valleyTerrain(seed: string, layout: string, profile: MapProfile) {
   const wave = (salt: string) => (tileHash(layout, 0, 0, salt) % 628) / 100;
@@ -144,10 +143,10 @@ function residentialLots({ world, placed }: FieldMapWorld, layout: string): Poin
 }
 
 function makeValley(map: FieldMap, seed: string, pois: readonly PointOfInterest[], layout: string) {
-  const legacySeed = twinWorldSeed(seed);
-  const form = valleyTerrain(legacySeed, layout, TWIN_PROFILE);
+  const crossingSeed = twinWorldSeed(seed);
+  const form = valleyTerrain(crossingSeed, layout, TWIN_PROFILE);
   return generateFromProfile(TWIN_PROFILE, () => {
-    const built = buildTwinCities(map, seed, pois, form);
+    const built = buildTwinValleyBase(map, seed, pois, form);
     const phase = (tileHash(layout, 0, 0, 'hybrid:foothill') % 628) / 100;
     for (const row of built.world.tiles) for (const tile of row) {
       if (!inTwinHighlands(tile) || tile.biome !== 'hills' || tile.x < 46 || Math.abs(tile.y - CAVE_AT.y) < 3) continue;
@@ -169,7 +168,10 @@ function makeValley(map: FieldMap, seed: string, pois: readonly PointOfInterest[
 }
 
 export function buildHybridTwinCities(map: FieldMap, seed: string, pois: readonly PointOfInterest[]): FieldMapWorld {
-  const built = makeValley(map, seed, pois, seed) ?? makeValley(map, seed, pois, FALLBACK_LAYOUT);
-  if (!built) throw new Error('The Twin Cities reference layout must remain navigable.');
-  return built;
+  for (let attempt = 0; attempt < 16; attempt++) {
+    const layout = attempt === 0 ? seed : `${seed}:layout:${attempt}`;
+    const built = makeValley(map, seed, pois, layout);
+    if (built) return built;
+  }
+  throw new Error(`No navigable Twin Cities layout for ${seed}`);
 }

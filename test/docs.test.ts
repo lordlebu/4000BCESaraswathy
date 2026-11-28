@@ -85,9 +85,9 @@ describe('CLAUDE.md says where the save version is', () => {
     // It said 16 for two bumps after the code reached 18 -- and every bump discards every journey
     // in existence, which is the one number here a reader most needs to be right.
     const claude = readFileSync(join(ROOT, 'CLAUDE.md'), 'utf8');
-    const save = readFileSync(join(ROOT, 'src', 'save.ts'), 'utf8');
-    const actual = save.match(/export const SAVE_VERSION = (\d+);/)?.[1];
-    expect(actual, 'could not read SAVE_VERSION out of src/save.ts').toBeDefined();
+    const save = readFileSync(join(ROOT, 'src', 'storageKeys.ts'), 'utf8');
+    const actual = save.match(/export const JOURNEY_VERSION = (\d+);/)?.[1];
+    expect(actual, 'could not read SAVE_VERSION out of src/storageKeys.ts').toBeDefined();
     expect(claude).toContain(`It is at ${actual} —`);
   });
 });

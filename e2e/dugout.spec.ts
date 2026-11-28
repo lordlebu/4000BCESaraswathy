@@ -38,7 +38,7 @@ async function bankOf(page: Page, seed: string, map: string) {
   await boot(page, `/?seed=${seed}&map=${map}&door=open`);
   const baked = await page.evaluate(
     (k) => JSON.parse(localStorage.getItem(k) ?? 'null') as { biomes: string[]; flags: string[] },
-    `south-of-tethys:world:${seed}:${map}`
+    `south-of-tethys-v20:world:${seed}:${map}`
   );
   const biome = (x: number, y: number) => {
     const code = baked.biomes[y]?.[x];
@@ -145,7 +145,7 @@ test('on Lothal, the dugout goes out from the beach into the shallows and no fur
   await boot(page, `/?seed=${seed}&map=${map}&door=open`);
   const baked = await page.evaluate(
     (k) => JSON.parse(localStorage.getItem(k) ?? 'null') as { biomes: string[]; flags: string[] },
-    `south-of-tethys:world:${seed}:${map}`
+    `south-of-tethys-v20:world:${seed}:${map}`
   );
   const biome = (x: number, y: number) => {
     const code = baked.biomes[y]?.[x];

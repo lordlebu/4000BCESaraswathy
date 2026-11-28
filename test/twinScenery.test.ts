@@ -16,10 +16,10 @@ const homes=new Set(['twinHouses','twinHousesDetail','twinHomesPainted']);
 const sites=['poi_earthen_workshop','poi_nesting_ruins','poi_planted_ruins','poi_drain_court','poi_dune_windbreak','poi_reedwright_bank'];
 
 it('rebuilds six registered sites while keeping the approved homes and cave routes',()=>{
-  for(const twinGeneration of [1,2] as const){
-    const built=buildFieldMap(twins,{seed:'hybrid-review-0',twinGeneration});
+  {
+    const built=buildFieldMap(twins,{seed:'hybrid-review-0'});
     const original=planScene(built);
-    const plan=planScene(built,true,review);
+    const plan=planScene(built,review);
     expect(original.some(p=>p.sheet==='twinSite'||p.sheet==='twinRelief'||p.twinShadow)).toBe(false);
     for(const id of sites){
       expect(plan.filter(p=>p.name===`poi:${id}`)).toHaveLength(1);
@@ -44,13 +44,13 @@ it('rebuilds six registered sites while keeping the approved homes and cave rout
 
 it('preserves gameplay ground, reciprocal ridge joins and preview placement across 150 layouts',()=>{
   for(let n=0;n<150;n++){
-    const built=buildFieldMap(twins,{seed:`valley-stress-${n}`,twinGeneration:2});
+    const built=buildFieldMap(twins,{seed:`valley-stress-${n}`});
     const restored=rebake(built)!;
     const before=JSON.stringify(built);
-    const plan=planScene(built,true,review);
+    const plan=planScene(built,review);
     expect(JSON.stringify(built)).toBe(before);
     const preview=(list:typeof plan)=>list.filter(p=>p.sheet==='twinRelief'||p.sheet==='twinSite'||p.sheet==='twinLandmark'||p.twinShadow);
-    expect(preview(planScene(restored,true,review))).toEqual(preview(plan));
+    expect(preview(planScene(restored,review))).toEqual(preview(plan));
     const allowed=new Set(built.placed.map(p=>pointKey(p.at)));
     for(const p of preview(plan)){
       const t=built.world.tiles[p.y]![p.x]!;

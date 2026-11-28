@@ -2,10 +2,8 @@
 // builds behind them, and stepping down off the cart at the other end.
 //
 // **The sixth hook out of `App.tsx`** (`docs/satchel-and-hearth.md`, phase 9), moved as it was with
-// no change in behaviour. The road is `content/places.ts`'s (`roadBetween`, `arrivalPoint`), the
-// cards are `Journey.tsx`, and the scene builds the next map on `travel-to`. The crossing refs stay
-// in App because the event hook reads them too: an arrival that lands mid-crossing waits in
-// `heldArrival` until the cart is left.
+// The scene builds the destination on `travel-to`. Its encounters wait in the same queue as any
+// other sighting until the crossing cards are complete.
 
 import { useCallback, useState, type Dispatch, type MutableRefObject } from 'react';
 import { EventBus } from '../game/EventBus';
@@ -21,8 +19,6 @@ export function useCrossing({
   setFieldMapId,
   journeyFlags,
   crossing,
-  heldArrival,
-  arrivedRef,
   discovered,
   latest,
   happens,
@@ -33,8 +29,6 @@ export function useCrossing({
   setFieldMapId: (id: string) => void;
   journeyFlags: MutableRefObject<string[]>;
   crossing: MutableRefObject<boolean>;
-  heldArrival: MutableRefObject<string | null>;
-  arrivedRef: MutableRefObject<((e: { poiId: string }) => void) | null>;
   discovered: MutableRefObject<string[]>;
   latest: MutableRefObject<Latest>;
   happens: MutableRefObject<Happens | null>;
@@ -53,7 +47,6 @@ export function useCrossing({
         const first = !journeyFlags.current.includes(seenFlag);
         if (first) journeyFlags.current = [...journeyFlags.current, seenFlag];
         crossing.current = true;
-        heldArrival.current = null;
         setJourney({ from: fieldMapId, to: next, road, first });
       }
       setFieldMapId(next);
@@ -86,27 +79,15 @@ export function useCrossing({
     [seed, fieldMapId]
   );
 
-  /**
-   * The ride is over. **The first time on a road, something happens on it**: the road's own written
-   * happening when canon has one -- the ferry song, the line where the sea was -- else one of the
-   * road's woven events. Asked for, never rationed, and only once per road.
-   */
+  // The road's authored card takes its turn first. Destination sightings already wait in the queue.
   const stepDown = useCallback(() => {
     const done = journey;
     setJourney(null);
     crossing.current = false;
-    const held = heldArrival.current;
-    heldArrival.current = null;
     const here = latest.current.at;
-    // **One thing, in this order.** The road's own written happening, the first time on it; else
-    // whatever the arrival was holding -- somebody coming over, a rumour kept, an arrival card --
-    // which the cards had kept waiting; else, the first time, one of the road's woven events.
-    if (done?.first && here && happens.current?.('journey', here, null, `journey:${done.road.art}`, { cameFrom: done.from, roadArt: done.road.art, force: { asked: true } })) return;
-    if (held) {
-      arrivedRef.current?.({ poiId: held });
-      return;
+    if (done?.first && here) {
+      happens.current?.('journey', here, null, `journey:${done.road.art}`, { cameFrom: done.from });
     }
-    if (done?.first && here) happens.current?.('road', here, null, `journey-road:${done.road.art}`, { roadArt: done.road.art, force: { asked: true } });
   }, [journey]);
 
   return { journey, travel, stepDown };

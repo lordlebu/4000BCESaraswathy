@@ -1265,9 +1265,9 @@ export function planMarkers(built: FieldMapWorld): Placement[] {
  * state, so the whole plan is a function of the world and nothing else. Two calls with the same
  * world return the same plan, which is what makes it worth asserting against.
  */
-export function planScene(built: FieldMapWorld, smoothTwinRail = true, review: TwinSceneryReview = {}): Placement[] {
+export function planScene(built: FieldMapWorld, review: TwinSceneryReview = {}): Placement[] {
   if (built.world.twinRegion) {
-    const original=planTwinScene(built, undefined, smoothTwinRail);
+    const original=planTwinScene(built);
     const base=planTwinScenery(built,original,review),clear=twinLandscapeClear(built,base);
     return [...base,...planTwinLandscape(built,base,planCliffs(built.world),planDecor(built.world,clear),clear),...planTwinLamps(built)];
   }

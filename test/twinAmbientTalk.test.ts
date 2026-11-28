@@ -23,7 +23,7 @@ const now: Circumstance = {
   fieldMapId: TWIN_MAP, occasion: 'road', day: 9, shelter: null, holds: [], seen: [], met: [speaker]
 };
 const road = { road: true, culture: 'harappan', biome: 'hills', standing: 'heard-of', warm: true } as const;
-const built = buildFieldMap(fieldMap(TWIN_MAP)!, { seed: 'camps', twinGeneration: 2 });
+const built = buildFieldMap(fieldMap(TWIN_MAP)!, { seed: 'camps' });
 const smallTalk = { kind: 'small-talk', asked: true };
 const campTalk = { kind: 'camp-talk', asked: true };
 
@@ -79,7 +79,7 @@ describe('Twin Cities ambient conversations', () => {
       const known = happeningNow({ ...now, met: [`${TWIN_MAP}:${person.id}`] }, roll, around, [], campTalk)!;
       expect(first.topics?.[0]?.line).toContain('your bowl');
       expect(known.choices).toEqual(first.choices);
-      expect(known.artMoment).toBe(`woven-camp-meal-${camp.kind}`);
+      expect(known.art).toBe(`woven-camp-meal-${camp.caravan ? 'elamite' : camp.kind}`);
       expect(known.topics?.[0]?.line).toContain('your bowl');
 
       const way = wayIn(world, camp, walkedRoad(world, TWIN_MAP, places), placedTiles);

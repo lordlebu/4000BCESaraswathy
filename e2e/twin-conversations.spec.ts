@@ -29,7 +29,7 @@ test('tapping a causeway carrier hails them, approaches over the bridge, and rem
   await card.getByRole('button').last().click();
   await card.getByRole('button', { name: 'Go on', exact: true }).click();
   await page.reload();
-  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('south-of-tethys:twin-review') ?? '{}').met ?? [])).toContain('field_map_twins:company_carrier');
+  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('south-of-tethys-v20:journey:twin-review') ?? '{}').met ?? [])).toContain('field_map_twins:company_carrier');
 });
 
 test.describe('touch conversations', () => {

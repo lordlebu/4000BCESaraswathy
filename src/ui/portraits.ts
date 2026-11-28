@@ -5,9 +5,7 @@
 // Nothing to register, no list to keep in step. A list would be one more thing to drift out of
 // date, and this project has paid for that kind of drift more than once.
 //
-// Eight people is a small enough set that it will plausibly be finished, unlike the 297 species --
-// but the panel must still not wait for it. `PersonPortrait` draws its silhouette for anybody
-// unpainted, and a portrait replaces one individually, whenever it arrives.
+// A conversation remains available when its named portrait has not been painted.
 //
 // **The name is the person, not the canon id.** Canon calls the fisher `npc_thrali` and that is
 // the id the runtime carries too -- npcs are not run through `engineId` the way species are. A
@@ -18,7 +16,7 @@
 //
 // See `docs/portrait-prompts.md` for what to ask an image model for.
 
-import { preferredArt, artNames,art } from './art';
+import { preferredArt, artNames } from './art';
 
 /**
  * The bare name a portrait file carries, for a canon npc id.
@@ -38,8 +36,7 @@ export function portraitName(npcId: string): string {
  * actually cost time.
  */
 export function portraitFor(npcId: string): string | null {
-  if(npcId==='npc_cave_cook')return art('faces','maru-m-01');
-  return preferredArt('portraits', [portraitName(npcId)]);
+  return preferredArt('portraits', portraitName(npcId));
 }
 
 /**

@@ -1,5 +1,5 @@
-import { NEW_TWIN_GENERATION, TWIN_MAP } from '../world/twinGeneration';
-import { journeyStorageKey, worldStorageKey } from '../storageKeys';
+import { TWIN_MAP } from '../world/twinGeneration';
+import { journeyStorageKey, LAST_SEED_KEY, worldStorageKey } from '../storageKeys';
 
 // Which world this is.
 //
@@ -19,7 +19,7 @@ import { journeyStorageKey, worldStorageKey } from '../storageKeys';
 export const DEFAULT_SEED = 'jambhudweepa-evening';
 
 /** Where the last walk's seed is kept, so coming back without a link finds the same world. */
-export const LAST_SEED_KEY = 'south-of-tethys:last-seed';
+export { LAST_SEED_KEY } from '../storageKeys';
 
 /**
  * Which seed a visit starts on, as a pure rule: a link's seed first; under automation the fixed
@@ -83,7 +83,6 @@ export function seedFromUrl(): string {
     rememberSeed(chosen);
     const url = new URL(window.location.href);
     url.searchParams.set('seed', chosen);
-    if (!last?.trim() && !url.searchParams.has('twinGen')) url.searchParams.set('twinGen', String(NEW_TWIN_GENERATION));
     window.history.replaceState(null, '', url);
   }
   return chosen;

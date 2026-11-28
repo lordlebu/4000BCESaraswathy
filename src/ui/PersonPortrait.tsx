@@ -1,166 +1,5 @@
-// A face for each of the ten people.
-//
-// They have names, roles, four hundred years of family history and some of the best writing in the
-// game, and they appear as a line of text with a bullet in it. This gives each one a small drawn
-// portrait beside their name.
-//
-// Two things it is careful not to do.
-//
-// **It does not invent appearance.** Canon records none -- no age, no build, no colouring -- and a
-// portrait that decided those would be asserting something canon has not said, in a project whose
-// whole discipline is that canon owns what is true. So the drawing works from what canon *does*
-// record: the trade in the `role` field, and the language in `language`. Thrali is a fisher, so he
-// carries a net; Pell sweeps, so he holds a broom.
-//
-// **It does not make anyone a wise elder.** Canon is pointed about this -- Marn is "pointedly not a
-// wise elder, he is a working herder with a job on" -- so the silhouettes are working people caught
-// mid-task, and nobody gets a beard, a staff or a robe. Varuna has those, and the contrast is the
-// point: he is the traveller and they are the people who live here.
-//
-// Drawn rather than prompted, for the same reason the species icons are. At this size a portrait is
-// a head, a shoulder line and one held object, and an image model asked for that returns something
-// far more detailed that resamples into mush.
-
 import type { Npc } from '../content/places';
 import { portraitFor } from './portraits';
-
-/**
- * Ink by language.
- *
- * Language is the axis worth colouring by, because it is the one the game turns on: words are
- * learned from people, and which language a word belongs to decides who else can hear it. A player
- * scanning a place sees at a glance that these two speak Kia and that one does not.
- *
- * Uma has no language in canon -- she is the roofer at the Lothal camp and teaches no words -- so
- * she takes the neutral ink rather than being assigned one.
- *
- * **`sarv` currently draws nothing.** Canon has no speaker of it and no word in it -- the string
- * appears nowhere in the database -- so this entry has never rendered. It is kept rather than
- * deleted because the cost of a spare colour is nothing and the cost of a person arriving in a
- * language with no ink is a portrait that silently reads as "no language". If canon still has no
- * `sarv` by the time anybody is tidying this file, delete it; it is not load-bearing.
- */
-export const LANGUAGE_INK: Record<string, string> = {
-  kia: '#3d7a8c',
-  maru: '#8a6a3a',
-  sarv: '#7a5a7c',
-  harappan: '#986b46',
-  elamite: '#8b654f',
-  denisovan: '#68745a'
-};
-
-const NEUTRAL_INK = '#6b5c6f';
-
-/**
- * The shape of a working life, on a 24x24 grid.
- *
- * Every portrait shares a head and shoulders; `tool` is what distinguishes one from another, drawn
- * beside or across the body. Keeping the shared part shared is what stops ten portraits reading as
- * ten unrelated marks -- these are people of one place, doing different jobs in it.
- */
-export const HEAD = 'M8.5 5a3.2 3.2 0 0 1 0 6.4 3.2 3.2 0 0 1 0-6.4z';
-export const SHOULDERS = 'M2 21c0-4 2.9-6.6 6.5-6.6S15 17 15 21z';
-
-/**
- * What each person is holding or wearing, keyed by the trade canon gives them.
- *
- * Matched on the `role` string rather than the id, so a person who changes jobs in canon changes
- * picture without anything here being edited -- and a role nobody has drawn yet falls through to
- * the plain figure rather than to nothing.
- */
-const TOOLS: [string[], string][] = [
-  // A camp pot and a meditator's folded hands keep unpainted fallbacks legible.
-  [['camp cook'], 'M16 12h9v4a4.5 4.5 0 0 1-9 0zM18 9h5M20 7V5'],
-  [['meditator'], 'M16 18l4-4 4 4M16 18h8M20 14v-4'],
-  // A fisher's net: a hanging mesh, which is the shape a net makes when it is carried rather than
-  // cast. Two crossing runs read as mesh at this size; more would be a smudge.
-  [['fisher'], 'M17 6v10M23 6v10M17 6h6M17 11h6M17 16h6M20 6v10'],
-  // A roofer's cut reeds, a bundle stood on end.
-  [['roofer'], 'M17 21V7M20 21V6M23 21V8M16 12h8'],
-  // A herder's crook. Hooked, and held rather than leant on -- he is working, not presiding.
-  [['herder'], 'M20 21V9a3 3 0 0 0-6 0'],
-  // A sweeper's broom: a handle and a splayed head. Pell sweeps an interdimensional gate as
-  // municipal maintenance, and the broom is the entire joke.
-  [['sweeper', 'wall-keeper'], 'M22 5l-5 11M15 14l5 3M14 17h6'],
-  // A stylus over a tablet edge, for the copyists and archivists.
-  [['copyist', 'archivist', 'scholar'], 'M20 5v9M17 17h7M17 17v3h7v-3M20 5l-1.5 3h3z'],
-  // A well-keeper's rope, coiled on its hook.
-  [['well-keeper'], 'M20 8v3M17 14a3.5 3.5 0 1 0 7 0 3.5 3.5 0 1 0-7 0M18.5 14a2 2 0 1 0 4 0 2 2 0 1 0-4 0'],
-  // A bone-picker's sieve, seen face on.
-  [['bone-picker'], 'M16 8h8v9h-8zM19 8v9M22 8v9M16 11h8M16 14h8'],
-  // A rice-cutter's sickle: the curved blade and its short handle.
-  [['rice-cutter', 'cutter'], 'M16 9a6 6 0 0 1 8 5M21 12l-4 9'],
-  // A tally of four generations, which is what a custodian with nothing to guard actually keeps.
-  [['keeper', 'customs'], 'M17 7v13M20 7v13M23 7v13M15 13h10'],
-  // A scavenger's pry bar, bent at the working end. Odri lifts rail chairs out of a forest floor
-  // with it, which is a lever's whole job and looks like nothing else in this list.
-  [['scavenger'], 'M17 20l6-12M23 8l-3 1M23 8l1 3'],
-  // A nomad's tent peg and guy line: the two things you carry because the tent itself is felt and
-  // rolls. Terke pitches above a ford and moves on.
-  [['nomad'], 'M20 6v12M20 18l-4 3M20 18l4 3M16 21h8'],
-  // A stone-reader's hammer, square-headed and short-handled. Sesh taps basalt and listens, which
-  // is the least dramatic possible way to hold the deepest history on the map.
-  [['stone-reader'], 'M18 21l4-8M20 10h5v4h-5zM20 12h-2'],
-  // A line-keeper's lamp on a hook, which is what you hold up when the carriage is late and the
-  // light has gone. Hesh has one and mostly does not need it.
-  [['line-keeper', 'tram handler', 'causeway maintainer'], 'M20 5v3M17 8h6l-1 8h-4zM18 12h4'],
-  // An apothecary's mortar with the pestle standing in it. Ila grinds physic at a bench in a
-  // glasshouse, and the mortar is the one tool that says medicine rather than cooking -- a bowl
-  // this heavy is for breaking bark and seed, not for stirring.
-  [['apothecary'], 'M22 6l-3 6M16 13h8v2a4 4 0 0 1-8 0zM17 21h6'],
-  // A herbalist's sprig: a stem with three leaves. Guyuk the Seed-Gleaner, who keeps the Atelier.
-  [['herbalist', 'courtyard gardener'], 'M20 21V8M20 11l-4-3M20 14l4-3M20 17l-4-2'],
-  [['reed boat repairer'], 'M15 20l10-12M16 12l4 4M20 8l4 4M15 20h10'],
-  [['cove watcher'], 'M15 16h10M17 16V9h6v7M20 9V6M17 20h6'],
-  // A stonewaller's block, held against the hip the way a heavy thing is carried rather than
-  // lifted. Dala used to share Pell's broom by sharing the words "wall-keeper", and they are not
-  // the same job: Pell sweeps a gate, Dala puts stones back on a wall around nothing.
-  [['stonewaller', 'earthen mason', 'brickworker'], 'M15 14h10v6H15zM15 17h10M20 14v3M17.5 17v3M22.5 17v3'],
-  // A drover's goad and a coil of rope. Terke moves animals across a ford, which is a trade
-  // rather than the way of life "nomad" named -- and a goad is what the job looks like in a hand.
-  [['drover'], 'M17 21L23 7M15 12a2.5 2.5 0 1 0 5 0 2.5 2.5 0 1 0-5 0M16.5 12h3'],
-  // A charioteer's spear, held upright the way Sudama stands it in the Sinauli wagon: a long shaft
-  // and a leaf blade. Jarro's charioteer, on the owner's word of 4 October 2026.
-  [['charioteer'], 'M20 21V9M20 9l-2 -2 2 -4 2 4z'],
-  // A hunter's short bow, strung and carried rather than drawn: one curved limb and the string as
-  // a chord across it. Anu walks ahead of a herd and mostly comes back with nothing, so a bow at
-  // full draw would be the wrong picture -- and canon agrees, since every weapon in it affords
-  // `cut` and `deter` and nothing anywhere affords killing.
-  //
-  // The comment said *unstrung* first, which the path has never drawn: a stave with no chord is a
-  // stick. Strung-but-lowered is also the truer image for somebody walking with it all day.
-  [['hunter'], 'M18 6a9 9 0 0 1 0 15M18 6l-1 15'],
-  // A road singer's canes: three lengths cut to three notes, bound at the grip and carried in the
-  // hand they are struck with. Graded height is the whole of the instrument -- a cane gives one
-  // note and only one -- so three bars of three lengths says more about it than a drawing of
-  // somebody playing would at this size.
-  [['singer'], 'M16 21V10M20 21V6M24 21V13M15 17h10'],
-  // A driver's mounting strap and stirrup. Not a goad: the drover above already has one, and canon
-  // is specific that a straight-tusk is "worked rather than tamed" and that what a driver has is
-  // "forty years of being agreed with". A goad would draw the opposite claim. What the job actually
-  // looks like from the ground is the loop you put a foot in to get up nine feet of animal.
-  [['driver'], 'M20 5v9M16 14h8M17 14v2a3 3 0 0 0 6 0v-2'],
-  // A seedling from a mound, for the Asura-Tainted Princess: canon gives her mastery of cultivation,
-  // and what she wants of the plateau is that it grow more than goats. She has a painted portrait,
-  // so this is the fallback for a folder that has lost it.
-  [['exile'], 'M20 21v-7M20 14c0-3-3-4-5-4 0 3 2 5 5 4zM20 12c0-3 3-5 5-5 0 3-2 5-5 5zM16 21h8'],
-  // A surveyor's rod, marked off in alternating long and short ticks. Ardhi keeps the University's
-  // ground book, and the rod is the thing that book is written with.
-  [['steward', 'surveyor'], 'M20 4v17M20 7h2M20 10h3M20 13h2M20 16h3M20 19h2'],
-  // A water-skin, tied at the neck. Last on purpose: a dada is whoever got there first, so Drel and
-  // Tolla keep their sickle and crook, and only Jarro -- who keeps the Caravan Ground's well, and
-  // takes a skin of water a season for it -- reaches this.
-  [['dada'], 'M18.5 7h3M19 7v2.5c-2 1-3 3-3 5.5a4 4 0 0 0 8 0c0-2.5-1-4.5-3-5.5V7']
-];
-
-/** The tool for a role, or null for a person whose trade has no drawing yet. */
-export function toolFor(role: string): string | null {
-  const lowered = role.toLowerCase();
-  for (const [words, path] of TOOLS) {
-    if (words.some((word) => lowered.includes(word))) return path;
-  }
-  return null;
-}
 
 export interface PersonPortraitProps {
   person: Pick<Npc, 'id' | 'name' | 'role' | 'language'>;
@@ -183,48 +22,17 @@ export interface PersonPortraitProps {
  * announcing "portrait, Thrali" would be worse than one announcing "Thrali".
  */
 export function PersonPortrait({ person, size = 26, speaking = false }: PersonPortraitProps) {
-  const ink = LANGUAGE_INK[person.language] ?? NEUTRAL_INK;
-  const tool = toolFor(person.role);
   const painted = portraitFor(person.id);
-
-  // A painting replaces the silhouette individually, the moment one is added -- see `portraits.ts`.
-  // Nobody is blocked on the set being complete, and the drawing below stays the fallback rather
-  // than a placeholder anybody has to clear.
-  if (painted) {
-    return (
-      <img
-        className={`person-portrait is-painted${speaking ? ' is-speaking' : ''}`}
-        src={painted}
-        width={size}
-        height={size}
-        alt=""
-        aria-hidden="true"
-        draggable={false}
-      />
-    );
-  }
-
+  if (!painted) return null;
   return (
-    <svg
-      className={`person-portrait${speaking ? ' is-speaking' : ''}`}
+    <img
+      className={`person-portrait is-painted${speaking ? ' is-speaking' : ''}`}
+      src={painted}
       width={size}
       height={size}
-      viewBox="0 0 24 24"
+      alt=""
       aria-hidden="true"
-      focusable="false"
-    >
-      <path d={HEAD} fill={ink} />
-      <path d={SHOULDERS} fill={ink} />
-      {tool && (
-        <path
-          d={tool}
-          fill="none"
-          stroke={ink}
-          strokeWidth={1.6}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      )}
-    </svg>
+      draggable={false}
+    />
   );
 }

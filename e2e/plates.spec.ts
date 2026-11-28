@@ -54,7 +54,7 @@ async function bootWithCollection(page: Page) {
   await step(page, 'ArrowRight');
 
   const saved = await page.evaluate(
-    (seed) => localStorage.getItem(`south-of-tethys:${seed}`),
+    (seed) => localStorage.getItem(`south-of-tethys-v20:journey:${seed}`),
     SEED
   );
   expect(saved, 'the game wrote no save to add a collection to').toBeTruthy();
@@ -67,7 +67,7 @@ async function bootWithCollection(page: Page) {
 
   await page.addInitScript(
     ([seed, payload]) => {
-      localStorage.setItem(`south-of-tethys:${seed}`, payload as string);
+      localStorage.setItem(`south-of-tethys-v20:journey:${seed}`, payload as string);
     },
     [SEED, JSON.stringify(journey)] as const
   );

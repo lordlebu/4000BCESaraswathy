@@ -90,9 +90,11 @@ merely because work was pushed or checks passed. At the next session, verify the
   and prove the game loads the intended asset rather than a fallback.
 - Respect the existing dock, modal, accessibility and map-space budgets. Measure at the
   affected device sizes before changing layout thresholds. Guidance pointers must respect fog.
-- Preserve save compatibility deliberately. Read the current save implementation and the
-  separate ground and knowledge version rules before changing either. UI preferences belong
-  in preferences.ts; do not discard progress to remember a toggle.
+- Use one current journey schema and a versioned bake. Plan any release reset with the owner
+  and keep display preferences in `preferences.ts`.
+- Give each gameplay behavior one implementation and reuse it for new content. For new field
+  maps, follow the [Twin Cities profile](docs/twin-cities-uplift.md#add-a-profile), including
+  seeded generation stages, protected anchors and reachability checks.
 - Pages is deployed only by pages.yml. An itch.io release or tag is a separate, explicitly
   requested action; pushing ordinary work is not a release request.
 

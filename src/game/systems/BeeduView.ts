@@ -13,14 +13,16 @@ export class BeeduView{
  private safe=true;
  private reported='';
  private reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
+ private readonly review=import.meta.env.DEV&&new URLSearchParams(window.location.search).get('beedu')==='show';
+ private reviewStart:number|null=null;
  constructor(private scene:Phaser.Scene,private host:Host){
   this.body=scene.add.image(0,0,'twins-beedu',0).setDepth(STRAIT_DEPTH.air).setVisible(false).setName('flying-beedu');
   this.shadow=scene.add.image(0,0,'twins-beedu',0).setTint(0x393638).setAlpha(.22).setVisible(false).setName('beedu-shadow');
   this.sand=scene.add.image(0,0,'twins-stories',6).setVisible(false);
  }
  update(now:number):void{
-  const pose=beeduAt(this.host.world,now,this.reduced.matches,
-    import.meta.env.DEV&&new URLSearchParams(window.location.search).get('beedu')==='show');
+  const elapsed=this.review ? now-(this.reviewStart??=now) : now;
+  const pose=beeduAt(this.host.world,elapsed,this.reduced.matches,this.review);
   if(!pose){this.body.setVisible(false);this.shadow.setVisible(false);this.sand.setVisible(false);return;}
   const x=Math.floor(pose.x),y=Math.floor(pose.y),cx=pose.x*TILE_SIZE,cy=pose.y*TILE_SIZE;
   const view=this.scene.cameras.main.worldView;

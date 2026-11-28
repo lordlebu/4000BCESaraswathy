@@ -21,7 +21,7 @@ import { Heap } from '../world/heap';
 import { orthogonalNeighbours } from '../world/rivers';
 import { TWIN_MAP } from '../world/twinGeneration';
 import { stepCostOn } from './species';
-import { caravanStage, elamiteCaravanVisit, type CaravanSchedule, type CaravanVisit } from './elamiteCaravan';
+import { caravanStage, elamiteCaravanVisit, type CaravanVisit } from './elamiteCaravan';
 
 export type CampKind = 'adventurers' | 'dacoits' | 'pilgrims' | 'drovers';
 
@@ -35,6 +35,7 @@ export function campKindFor(seed: string, fieldMapId: string, cycle: number, twi
 }
 
 export interface Encampment {
+  cookVisit?: true;
   /** Stable for one camp's stay: `<map>:<cycle>`. What "seen" is kept against. */
   id: string;
   kind: CampKind;
@@ -179,14 +180,14 @@ export function campGround(world: World, places: readonly Point[]): Point[] {
   return ranked;
 }
 
-const caravanClocks = new WeakMap<World, { schedule: CaravanSchedule; phase: () => number }>();
+const caravanClocks = new WeakMap<World, () => number>();
 
-export function setCaravanClock(world: World, schedule: CaravanSchedule, phase: () => number): void {
-  caravanClocks.set(world, { schedule, phase });
+export function setCaravanClock(world: World, phase: () => number): void {
+  caravanClocks.set(world, phase);
 }
 
 export function caravanPhase(world: World, fallback: number): number {
-  return caravanClocks.get(world)?.phase() ?? fallback;
+  return caravanClocks.get(world)?.() ?? fallback;
 }
 
 export function caravanStageAt(world: World, camp: Encampment, day: number, fallbackPhase = 0) {
@@ -213,8 +214,7 @@ export function encampmentOn(
   world: World,
   fieldMapId: string,
   places: readonly { poiId: string; at: Point }[],
-  day: number,
-  schedule?: CaravanSchedule
+  day: number
 ): Encampment | null {
   if (day < FIRST_DAY) return null;
   const cycle = Math.floor(day / CYCLE_DAYS);
@@ -233,10 +233,9 @@ export function encampmentOn(
   // half of everywhere.
   const sky = hash('sky') % SKY_TURN_ONE_IN === 0 ? skyGround(world, ground) : [];
   const hidden = sky.length > 0 ? sky : ground.slice(0, Math.max(1, Math.ceil(ground.length / 2)));
-  schedule ??= caravanClocks.get(world)?.schedule;
   const candidate = hash('tile') % hidden.length;
-  const caravan = schedule && world.twinRegion
-    ? elamiteCaravanVisit(world, fieldMapId, cycle, schedule,
+  const caravan = world.twinRegion
+    ? elamiteCaravanVisit(world, fieldMapId, cycle,
       [...hidden.slice(candidate), ...hidden.slice(0, candidate), ...ground.slice(hidden.length)],
       places.map((p) => p.at))
     : null;

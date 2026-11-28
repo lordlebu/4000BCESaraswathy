@@ -1,7 +1,7 @@
 import { allNpcs } from '../content/places';
 import { TWIN_PEOPLE } from '../content/twinPeople';
 import { travellersOn } from '../content/travellers';
-import { caveHelperPresent } from '../content/twinStories';
+import { caveHerderIsVisiting } from '../content/twinStories';
 import { isWalkable } from '../world/generate';
 import type { FieldMapWorld } from '../world/fieldMap';
 import type { Placement } from './scenePlan';
@@ -28,10 +28,11 @@ export function planTwinResidents(built:FieldMapWorld,scenery:readonly Placement
   const out:TwinResident[]=[];
   for(const person of allNpcs()){
     const art=TWIN_PEOPLE[person.id];
-    if(!art||walking.has(person.id)||!caveHelperPresent(person.id,day))continue;
+    if(!art||walking.has(person.id))continue;
+    if (person.id === 'npc_cave_herder' && !caveHerderIsVisiting(day)) continue;
     const home=person.foundAt.map(id=>anchors.get(id)).find(at=>at!==undefined);
     if(!home)continue;
-    const preferred:Record<string,number[][]>={npc_mirlepa:[[-1,0]],npc_yamantaka:[[2,1]],npc_cave_cook:[[-1,2]],npc_cave_herder:[[1,2]]};
+    const preferred:Record<string,number[][]>={npc_mirlepa:[[-1,0]],npc_yamantaka:[[2,1]],npc_cave_herder:[[1,2]]};
     for(const [dx,dy] of [...(preferred[person.id]??[]),...SPOTS]){
       const x=home.x+dx!,y=home.y+dy!,tile=built.world.tiles[y]?.[x],key=`${x},${y}`;
       if(!tile||!isWalkable(tile)||['river','sea','wetland'].includes(tile.biome)

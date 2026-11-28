@@ -112,8 +112,7 @@ same rows to its left. The unnamed Gemini image is a second take of the night vi
 (`camp-night-visitor.2.png`). Browser specs assert the opening, the scarp road and a camp card draw
 the owner's painting rather than a fallback.
 
-- **A woven event can carry a per-variant painting** (`artVariant`), tried before its own: the camp
-  card is the dacoits' own, not one picture of every camp.
+- **A woven event assigns its painting by subject.** The dacoit camp card uses the dacoits’ own artwork.
 - **The carts are drawn by elephantbirds**, because the paintings say so (canon 2.44.0).
 - **Malacite and Mehtar are out of the traveller menu for now** (`PLAYABLE`), by the owner's word.
   Their sheets stay loaded, because strangers can still wear them.

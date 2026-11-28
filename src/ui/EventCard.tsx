@@ -21,8 +21,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { type Choice, type GameEvent, choicesFor } from '../content/events';
 import type { AmbientTopic } from '../content/npcDialogue';
-import { firstArtSelection, preferredArtSelection, type ArtSelection } from './art';
-import { sceneNames } from './scenes';
+import { preferredArtSelection, type ArtSelection } from './art';
 import { Modal } from './Modal';
 import { StrangerFace } from './StrangerFace';
 import { ProfileButton } from './Profile';
@@ -31,14 +30,6 @@ export interface EventCardProps {
   event: GameEvent;
   /** Everything the player holds, for deciding which choices are real. */
   holds: readonly string[];
-  /**
-   * The shelter this night was spent in, when the event is a night one.
-   *
-   * Only used to pick a fallback painting: an event with no art of its own borrows the scene of the
-   * place it happened in, which is better than a blank panel and is usually the right picture
-   * anyway. **Nothing is blocked while the art is missing.**
-   */
-  shelter?: string | null;
   /** Which painting, when there is more than one. Seeded by the caller — see `art.ts`. */
   pick?: number;
   /**
@@ -61,7 +52,7 @@ export function EventCard(props: EventCardProps) {
 }
 
 export function EventCardBody({
-  event, holds, shelter, pick = 0, met = [], onChoose, onClose, onTopicHeard, continuation = 'Go on', alternatives, children
+  event, holds, pick = 0, met = [], onChoose, onClose, onTopicHeard, continuation = 'Go on', alternatives, children
 }: EventCardProps & { continuation?: string; alternatives?: ReactNode; children?: ReactNode }) {
   /**
    * The line the chosen option wrote, once one has been taken.
@@ -83,39 +74,25 @@ export function EventCardBody({
 
   // Resolve the painting before creating the choice handler so a card updated in place records
   // the image the player actually saw.
-  const contextualSelection = event.artCandidates?.map(({ collection, key }) =>
-    collection === 'scenes'
-      ? firstArtSelection(collection, [key], pick)
-      : preferredArtSelection(collection, [key], pick)
-  ).find((candidate) => candidate !== null) ?? null;
-  const selection = contextualSelection ??
-    (!event.artCandidates
-      ? preferredArtSelection('events', [event.artMoment, event.artVariant, event.art, event.artFallback], pick)
-      : null) ??
-    (shelter ? firstArtSelection('scenes', sceneNames('rest', shelter), pick) : null);
+  const selection = preferredArtSelection('events', event.art, pick);
 
   const choose = useCallback(
     (choice: Choice) => {
       if (taken) return;
-      const outcome = choice.outcomeArt ? preferredArtSelection('events', [choice.outcomeArt], pick) : null;
+      const outcome = choice.outcomeArt ? preferredArtSelection('events', choice.outcomeArt, pick) : selection;
       setTaken({ line: choice.line, art: outcome });
-      onChoose(choice, outcome ?? selection, topic);
+      onChoose(choice, outcome, topic);
     },
     [taken, onChoose, selection, topic, pick]
   );
 
-  // The painting of this moment, then the event's own, then one that will do (a road's, for a road's
-  // happening), then the night's, then nothing. Every step is optional and the card keeps its shape
-  // at each one, so it does not jump when art lands.
-  const picture = (taken?.art ?? selection)?.url ?? null;
+  const picture = (taken ? taken.art : selection)?.url ?? null;
   const choices = choicesFor(event, holds);
 
   return (
       <section className="activity-card">
         {picture ? (
           <img className="activity-scene" src={picture} alt="" aria-hidden="true" />
-        ) : event.origin !== 'discovery' && event.origin !== 'sub-location' ? (
-          <div className="activity-scene activity-scene-blank" aria-hidden="true" />
         ) : null}
 
         <div className="activity-body">

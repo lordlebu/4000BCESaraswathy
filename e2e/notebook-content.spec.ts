@@ -16,7 +16,7 @@ for (const kind of ['empty', 'words', 'questions', 'dense'] as const) {
     await page.goto('/?seed=notebook-content&hour=12&at=poi_eastern_field');
     await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
     await examineFirst(page);
-    const key = 'south-of-tethys:notebook-content';
+    const key = 'south-of-tethys-v20:journey:notebook-content';
     await expect.poll(() => page.evaluate(k => Boolean(JSON.parse(localStorage.getItem(k) ?? '{}').progress), key)).toBe(true);
     const saved = await page.evaluate(k => JSON.parse(localStorage.getItem(k)!), key);
     const base = { ...saved.progress, rungs: {}, words: [], questions: [], answered: {} };

@@ -30,7 +30,7 @@ const BAKE_VERSION = Number(
 
 const SEED = 'bake-e2e';
 const MAP = 'field_map_lothal';
-const KEY = `south-of-tethys:world:${SEED}:${MAP}`;
+const KEY = `south-of-tethys-v20:world:${SEED}:${MAP}`;
 
 async function boot(page: import('@playwright/test').Page, query = '') {
   await page.goto(`/?seed=${SEED}${query}`);

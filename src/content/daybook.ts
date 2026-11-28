@@ -11,7 +11,7 @@
 // What the page says is the difference between two readings of what the traveller knows: one
 // taken when the day began, one now. Nothing new is saved for it -- the reading at the day's start
 // is kept in memory, so a reload in the middle of a day starts the page from the reload. That is
-// the honest cost of no `KNOWLEDGE_VERSION` bump, and it is small: the page is a recap, and the
+// a session-only recap: the page is a recap, and the
 // diary holds everything.
 //
 // Pure, and free of React and Phaser. App takes the readings; the night's card draws the page.

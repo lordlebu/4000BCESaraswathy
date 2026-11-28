@@ -12,7 +12,7 @@
 import { expect, test } from '@playwright/test';
 
 const SEED = 'placeholder-e2e';
-const KEY = `south-of-tethys:world:${SEED}:field_map_lothal`;
+const KEY = `south-of-tethys-v20:world:${SEED}:field_map_lothal`;
 
 test('a biome with no sheet art still draws, and says what it is', async ({ page }) => {
   await page.goto(`/?seed=${SEED}&hour=12`);

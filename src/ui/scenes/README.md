@@ -38,7 +38,7 @@ An unpainted kind falls back to `rest.png`, so these land one at a time and in a
 
 **A night can be painted for its ground too** (3 October 2026): `rest-<shelter>-<biome>` and
 `rest-<shelter>-<group>`, each with `-midnight` or `-dawn`, are tried before the shelter alone
-(`sceneNames` in `src/ui/scenes.ts`). Have: `rest-bedroll-high-midnight`, `rest-bedroll-high-dawn`
+(`sceneKey` in `src/ui/scenes.ts`). Have: `rest-bedroll-high-midnight`, `rest-bedroll-high-dawn`
 (hills, mountains, snow, and for a night a sky island's top too -- `NIGHT_GROUND_GROUP`) and
 `rest-bedroll-snow-midnight`, the owner's, 3 October 2026.
 

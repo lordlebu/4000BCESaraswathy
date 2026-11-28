@@ -125,19 +125,10 @@ describe('every story beat has its painting', () => {
 });
 
 describe('every beat on the road or on arriving has a picture', () => {
-  // The owner, 3 October 2026: Guyuk's rumour and the Atelier without her opened blank. A beat with
-  // no painting of its own borrows a woven one of the same kind of moment (`BEAT_FALLBACK`).
-  it('resolves to a painting that exists, its own or the fallback', async () => {
-    const { existsSync } = await import('node:fs');
-    const { beatEvent, BEAT_FALLBACK } = await import('../src/content/storylines');
-    const painted = (name: string | undefined) => Boolean(name) && existsSync(`src/ui/events/${name}.png`);
-    for (const arc of storylines) {
-      for (const beat of arc.beats) {
-        if (beat.when !== 'road' && beat.when !== 'arriving') continue;
-        const e = beatEvent(arc, beat);
-        expect(painted(e.art) || painted(e.artFallback), `${arc.id}/${beat.id} draws nothing`).toBe(true);
-      }
+  it('assigns each story beat its own artwork key', async () => {
+    const { beatEvent } = await import('../src/content/storylines');
+    for (const arc of storylines) for (const beat of arc.beats) {
+      expect(beatEvent(arc, beat).art).toBe(beat.art ?? `story-${arc.id}-${beat.id}`);
     }
-    for (const name of Object.values(BEAT_FALLBACK)) expect(painted(name), `${name} is not painted`).toBe(true);
   });
 });

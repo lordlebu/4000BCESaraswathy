@@ -747,11 +747,8 @@ retrospective. The rules, because they are rules rather than history:
   road* and answers where the cart leaves from, with a plain hint under it (`content/roadTalk.ts`,
   the sentence composed from canon's names), and the Travel sheet says to walk there. A conversation
   takes a list of asks, so Thrali has the boat's row and the road's.
-- **The card after a road is never blank.** A road's happening with no painting of its own shows the
-  road's (`artFallback`, from `useCrossing`'s `roadArt`); the ferry song and the line where the sea
-  was have none yet. **Nor is a story beat's**: one with no painting borrows a woven one of the same
-  kind of moment (`BEAT_FALLBACK` in `content/storylines.ts`) -- Guyuk's road rumour and the Atelier
-  without her opened blank, and the rumour's canon title now says it is heard, not arrived at.
+- **Arrival and road cards use their assigned artwork.** An unillustrated card shows its
+  text and choices. The shared queue keeps destination arrivals until travel and earlier cards end.
 - **Camps are a pure function of seed, map and day** (`content/encampments.ts`): one at a time,
   three days a turn, on dry ground away from places and roads. Walking up to one asks for its card
   with `force: {kind: 'camp', asked: true}`, which `happeningNow` returns before any weighting --
@@ -763,8 +760,7 @@ retrospective. The rules, because they are rules rather than history:
   the props and `standingRoom` keeps people off them -- one rule, moved out of the scene so nobody
   stands in the tent. **Only these temporary camps**: the permanent camp places (`content/camps.ts`)
   are untouched. **Only the leader may call you over**, and only before the camp's welcome, on the
-  speak-first rules (`campCallers`); the runner and the watch never do. At the meal the card asks
-  for `woven-camp-meal-<kind>` first (`artMoment`), falling back to the camp's own painting.
+  speak-first rules (`campCallers`); the runner and the watch never do. Meals use the assigned `woven-camp-meal-<kind>` painting. The visiting cook at Windward Cave uses the generated camp roster on days 0 and 1 of each six-day cycle.
 - **Road company are dealt per journey** (the owner, 3 October 2026): their names, dyes and faces
   take the seed into the hash (`travellersOn(map, seed)`, `givenNameFor(who, seed)`), so a new
   journey meets new people and one journey keeps its own. Every journey used to meet Saalik, the same
@@ -897,7 +893,7 @@ The owner's play of the Narmada; `docs/satchel-and-hearth.md` is the record. Rul
 - **Any night closes on the day's page**, wherever it falls: there is no house in this game, so
   nothing on it says home. `content/daybook.ts` holds the rules; `ActivityModal` draws the page for
   a night only, under the dawn.
-- **The morning's reading is in memory, never saved**, so it cost no `KNOWLEDGE_VERSION` bump. It
+- **The morning's reading is in memory, never saved**, so it has no save field. It
   resets whenever a night card closes, pressed or not, because the night is spent either way.
 - **Tomorrow's line asks `goals.wanting` and `guide.nextStep`**, the dock's own answers, so the two
   cannot disagree.
@@ -915,7 +911,7 @@ The owner's play of the Narmada; `docs/satchel-and-hearth.md` is the record. Rul
 - **A new visit starts on a random seed** (`seed.chooseSeed`): a link's first, `DEFAULT_SEED` under
   automation, then the browser's last walked, then a fresh one. Starting over rolls a new seed.
 - **A wanderer can be a vehicle** (`PATROLS`): the Sinauli wagon near Dwarka's Caravan Ground, on dry
-  ground only, driven by canon's Sudama (`drives`). Its card waits for `PASSING_AFTER_STEPS`. **It
+  ground only, driven by canon's Sudama (`drives`). Its card waits until the player has walked at least three tiles from the arrival point and comes alongside. **It
   keeps the scene's clock, not the day's** (`patrolAt`, like the strait's ship): the day's clock jumps
   with every step, and a position read from it lurched. It glides at `PATROL_PACE` and halts at stops.
 - **Vasuki keeps far from people** (`KEEPS_AWAY`): stops ten tiles from settlements and cart stops,
@@ -1213,21 +1209,7 @@ Two habits that go with it, both learned by getting them wrong:
   introduce `Math.random()` or time-based values into `world/` or `content/` — all randomness comes
   from `world/rng.ts`. `game/dayNight.ts` is the one place allowed to read the wall clock, because
   what the sky looks like while you walk is presentation, not world state.
-- Saved journeys live in `localStorage` keyed by seed and carry a `version`; bump `SAVE_VERSION` in
-  `src/save.ts` when the payload shape changes so old saves are discarded rather than misread.
-  **Two things move it and only one of them is a payload change**: the other is the ground moving
-  under a saved journey, because a remembered position, node and fog mask all name tiles that a new
-  generator no longer produces. It is at 19 — the collection replacing the old sketch list moved it
-  to 6, resource nodes to 12, the Aravali growing to 52 × 78 moved it again, stamping the sky pool
-  moved it to 15, making that pool walkable moved it to 16, a tile's `road` flag to 17, placing
-  the painted buildings to 18 and Dwarka's cold desert to 19 — and `Progress` (rungs, words,
-  answered, questions) plus `collection` are the parts that matter. **The last two are the same
-  ground twice**, which is the clearest case this rule has: neither changed the payload's shape, and
-  both changed what a remembered tile means.
-  **Since the save split, a ground move no longer costs the diary.** `KNOWLEDGE_VERSION` versions
-  what the player knows (progress, collection, satchel, events seen, strangers met, the clock) and
-  `SAVE_VERSION` only where they are (fog, landmark, nodes). Bump `SAVE_VERSION` when the ground
-  moves; bump `KNOWLEDGE_VERSION` only when the knowledge half changes shape.
+- Saved journeys use a seed key and a single current schema in `src/storageKeys.ts`. It is at 20 — the release clears the retired journeys, world bakes and last seed. Update the journey schema and bake together when changing their data contract. Display preferences live separately in `src/ui/preferences.ts`.
 - **Dev dependencies grew by three, for a reason.** `jsdom`, `@testing-library/react` and
   `@testing-library/dom` exist because three panel bugs reached a browser before anything noticed.
   Node stays the default test environment; panel files opt in with `// @vitest-environment jsdom`,

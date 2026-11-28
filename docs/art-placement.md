@@ -1,8 +1,10 @@
 # Art placement
 
+Current callers resolve one subject and folder. Optional art is omitted when its asset is missing. Wandering sprites require their authored directional views. Accepted painted editions and seeded takes are alternate depictions of the same subject. The older placement recipes below record delivery history.
+
 > **Mixed-art owner rule (18 November):** Inspect the element and approved references; ask if uncertain, and show new/replacement samples for selection before applying them, including code-native art. Preserve accepted exceptions. Current choices: JRPG rail bridge with proper shadow; lower road bridge retained; object shrubs/old grass; covered clay lamps. [Current delivery ledger](twin-walkway-phase.md).
 
-> **Cave/roads follow-up:** Yamantaka doubles in map scale; cave/cooker proportions, Maru cook reuse, sparse highland trees and masonry roads follow the simple NES direction. Cave-specific watercolor meal/sleep scenes show the traveller with both residents every night. [Exact delivery and prompts](twin-cave-roads-phase.md).
+> **Cave/roads follow-up:** Yamantaka doubles in map scale; cave/cooker proportions, the earlier Maru cook, sparse highland trees and masonry roads follow the simple NES direction. Cave-specific watercolor meal/sleep scenes show the traveller with both residents every night. [Exact delivery and prompts](twin-cave-roads-phase.md).
 
 > **18 November place-art delivery:** all 16 twin-valley stops now have individual preferred watercolor views. The 15 new panels are full-colour 512?224 PNGs, crop/resize only; the accepted courtyard stays unchanged. [Prompts, sources and delivery ledger](twin-place-views-phase.md).
 
@@ -12,7 +14,7 @@
 
 The twin-city visual pass adds optional `<name>-painted.png` editions in `portraits/`,
 `places/` and `events/`. Each caller prefers that edition, then the accepted original,
-before trying its next broader subject. Original files remain available through `art()`.
+for the same subject. Original files remain available through `art()`.
 Portrait names still strip `npc_` and hyphenate underscores; POI and event IDs stay whole.
 Portrait and place selection stays stable. Events select seeded takes within the chosen
 edition. Numbered takes in other folders remain invalid.

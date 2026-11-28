@@ -1,3 +1,4 @@
+import { journeyFixture, journeyStorageKey } from './journey-fixture';
 // The three scales, walked.
 //
 // This is Phase 04's acceptance test in one file: stand on an authored place, look closer at
@@ -146,7 +147,7 @@ test('the diary survives a reload', async ({ page }) => {
         page.evaluate(() => {
           for (let i = 0; i < localStorage.length; i += 1) {
             const k = localStorage.key(i);
-            if (!k?.startsWith('south-of-tethys:')) continue;
+            if (!k?.startsWith('south-of-tethys-v20:journey:')) continue;
             try {
               const rungs = JSON.parse(localStorage.getItem(k) ?? '{}')?.progress?.rungs;
               if (rungs && Object.keys(rungs).length > 0) return true;
@@ -209,7 +210,7 @@ test('an instance is a place you go into, and it says why when you cannot', asyn
   await page.getByRole('button', { name: 'Leave' }).click();
   await expect.poll(() => page.evaluate(() => {
     const keys = ['poi_kavik_tower-lower_courses', 'discovery_tower_collapse'];
-    return Object.keys(localStorage).filter(key => key.startsWith('south-of-tethys:')).some(key => {
+    return Object.keys(localStorage).filter(key => key.startsWith('south-of-tethys-v20:journey:')).some(key => {
       const saved = JSON.parse(localStorage.getItem(key) ?? '{}');
       return keys.every(artKey => saved.diaryEvents?.some(
         (entry: { art?: { collection: string; key: string } }) =>
@@ -243,15 +244,12 @@ test('the overworld joins the two field maps, from where the cart leaves', async
   await expect(sheet.getByRole('button', { name: 'Travel' }).first()).toBeDisabled();
 
   // At the Camp in the Kilns, Lothal's cart point, it runs -- on the fourth day of a journey, so a
-  // crossing that resets the clock shows. Written as the save would hold it: `travelled` is in the
-  // what-you-know half, which knowledge version 1 reads whatever the ground's version.
+  // crossing that resets the clock shows. Seed after the previous page flushes its journey.
   const FOURTH_DAY = 3.5 * 60 * 60 * 1000;
-  await page.addInitScript(
-    ([seed, travelled]) => {
-      localStorage.setItem(`south-of-tethys:${seed}`, JSON.stringify({ knowledgeVersion: 1, travelled }));
-    },
-    [SEED, FOURTH_DAY] as const
-  );
+  await page.addInitScript(({ key, payload }) => localStorage.setItem(key, payload), {
+    key: journeyStorageKey(SEED), payload: JSON.stringify(journeyFixture({ travelled: FOURTH_DAY }))
+  });
+
   await page.goto(`/?seed=${SEED}&map=field_map_lothal&at=poi_lothal_camp`);
   await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
   await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });

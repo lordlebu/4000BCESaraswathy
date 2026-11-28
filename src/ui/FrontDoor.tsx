@@ -24,6 +24,7 @@ export interface FrontDoorProps {
   open: boolean;
   /** Whether there is a journey under this seed to go back to. */
   canContinue: boolean;
+  resetNotice?: boolean;
   /** The seed the door opens onto, shown so a shared link explains itself. */
   seed: string;
   /** Who would be walking. */
@@ -46,6 +47,7 @@ export interface FrontDoorProps {
 export function FrontDoor({
   open,
   canContinue,
+  resetNotice = false,
   seed,
   characterId,
   roster,
@@ -78,6 +80,8 @@ export function FrontDoor({
         <p className="front-door-line">
           A walk through the Saraswati country, and a notebook to keep it in.
         </p>
+
+        {resetNotice && <p role="status" className="front-door-line">This release starts a new journey. Previous journeys were cleared.</p>}
 
         {/* The picker's proper home. On the map sheet it was a setting; here it is the question
             the screen exists to ask. */}

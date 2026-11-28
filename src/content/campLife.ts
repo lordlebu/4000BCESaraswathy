@@ -24,6 +24,8 @@ import campLifeData from '../../data/camp-life.json';
 import type { Point, World } from '../world/types';
 import { tileHash, weightedPickFor } from '../world/rng';
 import { givenNames } from './places';
+import { CAVE_POI } from './twinStories';
+import { TWIN_MAP } from '../world/twinGeneration';
 import { npcAppearance } from './npcAppearance';
 import { elamiteIdentity, elamiteResidentId, type ElamiteRole } from './elamitePeople';
 import { CAMP_DAY, MEET_HOURS, RUNNER_PACE, VISIT_HOURS, VISIT_PACE_CAP } from './tiers';
@@ -96,19 +98,47 @@ export interface CampPerson extends GeneratedTraveller {
   /** What they are called before you know their name: "the head drover". */
   title: string;
   elamiteRole?: ElamiteRole;
+  cook?: true;
 }
 
 const isCulture = (c: string): c is (typeof STRANGER_CULTURES)[number] => (STRANGER_CULTURES as readonly string[]).includes(c);
 
+/** The visiting cook uses camp behavior beside the cave on the first two days of each cycle. */
+export function caveCookCamp(
+  map: string, places: readonly { poiId: string; at: Point }[], day: number
+): Encampment | null {
+  if (map !== TWIN_MAP || day % 6 >= 2) return null;
+  const cave = places.find(({ poiId }) => poiId === CAVE_POI);
+  if (!cave) return null;
+  const cycle = Math.floor(day / 6);
+  return { id: `cave-cook-visit:${cycle}`, at: cave.at, from: cycle * 6, to: cycle * 6 + 2,
+    near: CAVE_POI, kind: 'adventurers', cookVisit: true };
+}
+
+function caveCookPerson(cycle: number, seed: string): CampPerson {
+  const id = `cave-cook-${cycle}`;
+  const culture = 'harappan';
+  const names = givenNames[culture];
+  const givenName = names && weightedPickFor(names, seed, { x: cycle, y: 0 }, 'cave-cook', (name) => name, () => 1);
+  if (!givenName) throw new Error('Missing Harappan names for the cave cook');
+  const look = npcAppearance(TWIN_MAP, seed, id, 'traveller-carrier', culture);
+  return {
+    id, name: 'The visiting cook', role: 'camp cook', title: 'visiting cook', npcId: null,
+    circuit: [], conveyance: null, art: look.body, look, culture, givenName,
+    campId: `cave-cook-visit:${cycle}`, slot: 'watch', kind: 'adventurers', cook: true
+  };
+}
+
 /**
  * The people who keep this camp.
  *
- * Ids are `camp-<turn>-<slot>`: unique on the map, free of the `:` that a met stranger's key is
+ * Ordinary camp ids are `camp-<turn>-<slot>`: unique on the map, free of the `:` that a met stranger's key is
  * split on, and different for every camp, so the head drover of one camp is not the head drover of
  * the next. Names come from canon's peoples, never one a stranger on this map's road already has,
  * and never two alike in one camp.
  */
 export function campPeople(camp: Encampment, fieldMapId: string, seed = ''): CampPerson[] {
+  if (camp.cookVisit) return [caveCookPerson(Math.floor(camp.from / 6), seed)];
   if (!camp.caravan) return campRoster(camp.id, camp.kind, fieldMapId, seed);
   const cycle = Number(camp.id.split(':').at(-1));
   return (['master', 'handler', camp.caravan.thirdRole] as const).map((role) =>
@@ -158,6 +188,8 @@ function campRoster(campId: string, kind: CampKind, fieldMapId: string, seed: st
 
 /** Recreate a resident using the same roster the scene drew, even when the camp has moved on. */
 export function campPersonFor(fieldMapId: string, id: string, seed: string): CampPerson | undefined {
+  const cook = /^cave-cook-(0|[1-9]\d*)$/.exec(id);
+  if (fieldMapId === TWIN_MAP && cook && Number.isSafeInteger(Number(cook[1]))) return caveCookPerson(Number(cook[1]), seed);
   const elamite = elamiteCampPerson(fieldMapId, id, seed);
   if (elamite) return elamite;
   const match = /^camp-(0|[1-9]\d*)-(leader|runner|watch)$/.exec(id);
@@ -272,7 +304,12 @@ const ELAMITE_CHORES: Record<ElamiteRole, string> = {
   'wool-dresser': 'is brushing dust from a tiered wool wrap'
 };
 
-export function doingLine(kind: CampKind, slot: CampSlot, activity: CampActivity, elamiteRole?: ElamiteRole): string {
+export function doingLine(kind: CampKind, slot: CampSlot, activity: CampActivity, elamiteRole?: ElamiteRole, cook = false): string {
+  if (cook) {
+    if (activity === 'meal') return 'is ladling a meal beside the hearth';
+    if (activity === 'watch' || activity === 'evening') return 'is tending the sheltered fire';
+    return 'is preparing a meal at the cave';
+  }
   if (elamiteRole) {
     if (activity === 'chore') return ELAMITE_CHORES[elamiteRole];
     const line = ELAMITE_ACTIVITY[activity];
@@ -332,7 +369,8 @@ export function campPlacements(
   camp: Encampment,
   day: number,
   phase: number,
-  errand: RunnerErrand | null = null
+  errand: RunnerErrand | null = null,
+  reserved: ReadonlySet<string> = new Set()
 ): CampPlacement[] {
   if (!campIsOpen(world, camp, day)) return [];
   if (camp.caravan) phase = caravanPhase(world, phase);
@@ -340,7 +378,7 @@ export function campPlacements(
   const shelter = around[0] ?? camp.at;
   const things = around.slice(1, camp.caravan ? 4 : PROPS_AROUND[camp.kind]);
   const room = standingRoom(world, camp);
-  const taken = new Set<string>();
+  const taken = new Set(reserved);
   const near = (anchor: Point): Point | null => {
     let best: Point | null = null;
     let bestD = Infinity;
@@ -364,8 +402,9 @@ export function campPlacements(
   const roles = camp.caravan
     ? { leader: 'master', runner: 'handler', watch: camp.caravan.thirdRole } as const
     : null;
-  return CAMP_SLOTS.map((slot) => {
-    const id = roles ? elamiteResidentId(cycle, roles[slot]) : `camp-${cycle}-${slot}`;
+  const slots: readonly CampSlot[] = camp.cookVisit ? ['watch'] : CAMP_SLOTS;
+  return slots.map((slot) => {
+    const id = camp.cookVisit ? `cave-cook-${cycle}` : roles ? elamiteResidentId(cycle, roles[slot]) : `camp-${cycle}-${slot}`;
     const activity = campActivity(camp, slot, day, phase, slot === 'runner' ? errand : null);
     if (activity === 'asleep') return { id, slot, at: null, facing: shelter, activity };
     if (errand && (activity === 'road' || activity === 'trade' || activity === 'home')) {

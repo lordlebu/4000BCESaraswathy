@@ -45,7 +45,7 @@ what they were working towards (the pin, or the next building stage), and how mu
     the page and the dock cannot disagree;
   - `leftOffLines` is the front door's.
 - **The morning's reading is kept in memory, not saved.** A reload starts the day's page from the
-  reload. That avoids a `KNOWLEDGE_VERSION` bump, and loses only a recap the diary already holds.
+  reload. The recap does not need its own journey field.
 - **The night is spent on closing the card, so the morning resets on closing it too**, pressed or
   not. Otherwise the next night would tell two days.
 - `ActivityModal` draws the page only for a night (`gesture === 'rest'`), however it is called.

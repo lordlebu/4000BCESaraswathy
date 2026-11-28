@@ -11,7 +11,7 @@ afterEach(() => { cleanup(); vi.restoreAllMocks(); Reflect.deleteProperty(HTMLEl
 it('offers only sections with content and focuses the chosen section without hiding its words', () => {
   const scroll = vi.fn();
   Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', { configurable: true, value: scroll });
-  render(<Diary open progress={learn(emptyProgress(), 'word_kia_thal')} onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />);
+  render(<Diary open progress={learn(emptyProgress(), 'word_kia_thal')} onClose={noop} onAnswer={noop} onOpenKit={noop} />);
   const nav = screen.getByRole('navigation', { name: 'Diary sections' });
   expect(within(nav).getAllByRole('link')).toHaveLength(1);
   fireEvent.click(within(nav).getByRole('link', { name: /^Words$/ }));
@@ -23,7 +23,7 @@ it('offers only sections with content and focuses the chosen section without hid
 it('sends a reading-size choice to the owner rather than changing journey state', () => {
   const change = vi.fn();
   const progress = emptyProgress();
-  render(<Diary open progress={progress} readingSize="comfortable" onReadingSize={change} onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />);
+  render(<Diary open progress={progress} readingSize="comfortable" onReadingSize={change} onClose={noop} onAnswer={noop} onOpenKit={noop} />);
   const picker = screen.getByRole('combobox', { name: 'Reading size' });
   expect((picker as HTMLSelectElement).value).toBe('comfortable');
   fireEvent.change(picker, { target: { value: 'large' } });

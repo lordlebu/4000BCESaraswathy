@@ -119,7 +119,7 @@ test('a click on open air walks toward it instead of doing nothing', async ({ pa
 
   const baked = await page.evaluate(
     (k) => JSON.parse(localStorage.getItem(k) ?? 'null') as { biomes: string[]; flags: string[] } | null,
-    `south-of-tethys:world:${seed}:${map}`
+    `south-of-tethys-v20:world:${seed}:${map}`
   );
   expect(baked, 'no stored world to read the ground from').not.toBeNull();
   const w = (await walker(page))!;

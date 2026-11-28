@@ -1,6 +1,5 @@
 import { campPeople } from '../../content/campLife';
 import { loadCaravanArt } from '../systems/CaravanRig';
-import { caravanWitnessEvent } from '../../content/campHospitality';
 import { EnkiduView } from '../systems/EnkiduView';
 import { caravanCarriesEnkidu, caravanEnkiduPosition, ENKIDU_FOLLOWS, ENKIDU_ID, ENKIDU_JOINED } from '../../content/enkidu';
 import { loadJourney } from '../../save';
@@ -95,7 +94,7 @@ import {
 } from '../tileTextures';
 import { SWAY_PERIOD, planScene, type Placement, type PlacementSheet } from '../scenePlan';
 import { bustSite } from '../twinStoryArt';
-import { cavePose, cavePropFrames, planCaveWalks, type CaveWalk } from '../caveCamp';
+import { cavePose, caveSceneryTiles, cavePropFrames, planCaveWalks, type CaveWalk } from '../caveCamp';
 import { bustStage } from '../../content/twinStories';
 import { planTwinResidents } from '../twinResidents';
 import { BeeduView } from '../systems/BeeduView';
@@ -364,7 +363,6 @@ const STEP_KEYS: Record<string, [number, number]> = {
 
 export interface WorldSceneData {
   seed: string;
-  twinGeneration?: 1 | 2;
   discovered?: string[];
   /**
    * How much of the journey's time has already been spent, in milliseconds.
@@ -636,14 +634,10 @@ export class WorldScene extends Phaser.Scene {
     super('WorldScene');
   }
 
-  private twinGeneration: 1 | 2 = 1;
-  private smoothTwinRail = true;
   private twinScenery: TwinSceneryReview = {};
 
   init(data: WorldSceneData): void {
-    this.twinGeneration = data.twinGeneration ?? 1;
     this.twinScenery = import.meta.env.DEV ? twinSceneryReview(window.location.search) : TWIN_SCENERY;
-    this.smoothTwinRail = !import.meta.env.DEV || new URLSearchParams(window.location.search).get('twinRailReview') !== '0';
     this.character = characterFor(data.characterId);
     this.fieldMapId = data.fieldMapId ?? DEFAULT_FIELD_MAP;
     // A restart re-enters init, so every piece of per-journey state is reset here rather than in
@@ -723,6 +717,10 @@ export class WorldScene extends Phaser.Scene {
         return scene.startPhase;
       },
       day: () => scene.dayOfJourney(),
+      caveOccupied: () => [
+        ...caveSceneryTiles(scene.residentScenery),
+        ...scene.residentSprites.map(({ owned }) => `${owned.x},${owned.y}`)
+      ],
       camp: () => scene.campView.current,
       playerHeight: () => scene.player.displayHeight,
       companion: () => scene.enkidu?.selection() ?? null
@@ -873,6 +871,16 @@ export class WorldScene extends Phaser.Scene {
   }
 
   create(data: WorldSceneData): void {
+    try {
+      this.openField(data);
+    } catch (error) {
+      console.error('[world] could not open the map', error);
+      this.scene.pause();
+      EventBus.emitEvent('world-load-failed', undefined);
+    }
+  }
+
+  private openField(data: WorldSceneData): void {
     createTileTextures(this);
     if (this.fieldMapId === TWIN_MAP) for (const key of Object.values(TWIN_KEYS)) this.textures.get(key).setFilter(Phaser.Textures.FilterMode.NEAREST);
 
@@ -880,10 +888,7 @@ export class WorldScene extends Phaser.Scene {
     // leave the seed alone and every player walks the same documented Lothal.
     const map = fieldMap(data.fieldMapId ?? DEFAULT_FIELD_MAP);
     if (!map) throw new Error(`no such field map: ${data.fieldMapId}`);
-    // Resolved once and kept, rather than generated afresh on every load. A journey therefore
-    // keeps the ground it started on even when the generator changes underneath it -- which is
-    // what stops a terrain change from being a save-breaking change. See `world/bake.ts`.
-    this.built = worldFor(map, data.seed, this.twinGeneration);
+    this.built = worldFor(map, data.seed);
     this.world = this.built.world;
     this.enkidu = null;
     this.enkiduFollows = false;
@@ -893,10 +898,10 @@ export class WorldScene extends Phaser.Scene {
       const journey = loadJourney(data.seed);
       this.enkiduFollows = journey.flags?.includes(ENKIDU_FOLLOWS) ?? false;
       this.enkiduJoined = journey.flags?.includes(ENKIDU_JOINED) ?? false;
-      if (journey.caravanSchedule) {
+      {
         const hour = new URLSearchParams(window.location.search).get('hour');
         const start = hour === null ? 0 : startPhaseFor(hour);
-        setCaravanClock(this.world, journey.caravanSchedule, () => phaseAt(this.travelled, start));
+        setCaravanClock(this.world, () => phaseAt(this.travelled, start));
       }
       this.enkidu = new EnkiduView(this, this.world, landing.at, this.built.placed.map(({ at }) => at));
     }
@@ -913,7 +918,7 @@ export class WorldScene extends Phaser.Scene {
 
     const requestedTurf=import.meta.env.DEV?new URLSearchParams(window.location.search).get('turf'):null;
     const turf:TwinTurf=requestedTurf&&Object.hasOwn(TWIN_TURF,requestedTurf)?requestedTurf as TwinTurf:'sage';
-    const twinTerrain=this.world.twinRegion&&requestedTurf!=='legacy'?bakeTwinTerrain(this,this.world,turf,this.twinScenery.relief):null;
+    const twinTerrain=this.world.twinRegion?bakeTwinTerrain(this,this.world,turf,this.twinScenery.relief):null;
     if (twinTerrain) this.textures.get(twinTerrain.key).setFilter(Phaser.Textures.FilterMode.NEAREST);
     this.twinTerrainInfo=twinTerrain?{palette:turf,frames:twinTerrain.count,bytes:twinTerrain.bytes}:null;
 
@@ -1006,11 +1011,11 @@ export class WorldScene extends Phaser.Scene {
    * ever needs a decision, that decision belongs in the plan rather than here.
    */
   private createGround(): void {
-    if (this.smoothTwinRail && this.world.twinRegion) bakeTwinRailDetails(this);
+    if (this.world.twinRegion) bakeTwinRailDetails(this);
     if(this.world.twinRegion&&(this.twinScenery.relief||this.twinScenery.civic||this.twinScenery.outlying)){
       bakeTwinScenery(this,Boolean(this.twinScenery.relief));
     }
-    const scenery = planScene(this.built, this.smoothTwinRail, this.twinScenery);
+    const scenery = planScene(this.built, this.twinScenery);
     for (const item of scenery) {
       // The offset is a fraction of a cell and only decor carries one -- see `Placement.offset`.
       // Converting it here rather than in the plan is the same split as everything else: the plan
@@ -1379,7 +1384,7 @@ export class WorldScene extends Phaser.Scene {
     this.carriage = this.add.image(0, 0, this.world.twinRegion ? TWIN_KEYS.tram : CARRIAGE_IMAGE).setOrigin(0.5, 1).setVisible(false);
     if (this.world.twinRegion) {
       const p = this.world.twinRegion.stations[0]!;
-      const foot = this.smoothTwinRail ? TWIN_TRAM_FOOT_Y : 1;
+      const foot = TWIN_TRAM_FOOT_Y;
       this.carriage.setPosition((p.x + .5) * TILE_SIZE, (p.y + foot) * TILE_SIZE)
         .setDepth(depthFor(p.y, ROW_SLOT.walker)).setVisible(true);
     }
@@ -1870,7 +1875,6 @@ export class WorldScene extends Phaser.Scene {
   private onNewJourney = (payload: UiToGame['new-journey'] & { discovered?: string[] }): void => {
     this.scene.restart({
       seed: payload.seed,
-      twinGeneration: payload.twinGeneration,
       discovered: payload.discovered,
       // A new seed re-rolls the ground under the same place, rather than moving you.
       fieldMapId: this.built?.fieldMap.id,
@@ -1891,7 +1895,6 @@ export class WorldScene extends Phaser.Scene {
     // and every node's regrowth all went back to the first morning, and the save wrote that down.
     this.scene.restart({
       seed: payload.seed,
-      twinGeneration: this.twinGeneration,
       discovered: [],
       fieldMapId: payload.fieldMapId,
       // And the ride itself takes time: a day's travel between two countries (`CROSSING_MS`).
@@ -2137,7 +2140,7 @@ export class WorldScene extends Phaser.Scene {
     this.carriage.setVisible(true).setPosition(this.player.x, this.player.y).setDepth(this.player.depth);
     if (this.world.twinRegion) {
       this.carriage.setTexture(TWIN_KEYS.tramWalk, 0);
-      if (this.smoothTwinRail) this.carriage.y = (ride.from.y + TWIN_TRAM_FOOT_Y) * TILE_SIZE;
+      this.carriage.y = (ride.from.y + TWIN_TRAM_FOOT_Y) * TILE_SIZE;
     }
     // **Held on the car, not eased after it.** The walk's 9% a frame is a gentle trail at walking
     // pace; at four times that pace, on a slow frame rate, it fell so far behind that the carriage
@@ -2184,16 +2187,9 @@ export class WorldScene extends Phaser.Scene {
       ride.from.y + (ride.to.y - ride.from.y) * eased
     );
     if (this.world.twinRegion && ride.line.length>1) {
-      const distance=eased*(ride.line.length-1), i=Math.min(ride.line.length-2,Math.floor(distance)), f=distance-i;
-      const a=ride.line[i]!, b=ride.line[i+1]!;
-      heading=b.x>a.x?0:b.x<a.x?1:b.y<a.y?2:3;
-      if (this.smoothTwinRail) {
-        const pose = tramOnRail(ride.line, eased);
-        this.player.setPosition((pose.at.x + .5) * TILE_SIZE, (pose.at.y + TWIN_TRAM_FOOT_Y) * TILE_SIZE);
-        heading = pose.heading;
-      } else {
-        this.player.setPosition((a.x+(b.x-a.x)*f+.5)*TILE_SIZE,(a.y+(b.y-a.y)*f+1)*TILE_SIZE-2);
-      }
+      const pose = tramOnRail(ride.line, eased);
+      this.player.setPosition((pose.at.x + .5) * TILE_SIZE, (pose.at.y + TWIN_TRAM_FOOT_Y) * TILE_SIZE);
+      heading = pose.heading;
       this.carriage.setFrame(heading*4+Math.floor((this.game.loop.now-ride.start)/140)%4);
     }
     this.sortPlayer(rowAtFoot(this.player.y));
@@ -2404,7 +2400,7 @@ export class WorldScene extends Phaser.Scene {
         const route = visit.caravan.route;
         const wagon = pose ? route[Math.round(pose.routeProgress * (route.length - 1))] : null;
         if (moment && wagon && Math.max(Math.abs(wagon.x - this.at.x), Math.abs(wagon.y - this.at.y)) <= 2) {
-          EventBus.emitEvent('caravan-witnessed', { event: caravanWitnessEvent(visit, moment, this.built.fieldMap.id) });
+          EventBus.emitEvent('caravan-witnessed', { id: visit.id, moment });
         }
       }
       // The animals that are somewhere rather than everywhere, on the same gate and for the same
@@ -2453,7 +2449,7 @@ export class WorldScene extends Phaser.Scene {
       carriageTexture: this.carriage.texture.key,
       carriageFrame: this.carriage.frame.name,
       twinAmbience: this.twinAmbience?.report()??null,
-      twinGeneration: this.world.twinRegion ? this.world.twinRegion.generation ?? 1 : null,
+      twinGeneration: this.world.twinRegion?.generation ?? null,
       twinRailDetails: this.children.list.filter(sprite => (sprite as Phaser.GameObjects.Image).texture?.key === TWIN_RAIL_DETAILS).length,
       twinScenery: this.world.twinRegion ? {
         preview:this.twinScenery,
@@ -2851,7 +2847,7 @@ export class WorldScene extends Phaser.Scene {
       onUpdate: () => this.sortPlayer(rowAtFoot(this.player.y)),
       onComplete: () => {
         this.moving = false;
-        this.arriveAt(target);
+        this.arriveAt(target, true);
         // **Deliberately does not touch the animation.** Dropping to idle here is what made the
         // walk stutter: the next step is decided a frame later in `update`, so a held direction
         // went walk, idle, walk, idle -- and because the key changed each time, every tile
@@ -2976,7 +2972,7 @@ export class WorldScene extends Phaser.Scene {
     this.showPips();
   }
 
-  private arriveAt(at: Point): void {
+  private arriveAt(at: Point, walked = false): void {
     this.placePlayer(at);
     this.revealAround(at);
 
@@ -2985,7 +2981,7 @@ export class WorldScene extends Phaser.Scene {
 
     EventBus.emitEvent('navigation-changed', { boat: this.boat, afloat: this.afloat });
     EventBus.emitEvent('tile-entered', {
-      at,
+      fieldMapId: this.built.fieldMap.id, walked, at,
       entry: describeTile(tile, this.world, this.momentNow()),
       surroundings: describeSurroundings(this.world, at),
       hint: landmarkHint(this.world, at),

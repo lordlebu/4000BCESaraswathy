@@ -181,7 +181,7 @@ export function PlacePanel({
   // A preferred painted place view, then its category fallback, or no image.
   // The panel reads perfectly well without one and always has; this is the hook that makes the
   // first painting a file rather than a sprint. See `src/ui/places.ts`.
-  const view = placeArt(place.id, place.kind);
+  const view = placeArt(place.id);
 
   return (
     <section className="place" aria-live="polite">

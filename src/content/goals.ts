@@ -6,7 +6,7 @@
 // `shortfalls` or `mayBuild` for itself would be four readings of "what is missing" that drift.
 //
 // **A pin is a recipe or a building stage.** The save holds one string, `pinned`, and it has always
-// been a recipe id. A stage is `stage:<field map id>`, so pinning one costs no `KNOWLEDGE_VERSION`
+// been a recipe id. A stage is `stage:<field map id>`, so pinning one costs no schema
 // bump and an old save's recipe id reads exactly as it did. Which stage is next is the homestead's
 // flags' answer, asked at the moment, so a pinned stage moves on by itself as each one is raised.
 //
