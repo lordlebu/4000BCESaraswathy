@@ -9,7 +9,7 @@ import { rememberNpcAppearance, type NpcAppearanceJournal } from '../content/npc
 // bus listeners that ask moved with the question they ask; the rest of the bus stays in `App`.
 // `Happens`, the shape everything else calls it by, is `useRoadTalk`'s.
 
-import type { AmbientTopic } from '../content/twinAmbientTalk';
+import type { AmbientTopic } from '../content/npcDialogue';
 import { useCallback, useEffect, useRef, useState, type Dispatch, type MutableRefObject, type SetStateAction } from 'react';
 import { EventBus, type GameToUi } from '../game/EventBus';
 import { isComplete, receiveAll, type Progress, type WorldMoment } from '../journey';
@@ -493,9 +493,9 @@ export function useHappenings({
     EventBus.emitEvent('twin-knowledge', {completed:Object.keys(latest.current.progress.rungs).filter(id=>isComplete(latest.current.progress,id)), flags:journeyFlags.current});
     // Whoever this was about, you have met now.
     const stranger = event.stranger;
-    if (stranger && !metStrangers.current.includes(stranger.id)) {
+    if (stranger) {
       rememberNpcAppearance(npcAppearances.current, stranger.id, stranger.look);
-      metStrangers.current = [...metStrangers.current, stranger.id];
+      if (!metStrangers.current.includes(stranger.id)) metStrangers.current = [...metStrangers.current, stranger.id];
     }
     // Noted rather than announced, like every other outcome in this game: the progression
     // is a written journal and a thing that happened to you is a line in it.

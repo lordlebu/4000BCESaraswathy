@@ -4,9 +4,9 @@ import { campPeople } from '../src/content/campLife';
 import { caravanCarriesEnkidu } from '../src/content/enkidu';
 import type { Encampment } from '../src/content/encampments';
 import {
-  PAINTED_APPEARANCE, bindNpcAppearances, legacyNpcAppearances, rememberNpcAppearance
+  PAINTED_APPEARANCE, bindNpcAppearances, readNpcAppearances, rememberNpcAppearance
 } from '../src/content/npcAppearance';
-import { travellersOn } from '../src/content/travellers';
+import { isGeneratedTraveller, travellersOn } from '../src/content/travellers';
 import { artNames, preferredArtSelection } from '../src/ui/art';
 import { paintedFaceFor } from '../src/ui/StrangerFace';
 import { TWIN_MAP, twinWorldSeed } from '../src/world/twinGeneration';
@@ -24,7 +24,7 @@ describe('Bow and Hearth Level 1', () => {
     bindNpcAppearances(seed, {});
     for (const map of maps) {
       const worldSeed = map === TWIN_MAP ? twinWorldSeed(seed) : seed;
-      const road = travellersOn(map, worldSeed).filter(({ npcId }) => npcId === null);
+      const road = travellersOn(map, worldSeed).filter(isGeneratedTraveller);
       expect(road.length).toBeGreaterThan(0);
       const residents = kinds.flatMap((kind) => campPeople({ ...camp, kind }, map, worldSeed));
       for (const npc of [...road, ...residents]) {
@@ -35,21 +35,20 @@ describe('Bow and Hearth Level 1', () => {
     }
   });
 
-  it('preserves a met traveller’s legacy appearance and pins new kit IDs on meeting', () => {
+  it('replaces retired save markers with seeded kits and preserves valid pinned kits', () => {
     const map = 'field_map_lothal';
     bindNpcAppearances('another-journey', {});
-    const legacy = travellersOn(map, seed).find(({ npcId }) => npcId === null)!;
-    const key = `${map}:${legacy.id}`;
-    bindNpcAppearances(seed, legacyNpcAppearances([key]));
-    expect(travellersOn(map, seed).find(({ id }) => id === legacy.id)).toEqual(legacy);
-    const journal = {};
+    const expected = travellersOn(map, seed).find(isGeneratedTraveller)!;
+    const key = `${map}:${expected.id}`;
+    const journal = readNpcAppearances({ [key]: 'legacy', invalid: 'removed-kit' });
+    expect(journal).toEqual({});
     bindNpcAppearances(seed, journal);
-    const dressed = travellersOn(map, seed).find(({ id }) => id === legacy.id)!;
-    expect(dressed.look?.portraitId).toBeTruthy();
-    rememberNpcAppearance(journal, key, dressed.look!);
-    expect(journal).toHaveProperty([key], expect.stringContaining(dressed.look!.portraitId!));
-    bindNpcAppearances(seed, { ...journal });
-    expect(travellersOn(map, seed).find(({ id }) => id === legacy.id)).toEqual(dressed);
+    const dressed = travellersOn(map, seed).filter(isGeneratedTraveller).find(({ id }) => id === expected.id)!;
+    expect(dressed).toEqual(expected);
+    rememberNpcAppearance(journal, key, dressed.look);
+    expect(journal).toHaveProperty([key], expect.stringContaining(dressed.look.portraitId));
+    bindNpcAppearances(seed, readNpcAppearances(journal));
+    expect(travellersOn(map, seed).filter(isGeneratedTraveller).find(({ id }) => id === dressed.id)).toEqual(dressed);
   });
 
   it('gives each camp its own overnight offer and makes declining consequence-free', () => {

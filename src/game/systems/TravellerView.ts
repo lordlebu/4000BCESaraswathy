@@ -15,7 +15,7 @@ import { EventBus } from '../EventBus';
 import { TILE_SIZE } from '../tileTextures';
 import { ROW_SLOT, depthFor } from '../frames';
 import { DAY_MS, phaseAt } from '../dayNight';
-import { animFor, dyeSheet, everyCharacter, facingFromStep, forgetSheet, frameOf, travellerScale } from '../player';
+import { animFor, dyeSheet, facingFromStep, forgetSheet, frameOf, travellerScale } from '../player';
 import { WADE_ALPHA, wadeFor } from '../wading';
 import { PIP_NEWS, PIP_RING } from '../marks';
 import {
@@ -62,7 +62,6 @@ export interface TravellerHost {
   /** The player's tile. */
   readonly at: Point;
   /** The player's own sheet, which no traveller is ever drawn in. */
-  readonly playerKey: string;
   /** The day's clock in ms -- standing and walking both -- and the phase it starts from. */
   clock(): number;
   /** The clock only standing still advances, in ms: what a wait's patience is measured on. */
@@ -173,15 +172,10 @@ export class TravellerView {
       // road that nothing sent anywhere.
       if (stops.length < 2) continue;
 
-      const body = traveller.art === this.host.playerKey ? this.otherSheet(traveller.art) : traveller.art;
-      // Re-dyed to this person's look when the body has one, so three painted strangers read as
-      // many. Only when the body is the one the look was chosen for: a look names the colours of
-      // one sheet, and applied to the player-avoidance fallback it would match nothing.
-      // The cell the body was built at: a wide or tall figure has its own, so it is cut and drawn at
-      // that size rather than squeezed into the shared 26x40. Feet stay on the anchor either way.
+      const body = traveller.art;
       const frame = frameOf(body);
       const key =
-        traveller.look && traveller.look.body === body ? dyeSheet(this.scene, body, traveller.look, frame) : body;
+        traveller.look ? dyeSheet(this.scene, body, traveller.look, frame) : body;
       const sprite = this.scene.add
         .sprite(0, 0, key, 0)
         .setOrigin(0.5, 1)
@@ -235,12 +229,6 @@ export class TravellerView {
       }));
   }
 
-  /** Any built sheet but this one, so a traveller is never the player's own figure. */
-  private otherSheet(taken: string): string {
-    const art = everyCharacter().find((c) => c.key !== taken);
-    return art?.key ?? taken;
-  }
-
   /**
    * Today's runner errand and visitors, worked out once for the camp and the day.
    *
@@ -267,9 +255,9 @@ export class TravellerView {
   addCampFolk(camp: Encampment): void {
     const scale = travellerScale(TILE_SIZE);
     for (const person of campPeople(camp, this.host.fieldMapId, this.host.world.seed)) {
-      const body = person.art === this.host.playerKey ? this.otherSheet(person.art) : person.art;
+      const body = person.art;
       const frame = frameOf(body);
-      const key = !person.elamiteRole && person.look && person.look.body === body ? dyeSheet(this.scene, body, person.look, frame) : body;
+      const key = person.elamiteRole ? body : dyeSheet(this.scene, body, person.look, frame);
       const sprite = this.scene.add
         .sprite(0, 0, key, 0)
         .setOrigin(0.5, 1)

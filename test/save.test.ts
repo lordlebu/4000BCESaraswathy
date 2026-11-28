@@ -258,6 +258,21 @@ describe('the ground moving keeps what you know', () => {
     expect(back.satchel).toEqual({});
   });
 
+  it('keeps encounters while retiring old NPC appearance markers on load', () => {
+    const legacy = 'field_map_lothal:company_carrier';
+    const painted = 'field_map_narmada:company_drover';
+    const kit = 'maru-m-02/traveller-nomad';
+    writeRaw({
+      version: SAVE_VERSION,
+      knowledgeVersion: KNOWLEDGE_VERSION,
+      met: [legacy, painted],
+      npcAppearances: { [legacy]: 'legacy', [painted]: kit }
+    });
+    const journey = loadJourney(SEED);
+    expect(journey.met).toEqual([legacy, painted]);
+    expect(journey.npcAppearances).toEqual({ [painted]: kit });
+  });
+
   it('reads a save from before the split as knowledge version 1', () => {
     // Written by the build before this one: `version` 18 and no `knowledgeVersion` at all.
     writeRaw({ version: 18, discovered: ['1,1'], reached: false, ...known });

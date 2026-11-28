@@ -18,9 +18,9 @@
 //
 // Pure and free of React and Phaser, like the rest of `content/`. No clock: the caller says when.
 
-import type { AmbientTopic } from './twinAmbientTalk';
+import type { AmbientTopic } from './npcDialogue';
 import placesBundle from '../../data/canon/places.json';
-import type { Look } from './looks';
+import type { NpcLook } from './looks';
 import type { StrangerCulture } from './travellers';
 import type { EventOrigin } from './diaryEvents';
 
@@ -142,11 +142,11 @@ export interface Choice {
 export interface EventStranger {
   id: string;
   role: string;
-  look: Look;
-  /** Which of canon's peoples they are, so the face comes from the right part of the pool. */
+  look: NpcLook;
+  /** The speaker's culture, used by topic selection. */
   culture: StrangerCulture | null;
   /** The name their people gave them, from canon. Told to you in the first event they are in. */
-  givenName: string | null;
+  givenName: string;
 }
 
 export interface GameEvent {

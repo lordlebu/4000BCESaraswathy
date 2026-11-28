@@ -12,6 +12,12 @@ to you and asks for the Fourteen, the Violet-Horned Clan on the road, written ha
 with their paintings, and budgets on the page's size. What follows the plan is optional, and is
 listed at the end.
 
+> **Current implementation, 28 November 2026.** Generated road and camp NPCs use painted
+> appearance kits across all maps. Their sprite and portrait share the same kit. All their
+> conversations use the shared topic catalogue, including first meetings. Existing journeys
+> retain names, meeting history and saved kit IDs. A stranger with a retired appearance marker
+> receives the seeded kit for that journey. The design history below records the earlier system.
+
 ---
 
 ## 1. Strangers: three bodies, a road of people

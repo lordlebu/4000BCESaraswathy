@@ -20,7 +20,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { type Choice, type GameEvent, choicesFor } from '../content/events';
-import type { AmbientTopic } from '../content/twinAmbientTalk';
+import type { AmbientTopic } from '../content/npcDialogue';
 import { firstArtSelection, preferredArtSelection, type ArtSelection } from './art';
 import { sceneNames } from './scenes';
 import { Modal } from './Modal';
@@ -127,7 +127,7 @@ export function EventCardBody({
               {/* Pressed, the face opens at the size it was painted. By name only once you know it. */}
               <ProfileButton
                 who={{ kind: 'stranger', key: event.stranger.id, known: met.includes(event.stranger.id) }}
-                name={met.includes(event.stranger.id) && event.stranger.givenName ? event.stranger.givenName : event.stranger.role}
+                name={met.includes(event.stranger.id) ? event.stranger.givenName : event.stranger.role}
               >
                 <StrangerFace stranger={event.stranger} size={40} />
               </ProfileButton>

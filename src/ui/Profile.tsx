@@ -91,7 +91,7 @@ function StrangerCard({
 }) {
   const { traveller } = met;
   // A name is learned by walking with them, and a card must not tell it early.
-  const name = known && traveller.givenName ? traveller.givenName : traveller.name;
+  const name = known ? traveller.givenName : traveller.name;
   const people = traveller.culture ? PEOPLE_NAMES[traveller.culture] : null;
   const map = fieldMap(met.fieldMapId)?.name ?? null;
   return (
@@ -102,10 +102,10 @@ function StrangerCard({
             stranger={{
               id: met.key,
               role: traveller.role,
-              look: traveller.look!,
+              look: traveller.look,
               culture: traveller.culture,
               // Identity does not change when the player learns a name. Only the visible label
-              // above is redacted; the portrait hash must match events and the People diary.
+              // above is redacted. The assigned kit supplies the portrait everywhere.
               givenName: traveller.givenName
             }}
             size={PROFILE_SIZE}

@@ -11,7 +11,7 @@ import { type Drawn, type Nodes, noNodes } from './content/nodes';
 import { type Progress, emptyProgress } from './journey';
 import type { DiaryEventEntry, EventOrigin } from './content/diaryEvents';
 import { ENKIDU_FOLLOWS, ENKIDU_JOINED } from './content/enkidu';
-import { legacyNpcAppearances, type NpcAppearanceJournal } from './content/npcAppearance';
+import { readNpcAppearances, type NpcAppearanceJournal } from './content/npcAppearance';
 import { caravanSchedule, type CaravanSchedule } from './content/elamiteCaravan';
 import { CYCLE_DAYS } from './content/encampments';
 import { DAY_MS } from './game/dayNight';
@@ -487,9 +487,7 @@ export function loadJourney(seed: string): Journey {
       version: SAVE_VERSION, knowledgeVersion: KNOWLEDGE_VERSION, ...knowledge, ...ground, fieldMapId,
       twinGeneration: parsed.twinGeneration === 2 ? 2 : 1,
       caravanSchedule: caravanSchedule(firstCycle),
-      npcAppearances: parsed.npcAppearances && typeof parsed.npcAppearances === 'object' && !Array.isArray(parsed.npcAppearances) && knowledgeOk
-        ? Object.fromEntries(Object.entries(parsed.npcAppearances).filter(([, id]) => typeof id === 'string'))
-        : legacyNpcAppearances(knowledge.met)
+      npcAppearances: readNpcAppearances(knowledgeOk ? parsed.npcAppearances : undefined)
     };
   } catch {
     localStorage.removeItem(key(seed));

@@ -17,7 +17,7 @@ import { initialSurface, surfaceReducer } from './surface';
 import { readShowing, writeShowing, type ReadingSize } from './preferences';
 import { arrivalPoint, DEFAULT_FIELD_MAP, fieldMap, fieldMaps, poi } from '../content/places';
 import { walkers } from '../game/characters';
-import { travellerAttributes, travellersOn } from '../content/travellers';
+import { isGeneratedTraveller, travellerAttributes, travellersOn } from '../content/travellers';
 import { SatchelStrip } from './SatchelStrip';
 import type { RecordTab } from './Records';
 const RecordTabs = lazy(() => import('./Records'));
@@ -1154,7 +1154,7 @@ export function App() {
 
     const speaker = talk && !talk.npcId
       ? campFolk.find(({ id }) => id === talk.travellerId) ??
-        travellersOn(fieldMapId, world?.seed ?? '').find(({ id }) => id === talk.travellerId)
+        travellersOn(fieldMapId, world?.seed ?? '').filter(isGeneratedTraveller).find(({ id }) => id === talk.travellerId)
       : null;
     const talkFace = talk?.npcId === ENKIDU_ID ? ENKIDU_STRANGER
       : speaker?.look ? {

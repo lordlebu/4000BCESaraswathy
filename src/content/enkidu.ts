@@ -3,6 +3,7 @@ import type { Point, World } from '../world/types';
 import { caravanStageAt, type Encampment } from './encampments';
 import { tileHash } from '../world/rng';
 import type { Traveller } from './travellers';
+import type { NpcLook } from './looks';
 import { TWIN_MAP } from '../world/twinGeneration';
 import type { EventStranger } from './events';
 
@@ -12,10 +13,10 @@ export const ENKIDU_FOLLOWS = 'companion:npc_enkidu';
 
 export const ENKIDU_JOINED = 'recruited:npc_enkidu';
 
-export const ENKIDU_TRAVELLER: Traveller = {
+export const ENKIDU_TRAVELLER: Traveller & { look: NpcLook } = {
   id: ENKIDU_ID, name: 'Enkidu', role: 'pangolin adventurer',
   npcId: ENKIDU_ID, art: 'enkidu', circuit: [], conveyance: null, culture: null, givenName: 'Enkidu',
-  look: { body: 'enkidu', skin: 'as-painted', cloth: 'ochre', second: 'undyed' }
+  look: { body: 'enkidu', skin: 'as-painted', cloth: 'ochre', second: 'undyed', portraitId: 'enkidu' }
 };
 
 export function caravanCarriesEnkidu(seed: string, visitId: string): boolean {
@@ -61,5 +62,5 @@ export function enkiduHome(world: World, landing: Point, occupied: readonly Poin
 
 export const ENKIDU_STRANGER: EventStranger = {
   id: `${TWIN_MAP}:${ENKIDU_ID}`, role: ENKIDU_TRAVELLER.role, givenName: 'Enkidu', culture: null,
-  look: ENKIDU_TRAVELLER.look!
+  look: ENKIDU_TRAVELLER.look
 };

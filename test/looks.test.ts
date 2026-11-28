@@ -10,12 +10,8 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   BODIES,
-  DYES,
-  SKIN_TONES,
-  lookFor,
   lookKey,
-  recolourTable,
-  swatchesFor
+  recolourTable
 } from '../src/content/looks';
 import { recolourPixels } from '../src/game/recolour';
 import { TRAVELLER_ART } from '../src/game/characters';
@@ -35,8 +31,6 @@ function coloursIn(data: Uint8Array): Set<string> {
   for (let i = 0; i < data.length; i += 4) if (data[i + 3] !== 0) out.add(hexAt(data, i));
   return out;
 }
-
-const ids = Array.from({ length: 400 }, (_, i) => `stranger-${i}`);
 
 describe('the manifest names real colours', () => {
   it('lists a palette for every traveller body, and only for those', () => {
@@ -63,48 +57,6 @@ describe('the manifest names real colours', () => {
 });
 
 describe('who wears what', () => {
-  it('gives the same person the same look every time', () => {
-    for (const id of ids.slice(0, 50)) {
-      expect(lookFor(id, 'traveller-drover')).toEqual(lookFor(id, 'traveller-drover'));
-    }
-  });
-
-  it('refuses a body with no palette, so the player is never re-dyed', () => {
-    expect(lookFor('stranger-1', 'varuna')).toBeNull();
-    expect(lookFor('stranger-1', 'constructor')).toBeNull();
-  });
-
-  it('never dyes both garments the same colour', () => {
-    for (const id of ids) {
-      const look = lookFor(id, 'traveller-carrier')!;
-      expect(look.second).not.toBe(look.cloth);
-    }
-  });
-
-  it('uses every dye and every skin tone across a crowd', () => {
-    const cloth = new Set(ids.map((id) => lookFor(id, 'traveller-pilgrim')!.cloth));
-    const skin = new Set(ids.map((id) => lookFor(id, 'traveller-pilgrim')!.skin));
-    expect([...cloth].sort()).toEqual(DYES.map((d) => d.id).sort());
-    expect([...skin].sort()).toEqual(SKIN_TONES.map((t) => t.id).sort());
-  });
-
-  it('re-dresses almost nobody when a dye is added', () => {
-    // Rendezvous hashing's promise, measured: a ninth dye of average weight should take about its
-    // own share of people and leave the rest in what they wore. A modulo would move most of them.
-    const before = ids.map((id) => lookFor(id, 'traveller-drover')!.cloth);
-    const extra = { id: 'saffron', name: 'saffron', hue: 38, sat: 0.8, weight: 2 };
-    (DYES as unknown as { push: (d: typeof extra) => void }).push(extra);
-    try {
-      const after = ids.map((id) => lookFor(id, 'traveller-drover')!.cloth);
-      const moved = before.filter((c, i) => after[i] !== c);
-      // Everybody who moved went to the new dye; nobody swapped between two old ones.
-      expect(after.filter((c, i) => c !== before[i] && c !== 'saffron')).toEqual([]);
-      expect(moved.length / ids.length).toBeLessThan(0.2);
-    } finally {
-      (DYES as unknown as { pop: () => void }).pop();
-    }
-  });
-
   it('dresses every stranger on every map', () => {
     for (const map of fieldMaps) {
       for (const t of travellersOn(map.id)) {
@@ -116,7 +68,7 @@ describe('who wears what', () => {
   });
 
   it('keys a texture by everything that changes it', () => {
-    const a = lookFor('stranger-1', 'traveller-carrier')!;
+    const a = { body: 'traveller-carrier', skin: 'as-painted', cloth: 'ochre', second: 'indigo' };
     expect(lookKey(a)).toBe(`traveller-carrier~${a.skin}~${a.cloth}~${a.second}`);
   });
 });
@@ -155,14 +107,5 @@ describe('the dye reaches the pixels', () => {
     expect(after).toEqual([...after].sort((x, y) => x - y));
   });
 
-  it('draws the face in the colours the figure is wearing', () => {
-    const drover = swatchesFor({ body: 'traveller-drover', skin: 'as-painted', cloth: 'indigo', second: 'leaf' });
-    // His turban is never dyed, so the face must not dye it either.
-    expect(drover.headwear).toBe('#f9e3cc');
-    expect(drover.shoulders).toBe(
-      recolourTable({ body: 'traveller-drover', skin: 'as-painted', cloth: 'indigo', second: 'leaf' }).get('#5c5d35')
-    );
-    const pilgrim = swatchesFor({ body: 'traveller-pilgrim', skin: 'as-painted', cloth: 'lac', second: 'leaf' });
-    expect(pilgrim.headwear).toBe(pilgrim.shoulders);
-  });
+
 });
