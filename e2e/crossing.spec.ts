@@ -20,7 +20,7 @@ test('the first crossing to the Aravali steps down onto the ferry song, with the
   await road.getByRole('button', { name: 'Continue' }).click();
   await road.getByRole('button', { name: 'Step down' }).click();
 
-  // The ferry song has no painting of its own, so it shows the road it came by -- never a blank.
+  // The ferry song is assigned the same painting as the ferry crossing.
   const song = page.getByRole('dialog', { name: 'The ferry song' });
   await expect(song).toBeVisible({ timeout: 30_000 });
   await expect(song.locator('img.activity-scene')).toHaveAttribute('src', /journey-aravali-lothal/);

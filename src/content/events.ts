@@ -189,6 +189,11 @@ interface RawHappening {
   choices: { label: string; line: string; needs?: string[]; grants?: string[]; sets?: string[] }[];
 }
 
+const JOURNEY_EVENT_ART: Readonly<Record<string, string>> = {
+  happening_the_ferry_song: 'journey-aravali-lothal',
+  happening_where_the_sea_was: 'journey-dwarka-lothal'
+};
+
 /**
  * One of canon's happenings, as the game's event.
  *
@@ -213,7 +218,7 @@ export function fromCanon(h: RawHappening): GameEvent {
       ...(h.requires_flags ? {flags:h.requires_flags} : {})
     }),
     prose: h.prose,
-    art: h.id,
+    art: JOURNEY_EVENT_ART[h.id] ?? h.id,
     choices: h.choices.map((c, i) => ({
       id: `c${i}`,
       label: c.label,

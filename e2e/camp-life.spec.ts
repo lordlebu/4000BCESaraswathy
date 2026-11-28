@@ -216,10 +216,18 @@ test('at the meal you can eat with them, and at night only the watch is up', asy
     await welcome();
     await expect(card.locator('h2')).toHaveText(/, the /, { timeout: 15_000 });
   }
-  await expect(card.locator('h2')).toHaveText(/, the /);
+  const heading = card.locator('h2');
+  await expect(heading).toHaveText(/, the /);
+  const mealTitle = (await heading.textContent())!.trim();
   await card.getByRole('button', { name: 'Eat with them' }).click();
   await card.getByRole('button', { name: 'Go on' }).click();
-  await expect(card).toBeHidden();
+  // Another queued arrival may open as soon as the meal card closes.
+  await expect(page.getByRole('dialog', { name: mealTitle, exact: true })).toHaveCount(0);
+  await expect.poll(() => page.evaluate(({ key, eventId }) => {
+    const journey = JSON.parse(localStorage.getItem(key) ?? '{}');
+    return journey.diaryEvents?.some((entry: { choiceId: string; eventId: string }) =>
+      entry.choiceId === 'eat' && entry.eventId === eventId);
+  }, { key: journeyStorageKey(seed), eventId: `woven:camp-talk:${MAP}:${watch.id}:${day}` })).toBe(true);
 
   // The same camp at night: the leader and the runner asleep in the shelter, the watch at the fire.
   expect(await standNear(page, seed, day, 23, camp)).toBe(true);

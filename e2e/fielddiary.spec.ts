@@ -1,4 +1,4 @@
-import { seedJourney } from './journey-fixture';
+import { journeyFixture, journeyStorageKey } from './journey-fixture';
 // The three scales, walked.
 //
 // This is Phase 04's acceptance test in one file: stand on an authored place, look closer at
@@ -244,10 +244,11 @@ test('the overworld joins the two field maps, from where the cart leaves', async
   await expect(sheet.getByRole('button', { name: 'Travel' }).first()).toBeDisabled();
 
   // At the Camp in the Kilns, Lothal's cart point, it runs -- on the fourth day of a journey, so a
-  // crossing that resets the clock shows. Written as the save would hold it: `travelled` is in the
-  // what-you-know half, which knowledge version 1 reads whatever the ground's version.
+  // crossing that resets the clock shows. Seed after the previous page flushes its journey.
   const FOURTH_DAY = 3.5 * 60 * 60 * 1000;
-  await seedJourney(page, SEED, { travelled: FOURTH_DAY });
+  await page.addInitScript(({ key, payload }) => localStorage.setItem(key, payload), {
+    key: journeyStorageKey(SEED), payload: JSON.stringify(journeyFixture({ travelled: FOURTH_DAY }))
+  });
 
   await page.goto(`/?seed=${SEED}&map=field_map_lothal&at=poi_lothal_camp`);
   await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });

@@ -82,12 +82,19 @@ describe("canon's happenings", () => {
     ...crafting.recipes.map((r) => r.id)
   ]);
 
+  it('assigns the crossing illustrations to the authored road events', () => {
+    expect(events.filter(({ occasion }) => occasion === 'journey').map(({ id, art }) => [id, art])).toEqual([
+      ['happening_the_ferry_song', 'journey-aravali-lothal'],
+      ['happening_where_the_sea_was', 'journey-dwarka-lothal']
+    ]);
+  });
+
   it('come from the bundle, one event each, and happen once', () => {
     expect(events.length).toBeGreaterThan(0);
     for (const e of events) {
       expect(e.id).toMatch(/^happening_[a-z0-9_]+$/);
       expect(e.once).toBe(!['happening_twin_carrier','happening_twin_camp'].includes(e.id));
-      expect(e.art).toBe(e.id);
+      if (e.occasion !== 'journey') expect(e.art).toBe(e.id);
       expect(e.prose.length).toBeGreaterThan(0);
       expect(e.choices.length).toBeGreaterThan(0);
     }
